@@ -13,6 +13,10 @@
   <ItemGroup>
     <ClInclude Include="scanner\scanner.h" />
   </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="scanner\scanner.cpp" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{1AD72401-EA15-485A-9CBB-9574AC936ED6}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
