@@ -1,156 +1,88 @@
+#include <cassert>
+#include <algorithm>
+#include "constants.h"
 #include "../scanner/scanner.h"
 
-FileReader::FileReader(const char* path) {
-	ifs_ = new std::ifstream();
-	ifs_->open(path);
+static DummyToken dummyToken;
 
-	buffer_ = new char[kBufferSize];
+FileReader::FileReader(const char* path) {
+	ifs_.open(path);
 }
 
 FileReader::~FileReader() {
-	ifs_->close();
-	delete ifs_;
-
-	delete[] buffer_;
+	ifs_.close();
 }
 
-bool FileReader::GetNextChar(int* ch) {
-	if (current_ == nullptr || *current_ == 0) {
-		if (!ReadBuffer()) {
-			return false;
-		}
+bool FileReader::ReadLine(char* buffer, size_t length) {
+	return !!ifs_.getline(buffer, length);
+}
 
-		bool newline = false;
+LineScanner::LineScanner() 
+	: current_(nullptr), dest_(nullptr) {
+	lineBuffer_ = new char[Constants::kMaxLineCharacters]();
+	tokenBuffer_ = new char[Constants::kMaxTokenCharacters]();
+}
 
-		if (current_ != nullptr) {
-			*ch = '\n';
-			newline = true;
-		}
+LineScanner::~LineScanner() {
+	delete[] lineBuffer_;
+	delete[] tokenBuffer_;
+}
 
-		current_ = buffer_;
-		++lineNumber;
-		linePosition = 0;
+void LineScanner::SetText(const char* text) {
+	size_t length = strlen(text);
+	assert(length > 0 && length < Constants::kMaxLineCharacters);
 
-		if (newline) {
-			return true;
-		}
+	std::copy(text, text + length, lineBuffer_);
+	lineBuffer_[length] = 0;
+
+	current_ = lineBuffer_;
+	dest_ = lineBuffer_ + length + 1;
+}
+
+bool LineScanner::GetChar(int* ch) {
+	if (current_ == nullptr || current_ == dest_) {
+		return false;
 	}
 
 	*ch = *current_++;
-	++linePosition;
 	return true;
 }
 
-bool FileReader::SkipLine() {
-	current_ = buffer_;
-	++lineNumber;
-	linePosition = 0;
-	return ReadBuffer();
+void LineScanner::UngetChar() {
+	assert(current_ != nullptr && current_ > lineBuffer_);
+	--current_;
 }
 
-void FileReader::UngetNextChar() {
-	if (linePosition != 0) {
-		--linePosition;
-	}
-}
-
-bool FileReader::ReadBuffer() {
-	return !!ifs_->getline(buffer_, kBufferSize);
-}
-
-TokenValueType NumberLiteralContainer::Add(const char* constant) {
-	Container::iterator ite = cont_.find(constant);
-	NumberLiteral* ans = nullptr;
-
-	if (ite == cont_.end()) { 
-		ans = new NumberLiteral();
-		ans->value = atoi(constant);
-		cont_[constant] = ans;
-	}
-	else {
-		ans = ite->second;
-	}
-
-	return ans;
-}
-
-TokenValueType StringLiteralContainer::Add(const char* constant) {
-	Container::iterator ite = cont_.find(constant);
-	StringLiteral* ans = nullptr;
-
-	if (ite == cont_.end()) {
-		ans = new StringLiteral();
-		ans->value = atoi(constant);
-		cont_[constant] = ans;
-	}
-	else {
-		ans = ite->second;
-	}
-
-	return ans;
-}
-
-TokenValueType SymbolContainer::Add(const char* symbol) {
-	Container::iterator ite = cont_.find(symbol);
-	Symbol* ans = nullptr;
-
-	if (ite == cont_.end()) {
-		ans = new Symbol();
-		ans->name = symbol;
-		cont_[symbol] = ans;
-	}
-	else {
-		ans = ite->second;
-	}
-
-	return ans;
-}
-
-Scanner::Scanner(const char* path) {
-	reader_ = new FileReader(path);
-
-	symbols_ = new SymbolContainer();
-	numberLiterals_ = new NumberLiteralContainer();
-	stringLiterals_ = new StringLiteralContainer();
-}
-
-Scanner::~Scanner() {
-	delete reader_;
-
-	delete symbols_;
-	delete numberLiterals_;
-	delete stringLiterals_;
-}
-
-bool Scanner::GetToken(ScannerToken* token) {
+ScannerTokenType LineScanner::GetToken(char* token) {
 	ScannerStateType state = ScannerStateStart;
 	ScannerTokenType tokenType = ScannerTokenError;
 
-	bool savech = false, unget = false, nextline = false;
+	bool savech = false, unget = false;
 	int ch = 0;
 
-	const int kTokenSize = 65;
-	char buffer[kTokenSize];
 	int index = 0;
 
 	for (; state != ScannerStateDone;) {
-		if (!reader_->GetNextChar(&ch)) {
-			return false;
+		if (!GetChar(&ch)) {
+			return ScannerTokenEndOfFile;
 		}
 
 		savech = true;
 		unget = false;
-		nextline = false;
 
 		switch (state) {
 		case ScannerStateStart:
-			if (ch == ' ' || ch == '\t' || ch == '\n') {
+			if (ch == '#') {
+				return ScannerTokenEndOfFile;
+			}
+
+			if (ch == ' ' || ch == '\t' || ch == '\n' || ch == 0) {
 				savech = false;
 			}
 			else if (isdigit(ch)) {
 				state = ScannerStateNumber;
 			}
-			else if (isalpha(ch)) {
+			else if (isalpha(ch) || ch == '_') {
 				state = ScannerStateID;
 			}
 			else if (ch == '<') {
@@ -164,10 +96,6 @@ bool Scanner::GetToken(ScannerToken* token) {
 			}
 			else if (ch == '"') {
 				state = ScannerStateDoubleQuotes;
-				savech = false;
-			}
-			else if (ch == '#') {
-				nextline = true;
 				savech = false;
 			}
 			else {
@@ -188,6 +116,10 @@ bool Scanner::GetToken(ScannerToken* token) {
 
 				case '/':
 					tokenType = ScannerTokenDivide;
+					break;
+
+				case '|':
+					tokenType = ScannerTokenXor;
 					break;
 
 				case '(':
@@ -247,7 +179,7 @@ bool Scanner::GetToken(ScannerToken* token) {
 			break;
 
 		case ScannerStateID:
-			if (!isdigit(ch) && !isalpha(ch)) {
+			if (!isdigit(ch) && !isalpha(ch) && ch != '_') {
 				state = ScannerStateDone;
 				tokenType = ScannerTokenID;
 				unget = true;
@@ -260,38 +192,64 @@ bool Scanner::GetToken(ScannerToken* token) {
 				state = ScannerStateDone;
 				tokenType = ScannerTokenNumber;
 				unget = true;
+				savech = false;
 			}
 			break;
 		}
 
 		if (unget) {
-			reader_->UngetNextChar();
+			UngetChar();
 		}
 
 		if (savech) {
-			if (index >= kTokenSize - 1) {
-				printf("token length exceed");
-				return false;
-			}
-
-			buffer[index++] = ch;
+			assert(index < Constants::kMaxTokenCharacters);
+			tokenBuffer_[index++] = ch;
 		}
+	}
+	
+	std::copy(tokenBuffer_, tokenBuffer_ + index, token);
+	token[index] = 0;
 
-		if (nextline && !reader_->SkipLine()) {
+	return tokenType;
+}
+
+Scanner::Scanner(const char* path) 
+	: reader_(path) {
+}
+
+Scanner::~Scanner() {
+}
+
+bool Scanner::GetToken(ScannerToken* token) {
+	char buffer[Constants::kMaxTokenCharacters];
+	ScannerTokenType tokenType = lineScanner_.GetToken(buffer);
+
+	char line[Constants::kMaxLineCharacters];
+	for (; tokenType == ScannerTokenEndOfFile; ) {
+		if (!reader_.ReadLine(line, Constants::kMaxLineCharacters)) {
 			return false;
 		}
+
+		if (strlen(line) == 0) {
+			continue;
+		}
+
+		lineScanner_.SetText(line);
+		tokenType = lineScanner_.GetToken(buffer);
 	}
 
-	buffer[index] = 0;
+	if(tokenType == ScannerTokenError) {
+		return false;
+	}
 
 	token->tokenType = tokenType;
-	token->token = nullptr;
+	token->token = &dummyToken;
 
 	if (tokenType == ScannerTokenNumber) {
-		token->token = numberLiterals_->Add(buffer);
+		token->token = numberLiterals_.Add(buffer);
 	}
 	else if (tokenType == ScannerTokenString) {
-		token->token = stringLiterals_->Add(buffer);
+		token->token = stringLiterals_.Add(buffer);
 	}
 	else if (tokenType == ScannerTokenID) {
 		ScannerTokenType reserveTokenType = GetReserveTokenType(buffer);
@@ -299,7 +257,7 @@ bool Scanner::GetToken(ScannerToken* token) {
 			token->tokenType = reserveTokenType;
 		}
 		else {
-			token->token = symbols_->Add(buffer);
+			token->token = symbols_.Add(buffer);
 		}
 	}
 

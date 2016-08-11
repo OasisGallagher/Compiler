@@ -1,4 +1,6 @@
 #include "scanner/scanner.h"
+#include "parser/parser.h"
+
 const char* tokenName[] = {
 	"err",
 	"eof",
@@ -18,20 +20,30 @@ const char* tokenName[] = {
 	"minus",
 	"multiply",
 	"divide",
+	"xor",
 	"string",
 	"leftparenthesis",
 	"rightparenthesis"
 	"semicolon",
 };
 
-int main() {
-	Scanner* scanner = new Scanner("test.el");
-	ScannerToken token;
+const char* grammar[] = {
+	"_exp : _exp _addop _term",
+	"_exp : _term",
+	"_addop : + | -",
+	"_term : _term _mulop _factor",
+	"_term : _factor",
+	"_mulop : *",
+	"_factor : (_exp)",
+	"_factor : _number",
+	"_number : 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9"
+};
 
-	for (; scanner->GetToken(&token);) {
-		printf("type = %s, value = %p\n", tokenName[token.tokenType], token.token);
+int main() {
+	GrammarParser parser;
+	for (int i = 0; i < sizeof(grammar) / sizeof(grammar[0]); ++i) {
+		parser.AddProduction(grammar[i]);
 	}
 
-	delete scanner;
 	return 0;
 }

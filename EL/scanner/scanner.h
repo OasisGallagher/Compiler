@@ -1,7 +1,9 @@
+#pragma once
+
 #include <fstream>
 #include <map>
-
-typedef void* TokenValueType;
+#include <string>
+#include "types.h"
 
 // Scanner扫描到的标记.
 enum ScannerTokenType {
@@ -45,6 +47,9 @@ enum ScannerTokenType {
 	// 除.
 	ScannerTokenDivide,
 
+	// 位或, |.
+	ScannerTokenXor,
+
 	// 字符串.
 	ScannerTokenString,
 
@@ -56,43 +61,67 @@ enum ScannerTokenType {
 	ScannerTokenSemicolon,
 };
 
-struct NumberLiteral {
-	int value;
-};
-
-struct Symbol {
-	std::string name;
-};
-
-struct StringLiteral {
-	std::string value;
-};
-
-class NumberLiteralContainer {
+class Token {
 public:
-	TokenValueType Add(const char* number);
-
-private:
-	typedef std::map<std::string, NumberLiteral*> Container;
-	Container cont_;
+	virtual std::string ToString() = 0;
 };
 
-class StringLiteralContainer {
+class DummyToken : public Token {
 public:
-	TokenValueType Add(const char* number);
-
-private:
-	typedef std::map<std::string, StringLiteral*> Container;
-	Container cont_;
+	virtual std::string ToString() {
+		return "null";
+	}
 };
 
-class SymbolContainer {
+class Symbol : public Token {
 public:
-	TokenValueType Add(const char* symbol);
+	Symbol(const char* text) {
+		name_ = text;
+	}
 
+	virtual std::string ToString() {
+		return name_;
+	}
 private:
-	typedef std::map<std::string, Symbol*> Container;
-	Container cont_;
+	std::string name_;
+};
+
+class Literal : public Token {
+};
+
+class NumberLiteral : public Literal {
+public:
+	NumberLiteral(const char* text) {
+		value_ = atoi(text);
+	}
+
+	virtual std::string ToString() {
+		return std::to_string(value_);
+	}
+private:
+	int value_;
+};
+
+class StringLiteral : public Literal {
+public:
+	StringLiteral(const char* text) {
+		value_ = text;
+	}
+
+	virtual std::string ToString() {
+		return value_;
+	}
+private:
+	std::string value_;
+};
+
+class NumberLiteralContainer : public Table<NumberLiteral> {
+};
+
+class StringLiteralContainer : public Table<StringLiteral> {
+};
+
+class SymbolContainer : public Table<Symbol> {
 };
 
 class FileReader {
@@ -101,27 +130,15 @@ public:
 	~FileReader();
 
 public:
-	bool GetNextChar(int* ch);
-	void UngetNextChar();
-	bool SkipLine();
+	bool ReadLine(char* buffer, size_t length);
 
 private:
-	bool ReadBuffer();
-
-private:
-	int lineNumber;
-	int linePosition;
-
-	std::ifstream* ifs_;
-
-	char* current_;
-	char* buffer_;
-	const int kBufferSize = 256;
+	std::ifstream ifs_;
 };
 
 struct ScannerToken {
 	ScannerTokenType tokenType;
-	TokenValueType token;
+	Token* token;
 };
 
 enum ScannerStateType {
@@ -138,6 +155,25 @@ enum ScannerStateType {
 	ScannerStateDone
 };
 
+class LineScanner {
+public:
+	LineScanner();
+	~LineScanner();
+
+	void SetText(const char* text);
+	ScannerTokenType GetToken(char* token);
+
+private:
+	bool GetChar(int* ch);
+	void UngetChar();
+
+	int tokenBufferIndex_;
+	char* lineBuffer_;
+	char* tokenBuffer_;
+	char* dest_;
+	char* current_;
+};
+
 class Scanner {
 public:
 	Scanner(const char* path);
@@ -146,11 +182,13 @@ public:
 	bool GetToken(ScannerToken* token);
 
 private:
-	ScannerStateType CheckCharInStartState(int ch, ScannerToken* token);
 	ScannerTokenType GetReserveTokenType(const char* name);
 private:
-	FileReader* reader_;
-	SymbolContainer* symbols_;
-	NumberLiteralContainer* numberLiterals_;
-	StringLiteralContainer* stringLiterals_;
+	FileReader reader_;
+	LineScanner lineScanner_;
+
+	SymbolContainer symbols_;
+	NumberLiteralContainer numberLiterals_;
+	StringLiteralContainer stringLiterals_;
 };
+

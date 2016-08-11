@@ -4,16 +4,49 @@
     <Filter Include="scanner">
       <UniqueIdentifier>{15e7854f-fbd0-454f-b8ac-a663bdf9415d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="parser">
+      <UniqueIdentifier>{bed9a7d7-b6ed-4cc1-84bd-f2b039c9d83b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="parser\include">
+      <UniqueIdentifier>{2ae6e0d8-e830-4a7c-8546-accb92515856}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="parser\src">
+      <UniqueIdentifier>{0538c781-feb7-4bce-9b34-2a606ca8afb7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="scanner\include">
+      <UniqueIdentifier>{a38cdc06-096e-479d-a5b9-ba71d616c8ad}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="scanner\src">
+      <UniqueIdentifier>{e0048f5f-8a47-4e23-a89e-81f3831ad958}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="global">
+      <UniqueIdentifier>{bae71329-25f3-4ed7-995e-b6f06c03e4b9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="global\include">
+      <UniqueIdentifier>{82db5c25-7f95-42fa-89f4-a313445d26aa}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="parser\parser.h">
+      <Filter>parser\include</Filter>
+    </ClInclude>
     <ClInclude Include="scanner\scanner.h">
-      <Filter>scanner</Filter>
+      <Filter>scanner\include</Filter>
+    </ClInclude>
+    <ClInclude Include="global\constants.h">
+      <Filter>global\include</Filter>
+    </ClInclude>
+    <ClInclude Include="global\types.h">
+      <Filter>global\include</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="scanner\scanner.cpp">
-      <Filter>scanner</Filter>
-    </ClCompile>
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="parser\parser.cpp">
+      <Filter>parser\src</Filter>
+    </ClCompile>
+    <ClCompile Include="scanner\scanner.cpp">
+      <Filter>scanner\src</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>
