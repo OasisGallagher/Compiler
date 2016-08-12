@@ -2,7 +2,7 @@
 #include <sstream>
 #include <algorithm>
 #include <functional>
-#include "../scanner/scanner.h"
+#include "scanner.h"
 #include "parser.h"
 #include "constants.h"
 #include "debug.h"

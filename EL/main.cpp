@@ -1,5 +1,5 @@
-#include "scanner/scanner.h"
-#include "parser/parser.h"
+#include "scanner.h"
+#include "parser.h"
 #include "debug.h"
 
 const char* tokenName[] = {

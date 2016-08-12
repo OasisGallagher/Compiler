@@ -30,12 +30,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="parser\parser.h">
-      <Filter>parser\include</Filter>
-    </ClInclude>
-    <ClInclude Include="scanner\scanner.h">
-      <Filter>scanner\include</Filter>
-    </ClInclude>
     <ClInclude Include="global\include\constants.h">
       <Filter>global\include</Filter>
     </ClInclude>
@@ -45,21 +39,26 @@
     <ClInclude Include="global\include\debug.h">
       <Filter>global\include</Filter>
     </ClInclude>
+    <ClInclude Include="parser\include\parser.h">
+      <Filter>parser\include</Filter>
+    </ClInclude>
+    <ClInclude Include="scanner\include\scanner.h">
+      <Filter>scanner\include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="parser\parser.cpp">
-      <Filter>parser\src</Filter>
-    </ClCompile>
-    <ClCompile Include="scanner\scanner.cpp">
-      <Filter>scanner\src</Filter>
-    </ClCompile>
     <ClCompile Include="global\src\debug.cpp">
       <Filter>global\src</Filter>
     </ClCompile>
-    <ClCompile Include="global\include\types.cpp" />
     <ClCompile Include="global\src\types.cpp">
       <Filter>global\src</Filter>
+    </ClCompile>
+    <ClCompile Include="parser\src\parser.cpp">
+      <Filter>parser\src</Filter>
+    </ClCompile>
+    <ClCompile Include="scanner\src\scanner.cpp">
+      <Filter>scanner\src</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

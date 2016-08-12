@@ -14,15 +14,15 @@
     <ClInclude Include="global\include\constants.h" />
     <ClInclude Include="global\include\types.h" />
     <ClInclude Include="global\include\debug.h" />
-    <ClInclude Include="parser\parser.h" />
-    <ClInclude Include="scanner\scanner.h" />
+    <ClInclude Include="parser\include\parser.h" />
+    <ClInclude Include="scanner\include\scanner.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="global\src\debug.cpp" />
     <ClCompile Include="global\src\types.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="parser\parser.cpp" />
-    <ClCompile Include="scanner\scanner.cpp" />
+    <ClCompile Include="parser\src\parser.cpp" />
+    <ClCompile Include="scanner\src\scanner.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{1AD72401-EA15-485A-9CBB-9574AC936ED6}</ProjectGuid>
@@ -67,7 +67,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions);_SCL_SECURE_NO_WARNINGS</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>global/include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>global/include;scanner/include;parser/include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>

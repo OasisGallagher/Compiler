@@ -2,7 +2,7 @@
 #include <algorithm>
 #include "constants.h"
 #include "debug.h"
-#include "../scanner/scanner.h"
+#include "scanner.h"
 
 static DummyToken dummyToken;
 
