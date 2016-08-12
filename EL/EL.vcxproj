@@ -16,6 +16,7 @@
     <ClInclude Include="global\include\debug.h" />
     <ClInclude Include="parser\include\parser.h" />
     <ClInclude Include="scanner\include\scanner.h" />
+    <ClInclude Include="scanner\include\token.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="global\src\debug.cpp" />

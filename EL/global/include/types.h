@@ -1,6 +1,7 @@
 #pragma once
 #include <map>
 #include <string>
+#include <fstream>
 
 template <class Ty>
 class Table {
@@ -44,4 +45,16 @@ protected:
 
 private:
 	unsigned refCount_;
+};
+
+class FileReader {
+public:
+	FileReader(const char* path);
+	~FileReader();
+
+public:
+	bool ReadLine(char* buffer, size_t length);
+
+private:
+	std::ifstream ifs_;
 };

@@ -2,21 +2,24 @@
 #include <algorithm>
 #include "constants.h"
 #include "debug.h"
+#include "types.h"
 #include "scanner.h"
 
+enum ScannerStateType {
+	ScannerStateStart,
+	ScannerStateAssign,
+
+	ScannerStateLess,
+	ScannerStateGreater,
+
+	ScannerStateDoubleQuotes,
+
+	ScannerStateID,
+	ScannerStateNumber,
+	ScannerStateDone
+};
+
 static DummyToken dummyToken;
-
-FileReader::FileReader(const char* path) {
-	ifs_.open(path);
-}
-
-FileReader::~FileReader() {
-	ifs_.close();
-}
-
-bool FileReader::ReadLine(char* buffer, size_t length) {
-	return !!ifs_.getline(buffer, length);
-}
 
 LineScanner::LineScanner() 
 	: current_(nullptr), dest_(nullptr) {
@@ -214,20 +217,27 @@ ScannerTokenType LineScanner::GetToken(char* token) {
 	return tokenType;
 }
 
-Scanner::Scanner(const char* path) 
-	: reader_(path) {
+FileScanner::FileScanner(const char* path) 
+	: reader_(new FileReader(path)) {
+	symbols_ = new Table < Symbol >();
+	numberLiterals_ = new Table < NumberLiteral >();
+	stringLiterals_ = new Table < StringLiteral >();
 }
 
-Scanner::~Scanner() {
+FileScanner::~FileScanner() {
+	delete reader_;
+	delete symbols_;
+	delete numberLiterals_;
+	delete stringLiterals_;
 }
 
-bool Scanner::GetToken(ScannerToken* token) {
+bool FileScanner::GetToken(ScannerToken* token) {
 	char buffer[Constants::kMaxTokenCharacters];
 	ScannerTokenType tokenType = lineScanner_.GetToken(buffer);
 
 	char line[Constants::kMaxLineCharacters];
 	for (; tokenType == ScannerTokenEndOfFile; ) {
-		if (!reader_.ReadLine(line, Constants::kMaxLineCharacters)) {
+		if (!reader_->ReadLine(line, Constants::kMaxLineCharacters)) {
 			return false;
 		}
 
@@ -247,10 +257,10 @@ bool Scanner::GetToken(ScannerToken* token) {
 	token->token = &dummyToken;
 
 	if (tokenType == ScannerTokenNumber) {
-		token->token = numberLiterals_.Add(buffer);
+		token->token = numberLiterals_->Add(buffer);
 	}
 	else if (tokenType == ScannerTokenString) {
-		token->token = stringLiterals_.Add(buffer);
+		token->token = stringLiterals_->Add(buffer);
 	}
 	else if (tokenType == ScannerTokenID) {
 		ScannerTokenType reserveTokenType = GetReserveTokenType(buffer);
@@ -258,14 +268,14 @@ bool Scanner::GetToken(ScannerToken* token) {
 			token->tokenType = reserveTokenType;
 		}
 		else {
-			token->token = symbols_.Add(buffer);
+			token->token = symbols_->Add(buffer);
 		}
 	}
 
 	return true;
 }
 
-ScannerTokenType Scanner::GetReserveTokenType(const char* name) {
+ScannerTokenType FileScanner::GetReserveTokenType(const char* name) {
 	if (strcmp(name, "if") == 0) {
 		return ScannerTokenIf;
 	}

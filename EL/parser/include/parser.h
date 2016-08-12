@@ -150,10 +150,12 @@ private:
 	bool IsTerminal(const char* token);
 	bool ParseProductions(LineScanner* lineScanner, GrammarSymbolContainer* symbols);
 	bool ParseGrammar();
-	void CombineProductions();
+
 	void RemoveLeftRecursion();
 	bool HandleLeftRecursion(Grammar* g, GrammarContainer* newGrammars);
-	
+
+	void CreateFirstSets();
+	void CreateFollowSets();
 private:
 	GrammarContainer grammars_;
 };
