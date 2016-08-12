@@ -11,8 +11,9 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="global\constants.h" />
-    <ClInclude Include="global\types.h" />
+    <ClInclude Include="global\include\constants.h" />
+    <ClInclude Include="global\include\types.h" />
+    <ClInclude Include="global\include\utilities.h" />
     <ClInclude Include="parser\parser.h" />
     <ClInclude Include="scanner\scanner.h" />
   </ItemGroup>

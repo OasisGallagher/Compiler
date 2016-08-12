@@ -2,57 +2,86 @@
 #include <vector>
 #include "types.h"
 
-class GrammarSymbol {
+class _GrammarSymbol : public RefCountable {
 public:
+	friend class GrammarSymbol;
+
 	const std::string& ToString() {
 		return text_;
 	}
 
 protected:
-	GrammarSymbol(const char* text)
+	_GrammarSymbol(const char* text)
 		: text_(text) {
+	}
+
+	~_GrammarSymbol() {
 	}
 
 protected:
 	std::string text_;
 };
 
-class TerminalSymbol : public GrammarSymbol {
+class TerminalSymbol : public _GrammarSymbol {
 public:
 	TerminalSymbol(const char* text)
-		: GrammarSymbol(text) {
+		: _GrammarSymbol(text) {
 	}
 };
 
-class NonterminalSymbol : public GrammarSymbol {
+class NonterminalSymbol : public _GrammarSymbol {
 public:
 	NonterminalSymbol(const char* text) 
-		: GrammarSymbol(text) { 
+		: _GrammarSymbol(text) { 
 	}
 };
 
-class TerminalSymbolContainer : public Table<TerminalSymbol>{
+class GrammarSymbolContainer {
+public:
+	GrammarSymbol AddSymbol(const char* text, bool terminal);
+	void Clear();
+
+private:
+	typedef std::map<std::string, GrammarSymbol> Container;
+	Container cont_;
 };
 
-class NonterminalSymbolContainer : public Table<NonterminalSymbol>{
+class GrammarSymbol {
+public:
+	GrammarSymbol();
+	GrammarSymbol(_GrammarSymbol* symbol);
+
+	GrammarSymbol(const GrammarSymbol& other);
+
+	GrammarSymbol& operator = (const GrammarSymbol& other);
+
+	~GrammarSymbol();
+
+public:
+	std::string ToString();
+
+private:
+	void* operator new(size_t);
+
+private:
+	_GrammarSymbol* symbol_;
 };
 
-typedef std::vector<GrammarSymbol*> Condinate;
+typedef std::vector<GrammarSymbol> Condinate;
 typedef std::vector<Condinate*> CondinateContainer;
 
 class Grammar {
 public:
-	Grammar();
+	Grammar(const GrammarSymbol& left);
 	~Grammar();
 
 public:
-	void SetLeft(GrammarSymbol* left);
 	Condinate* AddCondinate();
 
 	std::string ToString();
 
 private:
-	GrammarSymbol* left_;
+	GrammarSymbol left_;
 	CondinateContainer condinates_;
 };
 
@@ -65,16 +94,15 @@ public:
 	~GrammarParser();
 
 public:
-	bool AddProduction(const char* production);
+	bool Parse(const char* productions[], int count);
+
 	std::string ToString();
 
 private:
 	bool IsTerminal(const char* token);
-	bool ParseProduction();
+	bool ParseProduction(LineScanner* lineScanner, GrammarSymbolContainer* symbols);
+	bool ParseGrammar();
 
 private:
 	GrammarContainer grammars_;
-	LineScanner* lineScanner_;
-	TerminalSymbolContainer terminalSymbols_;
-	NonterminalSymbolContainer nonterminalSymbols_;
 };

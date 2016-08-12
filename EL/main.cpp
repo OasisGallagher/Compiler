@@ -41,9 +41,7 @@ const char* grammar[] = {
 
 int main() {
 	GrammarParser parser;
-	for (int i = 0; i < sizeof(grammar) / sizeof(grammar[0]); ++i) {
-		parser.AddProduction(grammar[i]);
-	}
+	parser.Parse(grammar, sizeof(grammar) / sizeof(grammar[0]));
 
 	return 0;
 }

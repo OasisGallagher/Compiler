@@ -33,10 +33,13 @@
     <ClInclude Include="scanner\scanner.h">
       <Filter>scanner\include</Filter>
     </ClInclude>
-    <ClInclude Include="global\constants.h">
+    <ClInclude Include="global\include\constants.h">
       <Filter>global\include</Filter>
     </ClInclude>
-    <ClInclude Include="global\types.h">
+    <ClInclude Include="global\include\types.h">
+      <Filter>global\include</Filter>
+    </ClInclude>
+    <ClInclude Include="global\include\utilities.h">
       <Filter>global\include</Filter>
     </ClInclude>
   </ItemGroup>
