@@ -1,6 +1,7 @@
 #include <cassert>
 #include <algorithm>
 #include "constants.h"
+#include "debug.h"
 #include "../scanner/scanner.h"
 
 static DummyToken dummyToken;
@@ -30,7 +31,7 @@ LineScanner::~LineScanner() {
 
 void LineScanner::SetText(const char* text) {
 	size_t length = strlen(text);
-	assert(length > 0 && length < Constants::kMaxLineCharacters);
+	Assert(length > 0 && length < Constants::kMaxLineCharacters, "invalid line text");
 
 	std::copy(text, text + length, lineBuffer_);
 	lineBuffer_[length] = 0;
@@ -49,7 +50,7 @@ bool LineScanner::GetChar(int* ch) {
 }
 
 void LineScanner::UngetChar() {
-	assert(current_ != nullptr && current_ > lineBuffer_);
+	Assert(current_ != nullptr && current_ > lineBuffer_, "unget failed. invalid state");
 	--current_;
 }
 
@@ -82,7 +83,7 @@ ScannerTokenType LineScanner::GetToken(char* token) {
 			else if (isdigit(ch)) {
 				state = ScannerStateNumber;
 			}
-			else if (isalpha(ch) || ch == '_') {
+			else if (isalpha(ch) || ch == '_' || ch == '$') {
 				state = ScannerStateID;
 			}
 			else if (ch == '<') {
@@ -179,7 +180,7 @@ ScannerTokenType LineScanner::GetToken(char* token) {
 			break;
 
 		case ScannerStateID:
-			if (!isdigit(ch) && !isalpha(ch) && ch != '_') {
+			if (!isdigit(ch) && !isalpha(ch) && ch != '_' && ch != '$') {
 				state = ScannerStateDone;
 				tokenType = ScannerTokenID;
 				unget = true;
@@ -202,7 +203,7 @@ ScannerTokenType LineScanner::GetToken(char* token) {
 		}
 
 		if (savech) {
-			assert(index < Constants::kMaxTokenCharacters);
+			Assert(index < Constants::kMaxTokenCharacters, "invalid token. buffer too small.");
 			tokenBuffer_[index++] = ch;
 		}
 	}

@@ -13,11 +13,13 @@
   <ItemGroup>
     <ClInclude Include="global\include\constants.h" />
     <ClInclude Include="global\include\types.h" />
-    <ClInclude Include="global\include\utilities.h" />
+    <ClInclude Include="global\include\debug.h" />
     <ClInclude Include="parser\parser.h" />
     <ClInclude Include="scanner\scanner.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="global\src\debug.cpp" />
+    <ClCompile Include="global\src\types.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="parser\parser.cpp" />
     <ClCompile Include="scanner\scanner.cpp" />

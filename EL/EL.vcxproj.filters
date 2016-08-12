@@ -25,6 +25,9 @@
     <Filter Include="global\include">
       <UniqueIdentifier>{82db5c25-7f95-42fa-89f4-a313445d26aa}</UniqueIdentifier>
     </Filter>
+    <Filter Include="global\src">
+      <UniqueIdentifier>{4955cf20-14b4-4024-bf2d-1b8764e6347f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="parser\parser.h">
@@ -39,7 +42,7 @@
     <ClInclude Include="global\include\types.h">
       <Filter>global\include</Filter>
     </ClInclude>
-    <ClInclude Include="global\include\utilities.h">
+    <ClInclude Include="global\include\debug.h">
       <Filter>global\include</Filter>
     </ClInclude>
   </ItemGroup>
@@ -50,6 +53,13 @@
     </ClCompile>
     <ClCompile Include="scanner\scanner.cpp">
       <Filter>scanner\src</Filter>
+    </ClCompile>
+    <ClCompile Include="global\src\debug.cpp">
+      <Filter>global\src</Filter>
+    </ClCompile>
+    <ClCompile Include="global\include\types.cpp" />
+    <ClCompile Include="global\src\types.cpp">
+      <Filter>global\src</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

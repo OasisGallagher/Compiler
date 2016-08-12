@@ -1,5 +1,6 @@
 #pragma once
-#include "utilities.h"
+#include <map>
+#include <string>
 
 template <class Ty>
 class Table {
@@ -35,16 +36,11 @@ private:
 
 class RefCountable {
 protected:
-	RefCountable() : refCount_(1) {
-	}
-	unsigned IncRefCount() {
-		return ++refCount_;
-	}
+	RefCountable();
 
-	unsigned DecRefCount() {
-		Assert(refCount_ > 0, "can't decrease reference count");
-		return --refCount_;
-	}
+	unsigned IncRefCount();
+
+	unsigned DecRefCount();
 
 private:
 	unsigned refCount_;

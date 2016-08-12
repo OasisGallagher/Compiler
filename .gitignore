@@ -9,3 +9,5 @@
 /EL/Debug/EL.tlog/*.lastbuildstate
 /EL/Debug/*.idb
 /EL/Debug/*.pdb
+/*.opensdf
+/UpgradeLog.htm

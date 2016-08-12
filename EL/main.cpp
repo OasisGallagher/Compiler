@@ -1,5 +1,6 @@
 #include "scanner/scanner.h"
 #include "parser/parser.h"
+#include "debug.h"
 
 const char* tokenName[] = {
 	"err",
@@ -39,9 +40,19 @@ const char* grammar[] = {
 	"_number : 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9"
 };
 
+const char* grammar2[] = {
+	"$A : $alphabet | $digits | epsilon"
+};
+
+const char* grammar3[] = {
+	"$exp : $exp + $term | $exp - $term | $term",
+};
+
+#define GRAMMAR(name) name, sizeof(name) / sizeof(name[0])
+
 int main() {
 	GrammarParser parser;
-	parser.Parse(grammar, sizeof(grammar) / sizeof(grammar[0]));
+	parser.Parse(GRAMMAR(grammar3));
 
 	return 0;
 }
