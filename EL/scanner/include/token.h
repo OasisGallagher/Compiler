@@ -55,15 +55,33 @@ enum ScannerTokenType {
 	ScannerTokenRightParenthesis,
 	// ·ÖºÅ.
 	ScannerTokenSemicolon,
+	// Ã°ºÅ.
+	ScannerTokenColon,
 };
 
 class Token {
 public:
+	Token(const std::string& text) : text_(text) {
+
+	}
+
+public:
 	virtual std::string ToString() = 0;
+
+	const std::string& Text() const {
+		return text_;
+	}
+
+private:
+	std::string text_;
 };
 
 class DummyToken : public Token {
 public:
+	DummyToken() : Token("") {
+
+	}
+
 	virtual std::string ToString() {
 		return "null";
 	}
@@ -71,23 +89,28 @@ public:
 
 class Symbol : public Token {
 public:
-	Symbol(const char* text) {
+	Symbol(const char* text) :Token(text) {
 		name_ = text;
 	}
 
 	virtual std::string ToString() {
 		return name_;
 	}
+
 private:
 	std::string name_;
 };
 
 class Literal : public Token {
+public:
+	Literal(const char* text) : Token(text) {
+
+	}
 };
 
 class NumberLiteral : public Literal {
 public:
-	NumberLiteral(const char* text) {
+	NumberLiteral(const char* text) : Literal(text) {
 		value_ = atoi(text);
 	}
 
@@ -100,7 +123,7 @@ private:
 
 class StringLiteral : public Literal {
 public:
-	StringLiteral(const char* text) {
+	StringLiteral(const char* text) :Literal(text) {
 		value_ = text;
 	}
 

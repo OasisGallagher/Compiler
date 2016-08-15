@@ -33,9 +33,6 @@
     <ClInclude Include="global\include\constants.h">
       <Filter>global\include</Filter>
     </ClInclude>
-    <ClInclude Include="global\include\types.h">
-      <Filter>global\include</Filter>
-    </ClInclude>
     <ClInclude Include="global\include\debug.h">
       <Filter>global\include</Filter>
     </ClInclude>
@@ -46,18 +43,33 @@
       <Filter>scanner\include</Filter>
     </ClInclude>
     <ClInclude Include="scanner\include\token.h">
-      <Filter>scanner\include</Filter>
+		<Filter>scanner\include</Filter>
     </ClInclude>
     <ClInclude Include="global\include\utilities.h">
       <Filter>global\include</Filter>
     </ClInclude>
+    <ClInclude Include="parser\include\grammar.h">
+      <Filter>parser\include</Filter>
+    </ClInclude>
+    <ClInclude Include="parser\include\grammar_symbol.h">
+      <Filter>parser\include</Filter>
+    </ClInclude>
+    <ClInclude Include="parser\include\parsing_table.h">
+      <Filter>parser\include</Filter>
+    </ClInclude>
+    <ClInclude Include="parser\include\syntax_tree.h">
+      <Filter>parser\include</Filter>
+    </ClInclude>
+    <ClInclude Include="global\include\file_reader.h">
+      <Filter>global\include</Filter>
+    </ClInclude>
+	<ClInclude Include="global\include\reference_countable.h">
+      <Filter>global\include</Filter>
+	 </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
     <ClCompile Include="global\src\debug.cpp">
-      <Filter>global\src</Filter>
-    </ClCompile>
-    <ClCompile Include="global\src\types.cpp">
       <Filter>global\src</Filter>
     </ClCompile>
     <ClCompile Include="parser\src\parser.cpp">
@@ -65,6 +77,21 @@
     </ClCompile>
     <ClCompile Include="scanner\src\scanner.cpp">
       <Filter>scanner\src</Filter>
+    </ClCompile>
+    <ClCompile Include="parser\src\grammar.cpp">
+      <Filter>parser\src</Filter>
+    </ClCompile>
+    <ClCompile Include="parser\src\grammar_symbol.cpp">
+      <Filter>parser\src</Filter>
+    </ClCompile>
+    <ClCompile Include="parser\src\parsing_table.cpp">
+      <Filter>parser\src</Filter>
+    </ClCompile>
+    <ClCompile Include="global\src\utilities.cpp">
+      <Filter>global\src</Filter>
+    </ClCompile>
+    <ClCompile Include="parser\src\syntax_tree.cpp">
+      <Filter>parser\src</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

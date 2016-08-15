@@ -4,9 +4,9 @@
 #include <Windows.h>
 #include "debug.h"
 
-const int red = 4;
-const int white = 7;
-const int yellow = 6;
+const int red = 12;
+const int white = 15;
+const int yellow = 14;
 
 void Debug::Log(const std::string& text) {
 	SetConsoleColor(white);
@@ -15,13 +15,13 @@ void Debug::Log(const std::string& text) {
 
 void Debug::LogWarning(const std::string& text) {
 	SetConsoleColor(yellow);
-	std::cout << text << "\n";
+	std::cout << "[W] " << text << "\n";
 	SetConsoleColor(white);
 }
 
 void Debug::LogError(const std::string& text) {
 	SetConsoleColor(red);
-	std::cout << text << "\n";
+	std::cout << "[E] " << text << "\n";
 	SetConsoleColor(white);
 }
 

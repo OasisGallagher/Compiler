@@ -1,0 +1,48 @@
+=================== Grammars ===================
+$exp : $term $exp_2
+$exp_2 : $addop $term $exp_2|epsilon
+$addop : -|+
+$term : $factor $term_2
+$term_2 : $mulop $factor $term_2|epsilon
+$mulop : *
+$factor : ( $exp )|$digit
+
+==================== First =====================
+$exp        {$digit (}
+$addop      {+ -}
+$term       {$digit (}
+$mulop      {*}
+$factor     {$digit (}
+$exp_2      {epsilon + -}
+$term_2     {epsilon *}
+
+==================== Follow ====================
+$exp        {null )}
+$addop      {$digit (}
+$term       {null + - )}
+$mulop      {$digit (}
+$factor     {null + - * )}
+$exp_2      {null )}
+$term_2     {null + - )}
+
+================= ParsingTable =================
+[$exp, $digit]          $exp : $term $exp_2
+[$exp, (]               $exp : $term $exp_2
+[$addop, +]             $addop : +
+[$addop, -]             $addop : -
+[$term, $digit]         $term : $factor $term_2
+[$term, (]              $term : $factor $term_2
+[$mulop, *]             $mulop : *
+[$factor, $digit]       $factor : $digit
+[$factor, (]            $factor : ( $exp )
+[$exp_2, null]          $exp_2 : epsilon
+[$exp_2, epsilon]       $exp_2 : epsilon
+[$exp_2, +]             $exp_2 : $addop $term $exp_2
+[$exp_2, -]             $exp_2 : $addop $term $exp_2
+[$exp_2, )]             $exp_2 : epsilon
+[$term_2, null]         $term_2 : epsilon
+[$term_2, epsilon]      $term_2 : epsilon
+[$term_2, +]            $term_2 : epsilon
+[$term_2, -]            $term_2 : epsilon
+[$term_2, *]            $term_2 : $mulop $factor $term_2
+[$term_2, )]            $term_2 : epsilon

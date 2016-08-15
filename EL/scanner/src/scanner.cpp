@@ -1,9 +1,10 @@
 #include <cassert>
 #include <algorithm>
-#include "constants.h"
 #include "debug.h"
-#include "types.h"
 #include "scanner.h"
+#include "constants.h"
+#include "utilities.h"
+#include "file_reader.h"
 
 enum ScannerStateType {
 	ScannerStateStart,
@@ -136,6 +137,10 @@ ScannerTokenType LineScanner::GetToken(char* token) {
 
 				case ';':
 					tokenType = ScannerTokenSemicolon;
+					break;
+
+				case ':':
+					tokenType = ScannerTokenColon;
 					break;
 				}
 			}

@@ -12,18 +12,27 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="global\include\constants.h" />
-    <ClInclude Include="global\include\types.h" />
     <ClInclude Include="global\include\debug.h" />
+    <ClInclude Include="global\include\file_reader.h" />
+    <ClInclude Include="global\include\reference_countable.h" />
     <ClInclude Include="global\include\utilities.h" />
+    <ClInclude Include="parser\include\grammar.h" />
+    <ClInclude Include="parser\include\grammar_symbol.h" />
     <ClInclude Include="parser\include\parser.h" />
+    <ClInclude Include="parser\include\parsing_table.h" />
+    <ClInclude Include="parser\include\syntax_tree.h" />
     <ClInclude Include="scanner\include\scanner.h" />
     <ClInclude Include="scanner\include\token.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="global\src\debug.cpp" />
-    <ClCompile Include="global\src\types.cpp" />
+    <ClCompile Include="global\src\utilities.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="parser\src\grammar.cpp" />
+    <ClCompile Include="parser\src\grammar_symbol.cpp" />
     <ClCompile Include="parser\src\parser.cpp" />
+    <ClCompile Include="parser\src\parsing_table.cpp" />
+    <ClCompile Include="parser\src\syntax_tree.cpp" />
     <ClCompile Include="scanner\src\scanner.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
@@ -67,7 +76,7 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions);_SCL_SECURE_NO_WARNINGS</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions);_SCL_SECURE_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>global/include;scanner/include;parser/include</AdditionalIncludeDirectories>
     </ClCompile>
