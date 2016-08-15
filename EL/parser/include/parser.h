@@ -1,7 +1,13 @@
 #pragma once
+#include <set>
 #include <list>
 #include <vector>
 #include "types.h"
+
+enum GrammarSymbolType {
+	GrammarSymbolTerminal,
+	GrammarSymbolNonterminal,
+};
 
 class _GrammarSymbol : public RefCountable {
 public:
@@ -11,6 +17,7 @@ public:
 		return text_;
 	}
 
+	virtual GrammarSymbolType SymbolType() const = 0;
 	virtual bool Match(const std::string& text) const = 0;
 
 protected:
@@ -31,6 +38,10 @@ public:
 		: _GrammarSymbol(text) {
 	}
 
+	virtual GrammarSymbolType SymbolType() const {
+		return GrammarSymbolTerminal;
+	}
+
 	virtual bool Match(const std::string& text) const {
 		return true;
 	}
@@ -42,8 +53,19 @@ public:
 		: _GrammarSymbol(text) { 
 	}
 
+	virtual GrammarSymbolType SymbolType() const {
+		return GrammarSymbolNonterminal;
+	}
+
 	virtual bool Match(const std::string& text) const {
 		return true;
+	}
+};
+
+class Null : public TerminalSymbol {
+public:
+	Null()
+		: TerminalSymbol("null") {
 	}
 };
 
@@ -54,23 +76,25 @@ public:
 	}
 };
 
-class Alphabet : public NonterminalSymbol {
+class Letter : public NonterminalSymbol {
 public:
-	Alphabet()
-		: NonterminalSymbol("$alphabet") {
+	Letter()
+		: NonterminalSymbol("$letter") {
 	}
 };
 
-class Digits : public NonterminalSymbol {
+class Digit : public NonterminalSymbol {
 public:
-	Digits()
-		: NonterminalSymbol("$digits") {
+	Digit()
+		: NonterminalSymbol("$digit") {
 	}
 };
 
 class GrammarSymbolContainer {
 public:
 	GrammarSymbolContainer();
+
+public:
 	GrammarSymbol AddSymbol(const std::string& text, bool terminal);
 
 private:
@@ -94,11 +118,14 @@ public:
 	bool operator != (const GrammarSymbol& other) const;
 	bool operator < (const GrammarSymbol& other) const;
 	bool operator > (const GrammarSymbol& other) const;
+
 public:
+	GrammarSymbolType SymbolType() const;
 	std::string ToString() const;
 
 public:
 	static GrammarSymbol epsilon;
+	static GrammarSymbol null;
 	static GrammarSymbol letter;
 	static GrammarSymbol digit;
 
@@ -111,6 +138,24 @@ private:
 
 typedef std::vector<GrammarSymbol> Condinate;
 typedef std::vector<Condinate*> CondinateContainer;
+
+typedef std::set<GrammarSymbol> GrammarSymbolSet;
+
+class GrammarSymbolSetTable {
+public:
+	GrammarSymbolSetTable();
+
+public:
+	GrammarSymbolSet& operator[] (const GrammarSymbol& key);
+	std::string ToString() const;
+
+private:
+	bool IsBuildinSymbol(const GrammarSymbol& symbol) const;
+
+private:
+	typedef std::map<GrammarSymbol, GrammarSymbolSet> Container;
+	Container cont_;
+};
 
 class Grammar {
 public:
@@ -127,6 +172,7 @@ public:
 	const CondinateContainer& GetCondinates() const;
 	
 	std::string ToString() const;
+	
 private:
 	GrammarSymbol left_;
 	CondinateContainer condinates_;
@@ -141,25 +187,35 @@ public:
 	~Language();
 
 public:
-	bool SetGrammar(const char* productions[], int count);
+	bool SetGrammars(const char* productions[], int count);
 
 	std::string ToString();
 
 private:
 	bool IsTerminal(const char* token);
 	bool ParseProductions(LineScanner* lineScanner, GrammarSymbolContainer* symbols);
-	bool ParseGrammar();
+	bool ParseGrammars();
 
 	void RemoveLeftRecursion();
-	bool RemovImmidiateLeftRecursion(Grammar* g, GrammarContainer* newGrammars);
+	bool RemoveImmidiateLeftRecursion(Grammar* g, GrammarContainer* newGrammars);
 
 	int LongestCommonPrefix(const Condinate* first, const Condinate* second);
-	bool CalculateFactorLength(Grammar* g, int* range, int* length);
+	bool CalculateLongestFactor(Grammar* g, int* range, int* length);
 	void LeftFactoring();
 	bool LeftFactoringOnGrammar(Grammar* g, GrammarContainer* newGrammars);
 
+	Grammar* FindGrammar(const GrammarSymbol& left);
+
+	bool MergeNonEpsilonElements(GrammarSymbolSet& dest, const GrammarSymbolSet& src);
+
 	void CreateFirstSets();
+	bool CreateFirstSetsOnePass();
+	void GetFirstSet(GrammarSymbolSet* answer, Condinate::iterator first, Condinate::iterator last);
+
 	void CreateFollowSets();
+	bool CreateFollowSetsOnePass();
+
 private:
 	GrammarContainer grammars_;
+	GrammarSymbolSetTable firstSetContainer_, followSetContainer_;
 };

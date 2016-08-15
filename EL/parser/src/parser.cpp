@@ -8,14 +8,16 @@
 #include "debug.h"
 #include "utilities.h"
 
+GrammarSymbol GrammarSymbol::null = new Null();
+GrammarSymbol GrammarSymbol::digit = new Digit();
+GrammarSymbol GrammarSymbol::letter = new Letter();
 GrammarSymbol GrammarSymbol::epsilon = new Epsilon();
-GrammarSymbol GrammarSymbol::letter = new Alphabet();
-GrammarSymbol GrammarSymbol::digit = new Digits();
 
 GrammarSymbolContainer::GrammarSymbolContainer() {
-	cont_[GrammarSymbol::epsilon.ToString()] = GrammarSymbol::epsilon;
-	cont_[GrammarSymbol::letter.ToString()] = GrammarSymbol::letter;
+	cont_[GrammarSymbol::null.ToString()] = GrammarSymbol::null;
 	cont_[GrammarSymbol::digit.ToString()] = GrammarSymbol::digit;
+	cont_[GrammarSymbol::letter.ToString()] = GrammarSymbol::letter;
+	cont_[GrammarSymbol::epsilon.ToString()] = GrammarSymbol::epsilon;
 }
 
 GrammarSymbol GrammarSymbolContainer::AddSymbol(const std::string& text, bool terminal) {
@@ -34,6 +36,61 @@ GrammarSymbol GrammarSymbolContainer::AddSymbol(const std::string& text, bool te
 	}
 	else {
 		ans = ite->second;
+	}
+
+	return ans;
+}
+
+GrammarSymbolSetTable::GrammarSymbolSetTable() {
+	cont_[GrammarSymbol::null].insert(GrammarSymbol::null);
+	cont_[GrammarSymbol::digit].insert(GrammarSymbol::digit);
+	cont_[GrammarSymbol::letter].insert(GrammarSymbol::letter);
+	cont_[GrammarSymbol::epsilon].insert(GrammarSymbol::epsilon);
+}
+
+bool GrammarSymbolSetTable::IsBuildinSymbol(const GrammarSymbol& symbol) const {
+	return symbol == GrammarSymbol::null
+		|| symbol == GrammarSymbol::digit
+		|| symbol == GrammarSymbol::letter
+		|| symbol == GrammarSymbol::epsilon;
+}
+
+std::string GrammarSymbolSetTable::ToString() const {
+	std::ostringstream oss;
+
+	const char* newline = "";
+	for (Container::const_iterator ite = cont_.begin(); ite != cont_.end(); ++ite) {
+		if (ite->first.SymbolType() == GrammarSymbolTerminal || IsBuildinSymbol(ite->first)) {
+			continue;
+		}
+
+		oss << newline;
+		newline = "\n";
+		oss << ite->first.ToString() << "\t" << "{";
+
+		const char* seperator = "";
+		for (GrammarSymbolSet::const_iterator ite2 = ite->second.begin(); ite2 != ite->second.end(); ++ite2) {
+			oss << seperator;
+			seperator = " ";
+			oss << ite2->ToString();
+		}
+
+		oss << "}";
+	}
+
+	return oss.str();
+}
+
+GrammarSymbolSet& GrammarSymbolSetTable::operator [](const GrammarSymbol& key) {
+	Container::iterator ite = cont_.find(key);
+	if (ite != cont_.end()) {
+		return ite->second;
+	}
+
+	GrammarSymbolSet& ans = cont_[key];
+
+	if (key.SymbolType() == GrammarSymbolTerminal) {
+		ans.insert(key);
 	}
 
 	return ans;
@@ -65,7 +122,8 @@ void Grammar::AddCondinate(const Condinate& cond) {
 	Assert(!cond.empty(), "empty condinate");
 	Condinate* ptr = new Condinate(cond);
 	if (ptr->front() == left_) {
-		// TODO.
+		// Add left recursion condinate to front.
+		// TODO: O(n).
 		condinates_.insert(condinates_.begin(), ptr);
 	}
 	else {
@@ -97,8 +155,7 @@ void Grammar::SortCondinates() {
 		}
 	};
 
-	CondinateComparer comparer;
-	std::sort(condinates_.begin(), condinates_.end(), comparer);
+	std::sort(condinates_.begin(), condinates_.end(), CondinateComparer());
 }
 
 std::string Grammar::ToString() const {
@@ -135,7 +192,7 @@ Language::~Language() {
 	}
 }
 
-bool Language::SetGrammar(const char* productions[], int count) {
+bool Language::SetGrammars(const char* productions[], int count) {
 	GrammarSymbolContainer cont;
 	LineScanner lineScanner;
 	for (int i = 0; i < count; ++i) {
@@ -145,32 +202,46 @@ bool Language::SetGrammar(const char* productions[], int count) {
 		}
 	}
 
-	return ParseGrammar();
+	return ParseGrammars();
 }
 
-bool Language::ParseGrammar() {
+bool Language::ParseGrammars() {
 	RemoveLeftRecursion();
 	LeftFactoring();
-
-	std::string text;
-	const char* newline = "";
-	for (GrammarContainer::iterator ite = grammars_.begin(); ite != grammars_.end(); ++ite) {
-		text += newline;
-		newline = "\n";
-		text += (*ite)->ToString();
-	}
-
-	Debug::Log("Grammars:");
-	Debug::Log(text);
+	CreateFirstSets();
+	CreateFollowSets();
 
 	return true;
+}
+
+std::string Language::ToString() {
+	const char* newline = "";
+	std::ostringstream oss;
+	
+	oss << "============ Grammars ============ \n";
+	for (GrammarContainer::iterator ite = grammars_.begin(); ite != grammars_.end(); ++ite) {
+		oss << newline << (*ite)->ToString();
+		newline = "\n";
+	}
+
+	oss << "\n";
+
+	oss << "============ First ============ \n";
+	oss << firstSetContainer_.ToString();
+
+	oss << "\n";
+
+	oss << "============ Follow ============ \n";
+	oss << followSetContainer_.ToString();
+
+	return oss.str();
 }
 
 void Language::RemoveLeftRecursion() {
 	GrammarContainer newGrammars;
 
 	for (GrammarContainer::iterator ite = grammars_.begin(); ite != grammars_.end(); ) {
-		if(RemovImmidiateLeftRecursion(*ite, &newGrammars)) {
+		if(RemoveImmidiateLeftRecursion(*ite, &newGrammars)) {
 			ite = grammars_.erase(ite);
 			grammars_.insert(ite, newGrammars.begin(), newGrammars.end());
 			newGrammars.clear();
@@ -181,7 +252,7 @@ void Language::RemoveLeftRecursion() {
 	}
 }
 
-bool Language::RemovImmidiateLeftRecursion(Grammar* g, GrammarContainer* newGrammars) {
+bool Language::RemoveImmidiateLeftRecursion(Grammar* g, GrammarContainer* newGrammars) {
 	const GrammarSymbol& left = g->GetLeft();
 	const CondinateContainer& condinates = g->GetCondinates();
 
@@ -195,7 +266,7 @@ bool Language::RemovImmidiateLeftRecursion(Grammar* g, GrammarContainer* newGram
 	if (pos == condinates.begin()) {
 		return false;
 	}
-
+	 
 	Assert(pos != condinates.end(), "invalid production");
 	Grammar* grammar = new Grammar(left);
 
@@ -260,7 +331,7 @@ void Language::LeftFactoring() {
 	}
 }
 
-bool Language::CalculateFactorLength(Grammar* g, int* range, int* length) {
+bool Language::CalculateLongestFactor(Grammar* g, int* range, int* length) {
 	const CondinateContainer& cond = g->GetCondinates();
 	int maxlength = 0;
 	int from = 0, index = 1;
@@ -289,7 +360,7 @@ bool Language::CalculateFactorLength(Grammar* g, int* range, int* length) {
 bool Language::LeftFactoringOnGrammar(Grammar* g, GrammarContainer* newGrammars) {
 	int range, length, nsindex = 1;
 	Grammar* seed = g;
-	for (; CalculateFactorLength(g, &range, &length);) {
+	for (; CalculateLongestFactor(g, &range, &length);) {
 		int from = Utility::Loword(range), to = Utility::Highword(range);
 		Grammar* grammar = new Grammar(g->GetLeft());
 
@@ -329,27 +400,22 @@ bool Language::LeftFactoringOnGrammar(Grammar* g, GrammarContainer* newGrammars)
 			}
 		}
 
-		Debug::Log(g->ToString());
-
 		if (g != seed) {
 			delete g;
 		}
 
-		//newGrammars->push_back(grammar);
-		newGrammars->push_back(grammar2);
+		newGrammars->push_front(grammar2);
 
 		g = grammar;
 		g->SortCondinates();
-
-		Debug::Log(grammar->ToString());
-		Debug::Log(grammar2->ToString());
 	}
 
 	if (g != seed) {
-		newGrammars->push_back(g);
+		newGrammars->push_front(g);
+		return true;
 	}
 
-	return true;
+	return false;
 }
 
 bool Language::ParseProductions(LineScanner* lineScanner, GrammarSymbolContainer* symbols) {
@@ -383,8 +449,131 @@ bool Language::ParseProductions(LineScanner* lineScanner, GrammarSymbolContainer
 	return true;
 }
 
+bool Language::MergeNonEpsilonElements(GrammarSymbolSet& dest, const GrammarSymbolSet& src) {
+	bool modified = false;
+	for (GrammarSymbolSet::const_iterator ite = src.begin(); ite != src.end(); ++ite) {
+		if (*ite != GrammarSymbol::epsilon) {
+			modified = dest.insert(*ite).second || modified;
+		}
+	}
+
+	return modified;
+}
+
+void Language::CreateFirstSets() {
+	for (; CreateFirstSetsOnePass();) {
+	}
+}
+
+bool Language::CreateFirstSetsOnePass() {
+	bool anySetModified = false;
+
+	for (GrammarContainer::iterator ite = grammars_.begin(); ite != grammars_.end(); ++ite) {
+		Grammar* g = *ite;
+		const CondinateContainer& conds = g->GetCondinates();
+		GrammarSymbolSet& firstSet = firstSetContainer_[g->GetLeft()];
+
+		for (CondinateContainer::const_iterator ite2 = conds.begin(); ite2 != conds.end(); ++ite2) {
+			Condinate* c = *ite2;
+			GrammarSymbol& front = c->front();
+
+			if (front.SymbolType() == GrammarSymbolTerminal) {
+				anySetModified = firstSet.insert(c->front()).second || anySetModified;
+				continue;
+			}
+
+			Condinate::iterator ite3 = c->begin();
+			for (; ite3 != c->end(); ++ite3) {
+				GrammarSymbol& current = *ite3;
+				if (current.SymbolType() != GrammarSymbolNonterminal) {
+					break;
+				}
+
+				anySetModified = MergeNonEpsilonElements(firstSet, firstSetContainer_[front]) || anySetModified;
+
+				GrammarSymbolSet& currentFirstSet = firstSetContainer_[current];
+				if (currentFirstSet.find(GrammarSymbol::epsilon) == currentFirstSet.end()) {
+					break;
+				}
+			}
+
+			if (ite3 == c->end()) {
+				anySetModified = firstSet.insert(GrammarSymbol::epsilon).second || anySetModified;
+			}
+		}
+	}
+
+	return anySetModified;
+}
+
+void Language::CreateFollowSets() {
+	followSetContainer_[grammars_.front()->GetLeft()].insert(GrammarSymbol::null);
+
+	for (; CreateFollowSetsOnePass();) {
+	}
+}
+
+bool Language::CreateFollowSetsOnePass() {
+	bool anySetModified = false;
+
+	GrammarSymbolSet gss;
+	for (GrammarContainer::iterator ite = grammars_.begin(); ite != grammars_.end(); ++ite) {
+		Grammar* g = *ite;
+		const CondinateContainer& conds = g->GetCondinates();
+		
+		for (CondinateContainer::const_iterator ite2 = conds.begin(); ite2 != conds.end(); ++ite2) {
+			Condinate* current = *ite2;
+			for (Condinate::iterator ite3 = current->begin(); ite3 != current->end(); ++ite3) {
+				GrammarSymbol& symbol = *ite3;
+				if (symbol.SymbolType() == GrammarSymbolTerminal) {
+					continue;
+				}
+
+				Condinate::iterator ite4 = ite3;
+				GetFirstSet(&gss, ++ite4, current->end());
+				anySetModified = MergeNonEpsilonElements(followSetContainer_[symbol], gss) || anySetModified;
+
+				if (gss.find(GrammarSymbol::epsilon) != gss.end()) {
+					anySetModified = MergeNonEpsilonElements(followSetContainer_[symbol], followSetContainer_[g->GetLeft()]) || anySetModified;
+				}
+
+				gss.clear();
+			}
+		}
+	}
+
+	return anySetModified;
+}
+
+void Language::GetFirstSet(GrammarSymbolSet* answer, Condinate::iterator first, Condinate::iterator last) {
+	if (first == last) {
+		answer->insert(GrammarSymbol::epsilon);
+		return;
+	}
+
+	for (; first != last; ++first) {
+		GrammarSymbolSet& firstSet = firstSetContainer_[*first];
+		answer->insert(firstSet.begin(), firstSet.end());
+		if (firstSet.find(GrammarSymbol::epsilon) == firstSet.end()) {
+			break;
+		}
+	}
+}
+
+Grammar* Language::FindGrammar(const GrammarSymbol& left) {
+	Grammar* g = nullptr;
+	for (GrammarContainer::iterator ite = grammars_.begin(); ite != grammars_.end(); ++ite) {
+		if ((*ite)->GetLeft() == left) {
+			g = *ite;
+			break;
+		}
+	}
+
+	return g;
+}
+
 bool Language::IsTerminal(const char* token) {
-	return *token == '$';
+	return *token != '$';
 }
 
 GrammarSymbol::GrammarSymbol()
@@ -436,6 +625,10 @@ bool GrammarSymbol::operator < (const GrammarSymbol& other) const {
 
 bool GrammarSymbol::operator > (const GrammarSymbol& other) const {
 	return symbol_ > other.symbol_;
+}
+
+GrammarSymbolType GrammarSymbol::SymbolType() const {
+	return symbol_->SymbolType();
 }
 
 std::string GrammarSymbol::ToString() const {

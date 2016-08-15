@@ -58,4 +58,3 @@ public:
 private:
 	std::ifstream ifs_;
 };
-

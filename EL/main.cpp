@@ -29,19 +29,15 @@ const char* tokenName[] = {
 };
 
 const char* grammar[] = {
-	"_exp : _exp _addop _term",
-	"_exp : _term",
-	"_addop : + | -",
-	"_term : _term _mulop _factor",
-	"_term : _factor",
-	"_mulop : *",
-	"_factor : (_exp)",
-	"_factor : _number",
-	"_number : 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9"
-};
+	"$exp : $exp $addop $term | $term",
+	"$addop : + | -",
+	"$term : $term $mulop $factor | $factor",
+	"$mulop : *",
+	"$factor : ($exp) | $digit",
+}; 
 
 const char* grammar2[] = {
-	"$A : $alphabet | $digits | epsilon"
+	"$A : $letter | $digit | epsilon"
 };
 
 const char* grammar3[] = {
@@ -56,11 +52,22 @@ const char* grammar5[] = {
 	"$A : a b d | a b c | a b | a | c",
 };
 
-#define GRAMMAR(name) name, sizeof(name) / sizeof(name[0])
+const char* grammar6[] = {
+	"$exp : $term + $exp | $term",
+};
+
+const char* grammar7[] = {
+	"$statement : $if_stmt | other",
+	"$if_stmt : if($exp) $statement $else_part",
+	"$else_part : else $statment | epsilon",
+	"$exp : 0 | 1",
+};
+
+#define FORMAT_GRAMMARS(name) name, sizeof(name) / sizeof(name[0])
 
 int main() {
 	Language lang;
-	lang.SetGrammar(GRAMMAR(grammar5));
-
+	lang.SetGrammars(FORMAT_GRAMMARS(grammar));
+	Debug::Log(lang.ToString());
 	return 0;
 }
