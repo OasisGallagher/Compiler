@@ -21,7 +21,7 @@ const char* tokenName[] = {
 	"minus",
 	"multiply",
 	"divide",
-	"xor",
+	"seperator",
 	"string",
 	"leftparenthesis",
 	"rightparenthesis"
@@ -48,11 +48,19 @@ const char* grammar3[] = {
 	"$exp : $exp + $term | $exp - $term | $term",
 };
 
+const char* grammar4[] = {
+	"$A : $B $C | $D $E | $B $F"
+};
+
+const char* grammar5[] = {
+	"$A : a b d | a b c | a b | a | c",
+};
+
 #define GRAMMAR(name) name, sizeof(name) / sizeof(name[0])
 
 int main() {
-	GrammarParser parser;
-	parser.Parse(GRAMMAR(grammar3));
+	Language lang;
+	lang.SetGrammar(GRAMMAR(grammar5));
 
 	return 0;
 }

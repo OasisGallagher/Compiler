@@ -123,7 +123,7 @@ ScannerTokenType LineScanner::GetToken(char* token) {
 					break;
 
 				case '|':
-					tokenType = ScannerTokenXor;
+					tokenType = ScannerTokenSeperator;
 					break;
 
 				case '(':

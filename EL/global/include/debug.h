@@ -10,6 +10,7 @@ public:
 	static void Break(const char* message, const char* file, int line);
 
 private:
+	Debug();
 	static void SetConsoleColor(int color);
 };
 

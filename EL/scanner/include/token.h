@@ -43,8 +43,8 @@ enum ScannerTokenType {
 	// ³ý.
 	ScannerTokenDivide,
 
-	// Î»»ò, |.
-	ScannerTokenXor,
+	// ·Ö¸ô·û, |.
+	ScannerTokenSeperator,
 
 	// ×Ö·û´®.
 	ScannerTokenString,

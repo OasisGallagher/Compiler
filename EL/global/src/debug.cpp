@@ -35,5 +35,6 @@ void Debug::Break(const char* message, const char* file, int line) {
 	oss << message << "\n";
 	oss << "at " << file << ":" << line;
 	Debug::LogError(oss.str());
+
 	abort();
 }

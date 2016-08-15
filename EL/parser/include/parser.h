@@ -11,10 +11,10 @@ public:
 		return text_;
 	}
 
-	virtual bool Match(const char* text) const = 0;
+	virtual bool Match(const std::string& text) const = 0;
 
 protected:
-	_GrammarSymbol(const char* text)
+	_GrammarSymbol(const std::string& text)
 		: text_(text) {
 	}
 
@@ -27,22 +27,22 @@ protected:
 
 class TerminalSymbol : public _GrammarSymbol {
 public:
-	TerminalSymbol(const char* text)
+	TerminalSymbol(const std::string& text)
 		: _GrammarSymbol(text) {
 	}
 
-	virtual bool Match(const char* text) const {
+	virtual bool Match(const std::string& text) const {
 		return true;
 	}
 };
 
 class NonterminalSymbol : public _GrammarSymbol {
 public:
-	NonterminalSymbol(const char* text) 
+	NonterminalSymbol(const std::string& text) 
 		: _GrammarSymbol(text) { 
 	}
 
-	virtual bool Match(const char* text) const {
+	virtual bool Match(const std::string& text) const {
 		return true;
 	}
 };
@@ -71,7 +71,7 @@ public:
 class GrammarSymbolContainer {
 public:
 	GrammarSymbolContainer();
-	GrammarSymbol AddSymbol(const char* text, bool terminal);
+	GrammarSymbol AddSymbol(const std::string& text, bool terminal);
 
 private:
 	typedef std::map<std::string, GrammarSymbol> Container;
@@ -92,14 +92,15 @@ public:
 public:
 	bool operator == (const GrammarSymbol& other) const;
 	bool operator != (const GrammarSymbol& other) const;
-
+	bool operator < (const GrammarSymbol& other) const;
+	bool operator > (const GrammarSymbol& other) const;
 public:
 	std::string ToString() const;
 
 public:
 	static GrammarSymbol epsilon;
-	static GrammarSymbol alphabet;
-	static GrammarSymbol digits;
+	static GrammarSymbol letter;
+	static GrammarSymbol digit;
 
 private:
 	void* operator new(size_t);
@@ -119,15 +120,13 @@ public:
 
 public:
 	void SetLeft(const GrammarSymbol& symbol);
-	const GrammarSymbol& GetLeft() const;
-	const CondinateContainer& GetCondinates() const;
-
-	Condinate* AddCondinate();
-	
+	void AddCondinate(const Condinate& cond);
 	void SortCondinates();
 
+	const GrammarSymbol& GetLeft() const;
+	const CondinateContainer& GetCondinates() const;
+	
 	std::string ToString() const;
-
 private:
 	GrammarSymbol left_;
 	CondinateContainer condinates_;
@@ -136,13 +135,13 @@ private:
 typedef std::list<Grammar*> GrammarContainer;
 class LineScanner;
 
-class GrammarParser {
+class Language {
 public:
-	GrammarParser();
-	~GrammarParser();
+	Language();
+	~Language();
 
 public:
-	bool Parse(const char* productions[], int count);
+	bool SetGrammar(const char* productions[], int count);
 
 	std::string ToString();
 
@@ -152,7 +151,12 @@ private:
 	bool ParseGrammar();
 
 	void RemoveLeftRecursion();
-	bool HandleLeftRecursion(Grammar* g, GrammarContainer* newGrammars);
+	bool RemovImmidiateLeftRecursion(Grammar* g, GrammarContainer* newGrammars);
+
+	int LongestCommonPrefix(const Condinate* first, const Condinate* second);
+	bool CalculateFactorLength(Grammar* g, int* range, int* length);
+	void LeftFactoring();
+	bool LeftFactoringOnGrammar(Grammar* g, GrammarContainer* newGrammars);
 
 	void CreateFirstSets();
 	void CreateFollowSets();
