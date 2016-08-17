@@ -96,8 +96,10 @@ void Grammar::SortCondinates() {
 
 std::string Grammar::ToString() const {
 	std::ostringstream oss;
+	oss.width(22);
+	oss.setf(std::ios::left);
 	oss << left_.ToString();
-	oss << " : ";
+
 	oss << condinates_.ToString();
 
 	return oss.str();

@@ -39,7 +39,7 @@ std::string ParsingTable::ToString() const {
 		oss << seperator;
 		seperator = "\n";
 
-		oss.width(24);
+		oss.width(28);
 		oss.setf(std::ios::left);
 		oss << "[" + key.first.ToString() + ", " + key.second.ToString() + "]";
 		oss << value.first.ToString() << " : ";

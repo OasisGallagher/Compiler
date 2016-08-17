@@ -57,24 +57,29 @@ const char* grammar6[] = {
 };
 
 const char* grammar7[] = {
-	"$statement : $if_stmt | other",
+	"$statement : $if_stmt | identifier",
 	"$if_stmt : if($exp) $statement $else_part",
-	"$else_part : else $statment | epsilon",
+	"$else_part : else $statement | epsilon",
 	"$exp : 0 | 1",
 };
 
-#define FORMAT_GRAMMARS(name) name, sizeof(name) / sizeof(name[0])
+#define SetLanguage(_Ans, _Prod) if (true) { _Ans.productions = _Prod; _Ans.nproductions = sizeof(_Prod) / sizeof(_Prod[0]); } else (void)0
 
 #include <fstream>
 
 int main() {
-	Language lang;
-	lang.SetGrammars(FORMAT_GRAMMARS(grammar7));
+	LanguageParameter lp;
+
+	SetLanguage(lp, grammar);
+	Language lang(&lp);
 
 	Debug::Log(lang.ToString());
 
 	std::ofstream ofs("debug.txt");
 	ofs << lang.ToString() << std::endl;
+
+	SyntaxTree* tree = nullptr;
+	lang.Parse(&tree, "test.el");
 	
 	return 0;
 }

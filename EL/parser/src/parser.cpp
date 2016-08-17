@@ -13,8 +13,22 @@
 #include "debug.h"
 #include "utilities.h"
 
-Language::Language() {
+std::string BuildinSymbolContainer::ToString() const {
+	std::ostringstream oss;
+	const char* seperator = "";
+	for (const_iterator ite = begin(); ite != end(); ++ite) {
+		oss << seperator;
+		seperator = " ";
+		oss << ite->second.ToString();
+	}
+
+	return oss.str();
+}
+
+Language::Language(LanguageParameter* parameter) {
 	parsingTable_ = new ParsingTable();
+
+	SetGrammars(parameter->productions, parameter->nproductions);
 }
 
 Language::~Language() {
@@ -25,7 +39,7 @@ Language::~Language() {
 	}
 }
 
-bool Language::SetGrammars(const char* productions[], int count) {
+bool Language::SetGrammars(const char** productions, int count) {
 	LineScanner lineScanner;
 	for (int i = 0; i < count; ++i) {
 		lineScanner.SetText(productions[i]);
@@ -54,9 +68,15 @@ std::string Language::ToString() {
 	oss << Utility::Heading(" Grammars ", headingLength) << "\n";
 	
 	for (GrammarContainer::iterator ite = grammars_.begin(); ite != grammars_.end(); ++ite) {
-		oss << newline << (*ite)->ToString();
+		oss << newline;
+		oss << (*ite)->ToString();
 		newline = "\n";
 	}
+
+	oss << "\n\n";
+
+	oss << Utility::Heading(" BuildinSymbols ", headingLength) << "\n";
+	oss << buildinSymbols_.ToString();
 
 	oss << "\n\n";
 
@@ -271,14 +291,29 @@ bool Language::ParseProductions(LineScanner* lineScanner) {
 	Assert(strcmp(token, ":") == 0, "invalid production. missing \":\".");
 
 	for (; (tokenType = lineScanner->GetToken(token)) != ScannerTokenEndOfFile;) {
-		if (tokenType == ScannerTokenSeperator) {
+		if (tokenType == ScannerTokenSign && strcmp(token, "|") == 0) {
 			Assert(!cond.empty(), "empty production");
 			grammar->AddCondinate(cond);
 			cond.clear();
 			continue;
 		}
 
-		cond.push_back(symbolContainer_.AddSymbol(token, IsTerminal(token)));
+		GrammarSymbol symbol;
+		if (IsTerminal(token) && !IsMnemonic(token)) {
+			BuildinSymbolContainer::iterator pos = buildinSymbols_.find(token);
+			if (pos == buildinSymbols_.end()) {
+				symbol = new TerminalSymbol(token);
+				buildinSymbols_[token] = symbol;
+			}
+			else {
+				symbol = pos->second;
+			}
+		}
+		else {
+			symbol = symbolContainer_.AddSymbol(token, IsTerminal(token));
+		}
+
+		cond.push_back(symbol);
 	}
 
 	grammar->AddCondinate(cond);
@@ -463,7 +498,12 @@ Grammar* Language::FindGrammar(const GrammarSymbol& left) {
 	return g;
 }
 
-bool Language::Parse(SyntaxTree** tree, FileScanner* fileScanner) {
+bool Language::Parse(SyntaxTree** tree, const std::string& file) {
+	FileScanner scanner(file.c_str());
+	return ParseFile(tree, &scanner);
+}
+
+bool Language::ParseFile(SyntaxTree** tree, FileScanner* fileScanner) {
 	std::stack<GrammarSymbol> s;
 
 	s.push(grammars_.front()->GetLeft());
@@ -473,26 +513,32 @@ bool Language::Parse(SyntaxTree** tree, FileScanner* fileScanner) {
 	for (; !s.empty() && hasToken;) {
 		GrammarSymbol symbol = s.top();
 
-		if (symbol.SymbolType() == GrammarSymbolTerminal && symbol.Match(token.token->Text())) {
+		if (symbol.SymbolType() == GrammarSymbolTerminal && symbol.Match(token.text)) {
 			s.pop();
 			hasToken = fileScanner->GetToken(&token);
 			continue;
 		}
-		
+
 		if (symbol.SymbolType() == GrammarSymbolNonterminal) {
 			GrammarSymbol a;
-			if (token.tokenType == ScannerTokenID) {
-				a = GrammarSymbol::identifier;
+			if (token.tokenType == ScannerTokenEndOfFile) {
+				a = GrammarSymbol::null;
 			}
-			else if (token.tokenType == ScannerTokenNumber) {
-				a = GrammarSymbol::number;
+			else if (token.tokenType == ScannerTokenNumber || token.tokenType == ScannerTokenID) {
+				BuildinSymbolContainer::iterator pos = buildinSymbols_.find(token.text);
+				if (pos != buildinSymbols_.end()) {
+					a = pos->second;
+				}
+				else {
+					a = (token.tokenType == ScannerTokenNumber) ? GrammarSymbol::number : GrammarSymbol::identifier;
+				}
 			}
 			else if (token.tokenType == ScannerTokenString) {
 				a = GrammarSymbol::string;
 			}
 			else {
-				GrammarSymbolContainer::const_iterator ite = symbolContainer_.find(token.token->Text());
-				Assert(ite != symbolContainer_.end(), "unexpected token " + token.token->Text());
+				GrammarSymbolContainer::const_iterator ite = symbolContainer_.find(token.text);
+				Assert(ite != symbolContainer_.end(), "unexpected token " + token.text);
 				a = ite->second;
 			}
 
@@ -509,17 +555,24 @@ bool Language::Parse(SyntaxTree** tree, FileScanner* fileScanner) {
 		}
 
 		Debug::LogError("invalid syntax");
+		break;
 	}
 
-	if (!s.empty() || !hasToken) {
-		Debug::LogError("Error");
-		return false;
+	if (s.empty() && !hasToken) {
+		Debug::Log("Accept");
+		return true;
 	}
 
-	Debug::Log("Accept");
-	return true;
+	return false;
 }
 
 bool Language::IsTerminal(const char* token) {
 	return *token != '$';
+}
+
+bool Language::IsMnemonic(const char* token) {
+	return token == GrammarSymbol::string.ToString()
+		|| token == GrammarSymbol::number.ToString()
+		|| token == GrammarSymbol::identifier.ToString()
+		|| token == GrammarSymbol::epsilon.ToString();
 }

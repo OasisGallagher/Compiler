@@ -78,6 +78,10 @@ GrammarSymbolContainer::GrammarSymbolContainer() {
 	cont_[GrammarSymbol::identifier.ToString()] = GrammarSymbol::identifier;
 }
 
+GrammarSymbol& GrammarSymbolContainer::operator[] (const std::string& text) {
+	return cont_[text];
+}
+
 GrammarSymbolContainer::const_iterator GrammarSymbolContainer::begin() const {
 	return cont_.begin();
 }
@@ -128,7 +132,7 @@ std::string GrammarSymbolSetTable::ToString() const {
 		oss << newline;
 		newline = "\n";
 
-		oss.width(12);
+		oss.width(22);
 		oss.setf(std::ios::left);
 
 		oss << ite->first.ToString();

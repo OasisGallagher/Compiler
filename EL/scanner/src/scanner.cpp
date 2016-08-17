@@ -20,7 +20,7 @@ enum ScannerStateType {
 	ScannerStateDone
 };
 
-static DummyToken dummyToken;
+//static DummyToken dummyToken;
 
 LineScanner::LineScanner() 
 	: current_(nullptr), dest_(nullptr) {
@@ -105,7 +105,8 @@ ScannerTokenType LineScanner::GetToken(char* token) {
 			}
 			else {
 				state = ScannerStateDone;
-
+				tokenType = ScannerTokenSign;
+				/*
 				switch (ch) {
 				case '+':
 					tokenType = ScannerTokenPlus;
@@ -142,39 +143,42 @@ ScannerTokenType LineScanner::GetToken(char* token) {
 				case ':':
 					tokenType = ScannerTokenColon;
 					break;
-				}
+				}*/
 			}
 			break;
 
 		case ScannerStateAssign:
 			state = ScannerStateDone;
+			tokenType = ScannerTokenSign;
 			if (ch == '=') {
-				tokenType = ScannerTokenEqual;
+				//tokenType = ScannerTokenEqual;
 			}
 			else {
-				tokenType = ScannerTokenAssign;
+				//tokenType = ScannerTokenAssign;
 				unget = true;
 			}
 			break;
 
 		case ScannerStateLess:
 			state = ScannerStateDone;
+			tokenType = ScannerTokenSign;
 			if (ch == '=') {
-				tokenType = ScannerTokenLessEqual;
+				//tokenType = ScannerTokenLessEqual;
 			}
 			else {
-				tokenType = ScannerTokenLess;
+				//tokenType = ScannerTokenLess;
 				unget = true;
 			}
 			break;
 
 		case ScannerStateGreater:
 			state = ScannerStateDone;
+			tokenType = ScannerTokenSign;
 			if (ch == '=') {
-				tokenType = ScannerTokenGreaterEqual;
+				//tokenType = ScannerTokenGreaterEqual;
 			}
 			else {
-				tokenType = ScannerTokenGreater;
+				//tokenType = ScannerTokenGreater;
 				unget = true;
 			}
 			break;
@@ -223,27 +227,35 @@ ScannerTokenType LineScanner::GetToken(char* token) {
 }
 
 FileScanner::FileScanner(const char* path) 
-	: reader_(new FileReader(path)) {
-	symbols_ = new Table < Symbol >();
+	: reader_(new FileReader(path)), endOfFile_(false){
+	/*symbols_ = new Table < Symbol >();
 	numberLiterals_ = new Table < NumberLiteral >();
-	stringLiterals_ = new Table < StringLiteral >();
+	stringLiterals_ = new Table < StringLiteral >();*/
 }
 
 FileScanner::~FileScanner() {
 	delete reader_;
+	/*
 	delete symbols_;
 	delete numberLiterals_;
 	delete stringLiterals_;
+	*/
 }
 
 bool FileScanner::GetToken(ScannerToken* token) {
+	if (endOfFile_) {
+		return false;
+	}
+
 	char buffer[Constants::kMaxTokenCharacters];
 	ScannerTokenType tokenType = lineScanner_.GetToken(buffer);
 
 	char line[Constants::kMaxLineCharacters];
 	for (; tokenType == ScannerTokenEndOfFile; ) {
 		if (!reader_->ReadLine(line, Constants::kMaxLineCharacters)) {
-			return false;
+			endOfFile_ = true;
+			token->tokenType = ScannerTokenEndOfFile;
+			return true;
 		}
 
 		if (strlen(line) == 0) {
@@ -259,6 +271,8 @@ bool FileScanner::GetToken(ScannerToken* token) {
 	}
 
 	token->tokenType = tokenType;
+	strcpy(token->text, buffer);
+	/*
 	token->token = &dummyToken;
 
 	if (tokenType == ScannerTokenNumber) {
@@ -267,35 +281,34 @@ bool FileScanner::GetToken(ScannerToken* token) {
 	else if (tokenType == ScannerTokenString) {
 		token->token = stringLiterals_->Add(buffer);
 	}
-	else if (tokenType == ScannerTokenID) {
-		ScannerTokenType reserveTokenType = GetReserveTokenType(buffer);
-		if (reserveTokenType != ScannerTokenError) {
-			token->tokenType = reserveTokenType;
-		}
-		else {
-			token->token = symbols_->Add(buffer);
-		}
-	}
+	*/
 
+	if (tokenType == ScannerTokenID) {
+		//ScannerTokenType reserveTokenType = GetReserveTokenType(buffer);
+		//if (reserveTokenType != ScannerTokenError) {
+		//	token->tokenType = reserveTokenType;
+		//}
+	}
+	
 	return true;
 }
 
 ScannerTokenType FileScanner::GetReserveTokenType(const char* name) {
-	if (strcmp(name, "if") == 0) {
-		return ScannerTokenIf;
-	}
-
-	if (strcmp(name, "else") == 0) {
-		return ScannerTokenElse;
-	}
-
-	if (strcmp(name, "then") == 0) {
-		return ScannerTokenThen;
-	}
-
-	if (strcmp(name, "end") == 0) {
-		return ScannerTokenEnd;
-	}
+// 	if (strcmp(name, "if") == 0) {
+// 		return ScannerTokenIf;
+// 	}
+// 
+// 	if (strcmp(name, "else") == 0) {
+// 		return ScannerTokenElse;
+// 	}
+// 
+// 	if (strcmp(name, "then") == 0) {
+// 		return ScannerTokenThen;
+// 	}
+// 
+// 	if (strcmp(name, "end") == 0) {
+// 		return ScannerTokenEnd;
+// 	}
 
 	return ScannerTokenError;
 }

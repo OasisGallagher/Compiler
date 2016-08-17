@@ -62,15 +62,14 @@ public:
 	FileScanner(const char* path);
 	~FileScanner();
 
+public:
 	bool GetToken(ScannerToken* token);
 
 private:
 	ScannerTokenType GetReserveTokenType(const char* name);
+
 private:
+	bool endOfFile_;
 	FileReader* reader_;
 	LineScanner lineScanner_;
-
-	Table <Symbol >* symbols_;
-	Table <NumberLiteral>* numberLiterals_;
-	Table <StringLiteral>* stringLiterals_;
 };

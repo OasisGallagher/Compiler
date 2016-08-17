@@ -5,7 +5,7 @@
 #include "debug.h"
 
 const int red = 12;
-const int white = 15;
+const int white = 7;
 const int yellow = 14;
 
 void Debug::Log(const std::string& text) {

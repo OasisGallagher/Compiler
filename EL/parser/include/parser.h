@@ -1,6 +1,5 @@
 #pragma once
-#include <set>
-#include <list>
+#include <map>
 #include <vector>
 #include "grammar.h"
 
@@ -8,20 +7,31 @@ class LineScanner;
 class ParsingTable;
 class SyntaxTree;
 
+class BuildinSymbolContainer : public std::map<std::string, GrammarSymbol> {
+public:
+	std::string ToString() const;
+};
+
+struct LanguageParameter {
+	const char** productions;
+	int nproductions;
+};
+
 class Language {
 public:
-	Language();
+	Language(LanguageParameter* parameter);
 	~Language();
 
 public:
-	bool SetGrammars(const char* productions[], int count);
-	bool Parse(SyntaxTree** tree, FileScanner* fileScanner);
-
+	bool Parse(SyntaxTree** tree, const std::string& file);
 	std::string ToString();
 
 private:
+	bool SetGrammars(const char** productions, int count);
 
 	bool IsTerminal(const char* token);
+	bool IsMnemonic(const char* token);
+
 	bool ParseProductions(LineScanner* lineScanner);
 	bool ParseGrammars();
 
@@ -47,9 +57,15 @@ private:
 	bool BuildParingTable(Grammar* g);
 	bool CreateParsingTable();
 
+	bool ParseFile(SyntaxTree** tree, FileScanner* fileScanner);
+
 private:
-	ParsingTable* parsingTable_;
 	GrammarContainer grammars_;
+	ParsingTable* parsingTable_;
+
+	BuildinSymbolContainer buildinSymbols_;
 	GrammarSymbolContainer symbolContainer_;
-	GrammarSymbolSetTable firstSetContainer_, followSetContainer_;
+
+	GrammarSymbolSetTable firstSetContainer_;
+	GrammarSymbolSetTable followSetContainer_;
 };

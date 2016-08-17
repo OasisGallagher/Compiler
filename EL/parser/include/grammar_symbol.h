@@ -58,7 +58,8 @@ public:
 	}
 
 	virtual bool Match(const std::string& text) const {
-		return true;
+		Assert(false, "match nonterminal symbol");
+		return false;
 	}
 };
 
@@ -74,6 +75,10 @@ public:
 	Epsilon()
 		: TerminalSymbol("epsilon") {
 	}
+
+	virtual bool Match(const std::string& text) const {
+		return true;
+	}
 };
 
 class Identifier : public TerminalSymbol {
@@ -81,12 +86,20 @@ public:
 	Identifier()
 		: TerminalSymbol("identifier") {
 	}
+
+	virtual bool Match(const std::string& text) const {
+		return true;
+	}
 };
 
 class Number : public TerminalSymbol {
 public:
 	Number()
-		: TerminalSymbol("number") {
+		: TerminalSymbol("Number") {
+	}
+
+	virtual bool Match(const std::string& text) const {
+		return true;
 	}
 };
 
@@ -94,6 +107,10 @@ class String : public TerminalSymbol{
 public:
 	String()
 		: TerminalSymbol("string") {
+	}
+
+	virtual bool Match(const std::string& text) const {
+		return true;
 	}
 };
 
@@ -110,6 +127,7 @@ public:
 public:
 	GrammarSymbol AddSymbol(const std::string& text, bool terminal);
 
+	GrammarSymbol& operator[](const std::string& text);
 	const_iterator begin() const;
 	const_iterator end() const;
 	const_iterator find(const std::string& text) const;
