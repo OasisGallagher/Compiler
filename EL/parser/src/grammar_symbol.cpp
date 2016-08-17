@@ -2,9 +2,10 @@
 #include "grammar_symbol.h"
 
 GrammarSymbol GrammarSymbol::null = new Null();
-GrammarSymbol GrammarSymbol::digit = new Digit();
-GrammarSymbol GrammarSymbol::letter = new Letter();
+GrammarSymbol GrammarSymbol::number = new Number();
+GrammarSymbol GrammarSymbol::string = new String();
 GrammarSymbol GrammarSymbol::epsilon = new Epsilon();
+GrammarSymbol GrammarSymbol::identifier = new Identifier();
 
 GrammarSymbol::GrammarSymbol()
 	: symbol_(nullptr) {
@@ -71,9 +72,22 @@ std::string GrammarSymbol::ToString() const {
 
 GrammarSymbolContainer::GrammarSymbolContainer() {
 	cont_[GrammarSymbol::null.ToString()] = GrammarSymbol::null;
-	cont_[GrammarSymbol::digit.ToString()] = GrammarSymbol::digit;
-	cont_[GrammarSymbol::letter.ToString()] = GrammarSymbol::letter;
+	cont_[GrammarSymbol::number.ToString()] = GrammarSymbol::number;
+	cont_[GrammarSymbol::string.ToString()] = GrammarSymbol::string;
 	cont_[GrammarSymbol::epsilon.ToString()] = GrammarSymbol::epsilon;
+	cont_[GrammarSymbol::identifier.ToString()] = GrammarSymbol::identifier;
+}
+
+GrammarSymbolContainer::const_iterator GrammarSymbolContainer::begin() const {
+	return cont_.begin();
+}
+
+GrammarSymbolContainer::const_iterator GrammarSymbolContainer::end() const {
+	return cont_.end();
+}
+
+GrammarSymbolContainer::const_iterator GrammarSymbolContainer::find(const std::string& text) const {
+	return cont_.find(text);
 }
 
 GrammarSymbol GrammarSymbolContainer::AddSymbol(const std::string& text, bool terminal) {
@@ -99,16 +113,7 @@ GrammarSymbol GrammarSymbolContainer::AddSymbol(const std::string& text, bool te
 
 GrammarSymbolSetTable::GrammarSymbolSetTable() {
 	cont_[GrammarSymbol::null].insert(GrammarSymbol::null);
-	cont_[GrammarSymbol::digit].insert(GrammarSymbol::digit);
-	cont_[GrammarSymbol::letter].insert(GrammarSymbol::letter);
 	cont_[GrammarSymbol::epsilon].insert(GrammarSymbol::epsilon);
-}
-
-bool GrammarSymbolSetTable::IsBuildinSymbol(const GrammarSymbol& symbol) const {
-	return symbol == GrammarSymbol::null
-		|| symbol == GrammarSymbol::digit
-		|| symbol == GrammarSymbol::letter
-		|| symbol == GrammarSymbol::epsilon;
 }
 
 std::string GrammarSymbolSetTable::ToString() const {
@@ -116,7 +121,7 @@ std::string GrammarSymbolSetTable::ToString() const {
 
 	const char* newline = "";
 	for (Container::const_iterator ite = cont_.begin(); ite != cont_.end(); ++ite) {
-		if (ite->first.SymbolType() == GrammarSymbolTerminal || IsBuildinSymbol(ite->first)) {
+		if (ite->first.SymbolType() == GrammarSymbolTerminal) {
 			continue;
 		}
 

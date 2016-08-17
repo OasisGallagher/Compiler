@@ -33,8 +33,8 @@ const char* grammar[] = {
 	"$addop : + | -",
 	"$term : $term $mulop $factor | $factor",
 	"$mulop : *",
-	"$factor : ($exp) | $digit",
-}; 
+	"$factor : ($exp) | number",
+};
 
 const char* grammar2[] = {
 	"$A : $letter | $digit | epsilon"
@@ -69,7 +69,7 @@ const char* grammar7[] = {
 
 int main() {
 	Language lang;
-	lang.SetGrammars(FORMAT_GRAMMARS(grammar));
+	lang.SetGrammars(FORMAT_GRAMMARS(grammar7));
 
 	Debug::Log(lang.ToString());
 

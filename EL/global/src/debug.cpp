@@ -30,7 +30,7 @@ void Debug::SetConsoleColor(int color) {
 	SetConsoleTextAttribute(handle, color);
 }
 
-void Debug::Break(const char* message, const char* file, int line) {
+void Debug::Break(const std::string& message, const char* file, int line) {
 	std::ostringstream oss;
 	oss << message << "\n";
 	oss << "at " << file << ":" << line;

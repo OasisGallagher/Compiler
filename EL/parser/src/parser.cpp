@@ -26,11 +26,10 @@ Language::~Language() {
 }
 
 bool Language::SetGrammars(const char* productions[], int count) {
-	GrammarSymbolContainer cont;
 	LineScanner lineScanner;
 	for (int i = 0; i < count; ++i) {
 		lineScanner.SetText(productions[i]);
-		if (!ParseProductions(&lineScanner, &cont)) {
+		if (!ParseProductions(&lineScanner)) {
 			return false;
 		}
 	}
@@ -258,13 +257,13 @@ bool Language::LeftFactoringOnGrammar(Grammar* g, GrammarContainer* newGrammars)
 	return false;
 }
 
-bool Language::ParseProductions(LineScanner* lineScanner, GrammarSymbolContainer* symbols) {
+bool Language::ParseProductions(LineScanner* lineScanner) {
 	char token[Constants::kMaxTokenCharacters];
 
 	ScannerTokenType tokenType = lineScanner->GetToken(token);
 	Assert(tokenType != ScannerTokenEndOfFile, "invalid production. missing left part.");
 
-	Grammar* grammar = new Grammar(symbols->AddSymbol(token, false));
+	Grammar* grammar = new Grammar(symbolContainer_.AddSymbol(token, false));
 
 	Condinate cond;
 
@@ -279,7 +278,7 @@ bool Language::ParseProductions(LineScanner* lineScanner, GrammarSymbolContainer
 			continue;
 		}
 
-		cond.push_back(symbols->AddSymbol(token, IsTerminal(token)));
+		cond.push_back(symbolContainer_.AddSymbol(token, IsTerminal(token)));
 	}
 
 	grammar->AddCondinate(cond);
@@ -464,12 +463,6 @@ Grammar* Language::FindGrammar(const GrammarSymbol& left) {
 	return g;
 }
 
-std::map<int, GrammarSymbol> tokenSymbols_;
-void InitTokenSymbols() {
-	tokenSymbols_[ScannerTokenNumber] = GrammarSymbol::digit;
-	tokenSymbols_[ScannerTokenID] = GrammarSymbol::letter;
-}
-
 bool Language::Parse(SyntaxTree** tree, FileScanner* fileScanner) {
 	std::stack<GrammarSymbol> s;
 
@@ -487,7 +480,22 @@ bool Language::Parse(SyntaxTree** tree, FileScanner* fileScanner) {
 		}
 		
 		if (symbol.SymbolType() == GrammarSymbolNonterminal) {
-			GrammarSymbol a; // TODO.
+			GrammarSymbol a;
+			if (token.tokenType == ScannerTokenID) {
+				a = GrammarSymbol::identifier;
+			}
+			else if (token.tokenType == ScannerTokenNumber) {
+				a = GrammarSymbol::number;
+			}
+			else if (token.tokenType == ScannerTokenString) {
+				a = GrammarSymbol::string;
+			}
+			else {
+				GrammarSymbolContainer::const_iterator ite = symbolContainer_.find(token.token->Text());
+				Assert(ite != symbolContainer_.end(), "unexpected token " + token.token->Text());
+				a = ite->second;
+			}
+
 			ParsingTable::iterator pos = parsingTable_->find(symbol, a);
 			if (pos != parsingTable_->end()) {
 				Condinate* cond = pos->second.second;

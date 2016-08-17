@@ -22,7 +22,7 @@ public:
 private:
 
 	bool IsTerminal(const char* token);
-	bool ParseProductions(LineScanner* lineScanner, GrammarSymbolContainer* symbols);
+	bool ParseProductions(LineScanner* lineScanner);
 	bool ParseGrammars();
 
 	void RemoveLeftRecursion();
@@ -50,5 +50,6 @@ private:
 private:
 	ParsingTable* parsingTable_;
 	GrammarContainer grammars_;
+	GrammarSymbolContainer symbolContainer_;
 	GrammarSymbolSetTable firstSetContainer_, followSetContainer_;
 };

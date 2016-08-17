@@ -76,29 +76,44 @@ public:
 	}
 };
 
-class Letter : public NonterminalSymbol {
+class Identifier : public TerminalSymbol {
 public:
-	Letter()
-		: NonterminalSymbol("$letter") {
+	Identifier()
+		: TerminalSymbol("identifier") {
 	}
 };
 
-class Digit : public NonterminalSymbol {
+class Number : public TerminalSymbol {
 public:
-	Digit()
-		: NonterminalSymbol("$digit") {
+	Number()
+		: TerminalSymbol("number") {
+	}
+};
+
+class String : public TerminalSymbol{
+public:
+	String()
+		: TerminalSymbol("string") {
 	}
 };
 
 class GrammarSymbolContainer {
+private:
+	typedef std::map<std::string, GrammarSymbol> Container;
+
+public: 
+	typedef Container::const_iterator const_iterator;
+
 public:
 	GrammarSymbolContainer();
 
 public:
 	GrammarSymbol AddSymbol(const std::string& text, bool terminal);
 
+	const_iterator begin() const;
+	const_iterator end() const;
+	const_iterator find(const std::string& text) const;
 private:
-	typedef std::map<std::string, GrammarSymbol> Container;
 	Container cont_;
 };
 
@@ -126,9 +141,10 @@ public:
 
 public:
 	static GrammarSymbol null;
-	static GrammarSymbol digit;
-	static GrammarSymbol letter;
+	static GrammarSymbol number;
+	static GrammarSymbol string;
 	static GrammarSymbol epsilon;
+	static GrammarSymbol identifier;
 
 private:
 	void* operator new(size_t);
@@ -146,9 +162,6 @@ public:
 public:
 	GrammarSymbolSet& operator[] (const GrammarSymbol& key);
 	std::string ToString() const;
-
-private:
-	bool IsBuildinSymbol(const GrammarSymbol& symbol) const;
 
 private:
 	typedef std::map<GrammarSymbol, GrammarSymbolSet> Container;
