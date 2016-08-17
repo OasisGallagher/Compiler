@@ -9,6 +9,9 @@ class SyntaxTree;
 
 class BuildinSymbolContainer : public std::map<std::string, GrammarSymbol> {
 public:
+	BuildinSymbolContainer();
+
+public:
 	std::string ToString() const;
 };
 

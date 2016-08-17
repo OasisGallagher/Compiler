@@ -57,7 +57,7 @@ const char* grammar6[] = {
 };
 
 const char* grammar7[] = {
-	"$statement : $if_stmt | identifier",
+	"$statement : $if_stmt | other",
 	"$if_stmt : if($exp) $statement $else_part",
 	"$else_part : else $statement | epsilon",
 	"$exp : 0 | 1",
@@ -70,7 +70,7 @@ const char* grammar7[] = {
 int main() {
 	LanguageParameter lp;
 
-	SetLanguage(lp, grammar);
+	SetLanguage(lp, grammar7);
 	Language lang(&lp);
 
 	Debug::Log(lang.ToString());

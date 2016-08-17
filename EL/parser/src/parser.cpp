@@ -13,6 +13,13 @@
 #include "debug.h"
 #include "utilities.h"
 
+BuildinSymbolContainer::BuildinSymbolContainer() {
+	insert(std::make_pair(GrammarSymbol::string.ToString(), GrammarSymbol::string));
+	insert(std::make_pair(GrammarSymbol::number.ToString(), GrammarSymbol::number));
+	insert(std::make_pair(GrammarSymbol::epsilon.ToString(), GrammarSymbol::epsilon));
+	insert(std::make_pair(GrammarSymbol::identifier.ToString(), GrammarSymbol::identifier));
+}
+
 std::string BuildinSymbolContainer::ToString() const {
 	std::ostringstream oss;
 	const char* seperator = "";
@@ -299,7 +306,7 @@ bool Language::ParseProductions(LineScanner* lineScanner) {
 		}
 
 		GrammarSymbol symbol;
-		if (IsTerminal(token) && !IsMnemonic(token)) {
+		if ((tokenType != ScannerTokenSign && IsTerminal(token)) || IsMnemonic(token)) {
 			BuildinSymbolContainer::iterator pos = buildinSymbols_.find(token);
 			if (pos == buildinSymbols_.end()) {
 				symbol = new TerminalSymbol(token);

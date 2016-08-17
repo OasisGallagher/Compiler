@@ -1,51 +1,30 @@
 =================== Grammars ===================
-$exp                  $term $exp_2
-$exp_2                $addop $term $exp_2|epsilon
-$addop                -|+
-$term                 $factor $term_2
-$term_2               $mulop $factor $term_2|epsilon
-$mulop                *
-$factor               number|( $exp )
+$statement            other|$if_stmt
+$if_stmt              if ( $exp ) $statement $else_part
+$else_part            else $statement|epsilon
+$exp                  1|0
 
 ================ BuildinSymbols ================
-( ) * + - number
+0 1 Number else epsilon identifier if other string
 
 ==================== First =====================
-$exp                  {( number}
-$addop                {+ -}
-$term                 {( number}
-$mulop                {*}
-$factor               {( number}
-$exp_2                {epsilon + -}
-$term_2               {epsilon *}
+$statement            {other if}
+$if_stmt              {if}
+$exp                  {0 1}
+$else_part            {epsilon else}
 
 ==================== Follow ====================
-$exp                  {null )}
-$addop                {( number}
-$term                 {null + - )}
-$mulop                {( number}
-$factor               {null + - * )}
-$exp_2                {null )}
-$term_2               {null + - )}
+$statement            {null else}
+$if_stmt              {null else}
+$exp                  {)}
+$else_part            {null else}
 
 ================= ParsingTable =================
-[$exp, (]                   $exp : $term $exp_2
-[$exp, number]              $exp : $term $exp_2
-[$addop, +]                 $addop : +
-[$addop, -]                 $addop : -
-[$term, (]                  $term : $factor $term_2
-[$term, number]             $term : $factor $term_2
-[$mulop, *]                 $mulop : *
-[$factor, (]                $factor : ( $exp )
-[$factor, number]           $factor : number
-[$exp_2, null]              $exp_2 : epsilon
-[$exp_2, epsilon]           $exp_2 : epsilon
-[$exp_2, +]                 $exp_2 : $addop $term $exp_2
-[$exp_2, -]                 $exp_2 : $addop $term $exp_2
-[$exp_2, )]                 $exp_2 : epsilon
-[$term_2, null]             $term_2 : epsilon
-[$term_2, epsilon]          $term_2 : epsilon
-[$term_2, +]                $term_2 : epsilon
-[$term_2, -]                $term_2 : epsilon
-[$term_2, *]                $term_2 : $mulop $factor $term_2
-[$term_2, )]                $term_2 : epsilon
+[$statement, other]         $statement : other
+[$statement, if]            $statement : $if_stmt
+[$if_stmt, if]              $if_stmt : if ( $exp ) $statement $else_part
+[$exp, 0]                   $exp : 0
+[$exp, 1]                   $exp : 1
+[$else_part, null]          $else_part : epsilon
+[$else_part, epsilon]       $else_part : epsilon
+[$else_part, else]          $else_part : else $statement

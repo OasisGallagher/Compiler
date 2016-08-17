@@ -116,8 +116,8 @@ GrammarSymbol GrammarSymbolContainer::AddSymbol(const std::string& text, bool te
 }
 
 GrammarSymbolSetTable::GrammarSymbolSetTable() {
-	cont_[GrammarSymbol::null].insert(GrammarSymbol::null);
-	cont_[GrammarSymbol::epsilon].insert(GrammarSymbol::epsilon);
+// 	cont_[GrammarSymbol::null].insert(GrammarSymbol::null);
+// 	cont_[GrammarSymbol::epsilon].insert(GrammarSymbol::epsilon);
 }
 
 std::string GrammarSymbolSetTable::ToString() const {
