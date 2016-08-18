@@ -1,8 +1,8 @@
 =================== Grammars ===================
-$statement            other|$if_stmt
+$statement            $if_stmt|other
 $if_stmt              if ( $exp ) $statement $else_part
 $else_part            else $statement|epsilon
-$exp                  1|0
+$exp                  0|1
 
 ================ BuildinSymbols ================
 0 1 Number else epsilon identifier if other string
@@ -10,21 +10,21 @@ $exp                  1|0
 ==================== First =====================
 $statement            {other if}
 $if_stmt              {if}
-$exp                  {0 1}
 $else_part            {epsilon else}
+$exp                  {1 0}
 
 ==================== Follow ====================
 $statement            {null else}
 $if_stmt              {null else}
-$exp                  {)}
 $else_part            {null else}
+$exp                  {)}
 
 ================= ParsingTable =================
 [$statement, other]         $statement : other
 [$statement, if]            $statement : $if_stmt
 [$if_stmt, if]              $if_stmt : if ( $exp ) $statement $else_part
-[$exp, 0]                   $exp : 0
-[$exp, 1]                   $exp : 1
 [$else_part, null]          $else_part : epsilon
 [$else_part, epsilon]       $else_part : epsilon
 [$else_part, else]          $else_part : else $statement
+[$exp, 1]                   $exp : 1
+[$exp, 0]                   $exp : 0

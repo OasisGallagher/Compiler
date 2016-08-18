@@ -47,6 +47,7 @@ private:
 	bool LeftFactoringOnGrammar(Grammar* g, GrammarContainer* newGrammars);
 
 	Grammar* FindGrammar(const GrammarSymbol& left);
+	bool FindSymbol(GrammarSymbol* symbol, const ScannerToken& token);
 
 	bool MergeNonEpsilonElements(GrammarSymbolSet& dest, const GrammarSymbolSet& src);
 

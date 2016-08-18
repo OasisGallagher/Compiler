@@ -306,7 +306,7 @@ bool Language::ParseProductions(LineScanner* lineScanner) {
 		}
 
 		GrammarSymbol symbol;
-		if ((tokenType != ScannerTokenSign && IsTerminal(token)) || IsMnemonic(token)) {
+		if (tokenType != ScannerTokenSign && IsTerminal(token)) {
 			BuildinSymbolContainer::iterator pos = buildinSymbols_.find(token);
 			if (pos == buildinSymbols_.end()) {
 				symbol = new TerminalSymbol(token);
@@ -505,6 +505,36 @@ Grammar* Language::FindGrammar(const GrammarSymbol& left) {
 	return g;
 }
 
+bool Language::FindSymbol(GrammarSymbol* symbol, const ScannerToken& token) {
+	GrammarSymbol answer;
+	if (token.tokenType == ScannerTokenEndOfFile) {
+		answer = GrammarSymbol::null;
+	}
+	else if (token.tokenType == ScannerTokenNumber || token.tokenType == ScannerTokenID) {
+		BuildinSymbolContainer::iterator pos = buildinSymbols_.find(token.text);
+		if (pos != buildinSymbols_.end()) {
+			answer = pos->second;
+		}
+		else {
+			answer = (token.tokenType == ScannerTokenNumber) ? GrammarSymbol::number : GrammarSymbol::identifier;
+		}
+	}
+	else if (token.tokenType == ScannerTokenString) {
+		answer = GrammarSymbol::string;
+	}
+	else {
+		GrammarSymbolContainer::const_iterator ite = symbolContainer_.find(token.text);
+		if (ite == symbolContainer_.end()) {
+			return false;
+		}
+
+		answer = ite->second;
+	}
+
+	*symbol = answer;
+	return true;
+}
+
 bool Language::Parse(SyntaxTree** tree, const std::string& file) {
 	FileScanner scanner(file.c_str());
 	return ParseFile(tree, &scanner);
@@ -528,25 +558,9 @@ bool Language::ParseFile(SyntaxTree** tree, FileScanner* fileScanner) {
 
 		if (symbol.SymbolType() == GrammarSymbolNonterminal) {
 			GrammarSymbol a;
-			if (token.tokenType == ScannerTokenEndOfFile) {
-				a = GrammarSymbol::null;
-			}
-			else if (token.tokenType == ScannerTokenNumber || token.tokenType == ScannerTokenID) {
-				BuildinSymbolContainer::iterator pos = buildinSymbols_.find(token.text);
-				if (pos != buildinSymbols_.end()) {
-					a = pos->second;
-				}
-				else {
-					a = (token.tokenType == ScannerTokenNumber) ? GrammarSymbol::number : GrammarSymbol::identifier;
-				}
-			}
-			else if (token.tokenType == ScannerTokenString) {
-				a = GrammarSymbol::string;
-			}
-			else {
-				GrammarSymbolContainer::const_iterator ite = symbolContainer_.find(token.text);
-				Assert(ite != symbolContainer_.end(), "unexpected token " + token.text);
-				a = ite->second;
+			if (!FindSymbol(&a, token)) {
+				Debug::LogError(std::string("unexpected token ") + token.text);
+				return false;
 			}
 
 			ParsingTable::iterator pos = parsingTable_->find(symbol, a);
