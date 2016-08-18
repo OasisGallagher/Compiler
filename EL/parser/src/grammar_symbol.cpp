@@ -1,7 +1,7 @@
 #include <sstream>
 #include "grammar_symbol.h"
 
-GrammarSymbol GrammarSymbol::null = new Null();
+GrammarSymbol GrammarSymbol::zero = new Zero();
 GrammarSymbol GrammarSymbol::number = new Number();
 GrammarSymbol GrammarSymbol::string = new String();
 GrammarSymbol GrammarSymbol::epsilon = new Epsilon();
@@ -42,6 +42,10 @@ GrammarSymbol::~GrammarSymbol() {
 	}
 }
 
+GrammarSymbol::operator bool() const {
+	return symbol_ != nullptr;
+}
+
 bool GrammarSymbol::operator == (const GrammarSymbol& other) const {
 	return symbol_ == other.symbol_;
 }
@@ -71,7 +75,7 @@ std::string GrammarSymbol::ToString() const {
 }
 
 GrammarSymbolContainer::GrammarSymbolContainer() {
-	cont_[GrammarSymbol::null.ToString()] = GrammarSymbol::null;
+	cont_[GrammarSymbol::zero.ToString()] = GrammarSymbol::zero;
 	cont_[GrammarSymbol::number.ToString()] = GrammarSymbol::number;
 	cont_[GrammarSymbol::string.ToString()] = GrammarSymbol::string;
 	cont_[GrammarSymbol::epsilon.ToString()] = GrammarSymbol::epsilon;

@@ -6,6 +6,10 @@ protected:
 	RefCountable() : refCount_(1) {
 	}
 
+	virtual ~RefCountable() {
+
+	}
+
 	unsigned IncRefCount() {
 		return ++refCount_;
 	}

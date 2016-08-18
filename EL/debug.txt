@@ -1,30 +1,20 @@
 =================== Grammars ===================
-$statement            $if_stmt|other
-$if_stmt              if ( $exp ) $statement $else_part
-$else_part            else $statement|epsilon
-$exp                  0|1
+$exp                  number $exp_2
+$exp_2                + number $exp_2|epsilon
 
 ================ BuildinSymbols ================
-0 1 Number else epsilon identifier if other string
+epsilon identifier number string
 
 ==================== First =====================
-$statement            {other if}
-$if_stmt              {if}
-$else_part            {epsilon else}
-$exp                  {1 0}
+$exp                  {number}
+$exp_2                {epsilon +}
 
 ==================== Follow ====================
-$statement            {null else}
-$if_stmt              {null else}
-$else_part            {null else}
-$exp                  {)}
+$exp                  {zero}
+$exp_2                {zero}
 
 ================= ParsingTable =================
-[$statement, other]         $statement : other
-[$statement, if]            $statement : $if_stmt
-[$if_stmt, if]              $if_stmt : if ( $exp ) $statement $else_part
-[$else_part, null]          $else_part : epsilon
-[$else_part, epsilon]       $else_part : epsilon
-[$else_part, else]          $else_part : else $statement
-[$exp, 1]                   $exp : 1
-[$exp, 0]                   $exp : 0
+[$exp, number]              $exp : number $exp_2
+[$exp_2, zero]              $exp_2 : epsilon
+[$exp_2, epsilon]           $exp_2 : epsilon
+[$exp_2, +]                 $exp_2 : + number $exp_2

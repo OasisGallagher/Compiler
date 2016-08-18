@@ -1,4 +1,5 @@
 #include <cassert>
+#include <sstream>
 #include <algorithm>
 #include "debug.h"
 #include "scanner.h"
@@ -20,6 +21,12 @@ enum ScannerStateType {
 	ScannerStateDone
 };
 
+std::string TokenPosition::ToString() const {
+	std::ostringstream oss;
+	oss << lineno << ": " << linepos;
+	return oss.str();
+}
+
 //static DummyToken dummyToken;
 
 LineScanner::LineScanner() 
@@ -40,7 +47,7 @@ void LineScanner::SetText(const char* text) {
 	std::copy(text, text + length, lineBuffer_);
 	lineBuffer_[length] = 0;
 
-	current_ = lineBuffer_;
+	start_ = current_ = lineBuffer_;
 	dest_ = lineBuffer_ + length + 1;
 }
 
@@ -58,7 +65,7 @@ void LineScanner::UngetChar() {
 	--current_;
 }
 
-ScannerTokenType LineScanner::GetToken(char* token) {
+ScannerTokenType LineScanner::GetToken(char* token, int* pos) {
 	ScannerStateType state = ScannerStateStart;
 	ScannerTokenType tokenType = ScannerTokenError;
 
@@ -223,11 +230,15 @@ ScannerTokenType LineScanner::GetToken(char* token) {
 	std::copy(tokenBuffer_, tokenBuffer_ + index, token);
 	token[index] = 0;
 
+	if (pos != nullptr) {
+		*pos = 1 + current_ - start_ - index;
+	}
+
 	return tokenType;
 }
 
 FileScanner::FileScanner(const char* path) 
-	: reader_(new FileReader(path)), endOfFile_(false){
+	: reader_(new FileReader(path)), endOfFile_(false), lineno_(0){
 	/*symbols_ = new Table < Symbol >();
 	numberLiterals_ = new Table < NumberLiteral >();
 	stringLiterals_ = new Table < StringLiteral >();*/
@@ -242,29 +253,33 @@ FileScanner::~FileScanner() {
 	*/
 }
 
-bool FileScanner::GetToken(ScannerToken* token) {
+bool FileScanner::GetToken(ScannerToken* token, TokenPosition* pos) {
 	if (endOfFile_) {
 		return false;
 	}
 
-	char buffer[Constants::kMaxTokenCharacters];
-	ScannerTokenType tokenType = lineScanner_.GetToken(buffer);
+	char buffer[Constants::kMaxTokenCharacters] = { 0 };
+	ScannerTokenType tokenType = lineScanner_.GetToken(buffer, &pos->linepos);
 
 	char line[Constants::kMaxLineCharacters];
 	for (; tokenType == ScannerTokenEndOfFile; ) {
 		if (!reader_->ReadLine(line, Constants::kMaxLineCharacters)) {
 			endOfFile_ = true;
-			token->tokenType = ScannerTokenEndOfFile;
-			return true;
+			tokenType = ScannerTokenEndOfFile;
+			break;
 		}
+
+		++lineno_;
 
 		if (strlen(line) == 0) {
 			continue;
 		}
 
 		lineScanner_.SetText(line);
-		tokenType = lineScanner_.GetToken(buffer);
+		tokenType = lineScanner_.GetToken(buffer, &pos->linepos);
 	}
+
+	pos->lineno = lineno_;
 
 	if(tokenType == ScannerTokenError) {
 		return false;
@@ -272,6 +287,8 @@ bool FileScanner::GetToken(ScannerToken* token) {
 
 	token->tokenType = tokenType;
 	strcpy(token->text, buffer);
+
+	return true;
 	/*
 	token->token = &dummyToken;
 
@@ -283,14 +300,14 @@ bool FileScanner::GetToken(ScannerToken* token) {
 	}
 	*/
 
-	if (tokenType == ScannerTokenID) {
+	//if (tokenType == ScannerTokenID) {
 		//ScannerTokenType reserveTokenType = GetReserveTokenType(buffer);
 		//if (reserveTokenType != ScannerTokenError) {
 		//	token->tokenType = reserveTokenType;
 		//}
-	}
+	//}
 	
-	return true;
+	//return true;
 }
 
 ScannerTokenType FileScanner::GetReserveTokenType(const char* name) {

@@ -63,10 +63,10 @@ public:
 	}
 };
 
-class Null : public TerminalSymbol {
+class Zero : public TerminalSymbol {
 public:
-	Null()
-		: TerminalSymbol("null") {
+	Zero()
+		: TerminalSymbol("zero") {
 	}
 };
 
@@ -95,7 +95,7 @@ public:
 class Number : public TerminalSymbol {
 public:
 	Number()
-		: TerminalSymbol("Number") {
+		: TerminalSymbol("number") {
 	}
 
 	virtual bool Match(const std::string& text) const {
@@ -127,6 +127,7 @@ public:
 public:
 	GrammarSymbol AddSymbol(const std::string& text, bool terminal);
 
+	
 	GrammarSymbol& operator[](const std::string& text);
 	const_iterator begin() const;
 	const_iterator end() const;
@@ -147,6 +148,7 @@ public:
 	~GrammarSymbol();
 
 public:
+	operator bool() const;
 	bool operator == (const GrammarSymbol& other) const;
 	bool operator != (const GrammarSymbol& other) const;
 	bool operator < (const GrammarSymbol& other) const;
@@ -158,7 +160,7 @@ public:
 	std::string ToString() const;
 
 public:
-	static GrammarSymbol null;
+	static GrammarSymbol zero;
 	static GrammarSymbol number;
 	static GrammarSymbol string;
 	static GrammarSymbol epsilon;

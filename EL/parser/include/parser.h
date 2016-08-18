@@ -33,7 +33,6 @@ private:
 	bool SetGrammars(const char** productions, int count);
 
 	bool IsTerminal(const char* token);
-	bool IsMnemonic(const char* token);
 
 	bool ParseProductions(LineScanner* lineScanner);
 	bool ParseGrammars();
@@ -47,7 +46,7 @@ private:
 	bool LeftFactoringOnGrammar(Grammar* g, GrammarContainer* newGrammars);
 
 	Grammar* FindGrammar(const GrammarSymbol& left);
-	bool FindSymbol(GrammarSymbol* symbol, const ScannerToken& token);
+	GrammarSymbol FindSymbol(const ScannerToken& token);
 
 	bool MergeNonEpsilonElements(GrammarSymbolSet& dest, const GrammarSymbolSet& src);
 

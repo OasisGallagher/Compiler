@@ -15,6 +15,7 @@
     <ClInclude Include="global\include\debug.h" />
     <ClInclude Include="global\include\file_reader.h" />
     <ClInclude Include="global\include\reference_countable.h" />
+    <ClInclude Include="global\include\static_vector.h" />
     <ClInclude Include="global\include\utilities.h" />
     <ClInclude Include="parser\include\grammar.h" />
     <ClInclude Include="parser\include\grammar_symbol.h" />
@@ -79,6 +80,7 @@
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions);_SCL_SECURE_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>global/include;scanner/include;parser/include</AdditionalIncludeDirectories>
+      <TreatWarningAsError>true</TreatWarningAsError>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>

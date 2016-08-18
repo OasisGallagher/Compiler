@@ -43,7 +43,7 @@
       <Filter>scanner\include</Filter>
     </ClInclude>
     <ClInclude Include="scanner\include\token.h">
-		<Filter>scanner\include</Filter>
+      <Filter>scanner\include</Filter>
     </ClInclude>
     <ClInclude Include="global\include\utilities.h">
       <Filter>global\include</Filter>
@@ -63,9 +63,12 @@
     <ClInclude Include="global\include\file_reader.h">
       <Filter>global\include</Filter>
     </ClInclude>
-	<ClInclude Include="global\include\reference_countable.h">
+    <ClInclude Include="global\include\reference_countable.h">
       <Filter>global\include</Filter>
-	 </ClInclude>
+    </ClInclude>
+    <ClInclude Include="global\include\static_vector.h">
+      <Filter>global\include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />

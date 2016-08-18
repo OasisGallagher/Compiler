@@ -1,32 +1,7 @@
 #include "scanner.h"
 #include "parser.h"
+#include "syntax_tree.h"
 #include "debug.h"
-
-const char* tokenName[] = {
-	"err",
-	"eof",
-	"if",
-	"then",
-	"else",
-	"end",
-	"id",
-	"number",
-	"assign",
-	"equal",
-	"less",
-	"lessequal",
-	"greater",
-	"greaterequal",
-	"plus",
-	"minus",
-	"multiply",
-	"divide",
-	"seperator",
-	"string",
-	"leftparenthesis",
-	"rightparenthesis"
-	"semicolon",
-};
 
 const char* grammar[] = {
 	"$exp : $exp $addop $term | $term",
@@ -63,6 +38,10 @@ const char* grammar7[] = {
 	"$exp : 0 | 1",
 };
 
+const char* grammar8[] = {
+	"$exp : $exp + number | number"
+};
+
 #define SetLanguage(_Ans, _Prod) if (true) { _Ans.productions = _Prod; _Ans.nproductions = sizeof(_Prod) / sizeof(_Prod[0]); } else (void)0
 
 #include <fstream>
@@ -70,7 +49,7 @@ const char* grammar7[] = {
 int main() {
 	LanguageParameter lp;
 
-	SetLanguage(lp, grammar7);
+	SetLanguage(lp, grammar8);
 	Language lang(&lp);
 
 	Debug::Log(lang.ToString());
@@ -80,6 +59,11 @@ int main() {
 
 	SyntaxTree* tree = nullptr;
 	lang.Parse(&tree, "test.el");
+
+	if (tree != nullptr) {
+		Debug::Log(tree->ToString());
+		ofs << tree->ToString();
+	}
 	
 	return 0;
 }
