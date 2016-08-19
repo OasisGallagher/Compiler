@@ -432,6 +432,7 @@ bool Language::CreateParsingTable() {
 		}
 	}
 
+	AddAsyncSymbol();
 	return true;
 }
 
@@ -476,6 +477,24 @@ bool Language::BuildParingTable(Grammar* g) {
 	}
 
 	return true;
+}
+
+void Language::AddAsyncSymbol() {
+	for (GrammarContainer::iterator ite = grammars_.begin(); ite != grammars_.end(); ++ite) {
+		Grammar* g = *ite;
+		const GrammarSymbol& left = g->GetLeft();
+		GrammarSymbolSetTable::const_iterator pos = followSetContainer_.find(left);
+		if (pos == followSetContainer_.end()) {
+			continue;
+		}
+
+		const GrammarSymbolSet& follow = pos->second;
+		for (GrammarSymbolSet::const_iterator ite2 = follow.begin(); ite2 != follow.end(); ++ite2) {
+			if (parsingTable_->find(left, *ite2) == parsingTable_->end()) {
+				parsingTable_->at(left, *ite2) = std::make_pair(GrammarSymbol::synch, nullptr);
+			}
+		}
+	}
 }
 
 void Language::GetFirstSet(GrammarSymbolSet* answer, Condinate::iterator first, Condinate::iterator last) {
@@ -532,12 +551,12 @@ GrammarSymbol Language::FindSymbol(const ScannerToken& token) {
 	return answer;
 }
 
-bool Language::Parse(SyntaxTree** tree, const std::string& file) {
+bool Language::Parse(SyntaxTree* tree, const std::string& file) {
 	FileScanner scanner(file.c_str());
 	return ParseFile(tree, &scanner);
 }
 
-bool Language::ParseFile(SyntaxTree** tree, FileScanner* fileScanner) {
+bool Language::ParseFile(SyntaxTree* tree, FileScanner* fileScanner) {
 	ScannerToken token;
 	TokenPosition tokenPosition = { 0 };
 	if (!fileScanner->GetToken(&token, &tokenPosition)) {
@@ -546,13 +565,12 @@ bool Language::ParseFile(SyntaxTree** tree, FileScanner* fileScanner) {
 	}
 
 	std::string error = "invalid syntax";
-	SyntaxTree* answer = new SyntaxTree();
 
 	typedef std::pair<GrammarSymbol, SyntaxNode*> StackItem;
 	std::stack<StackItem> s;
 	GrammarSymbol symbol = grammars_.front()->GetLeft();
 	SyntaxNode* root = nullptr;
-	root = answer->AddNode(root, symbol.ToString());
+	root = tree->AddNode(root, symbol.ToString());
 
 	s.push(std::make_pair(symbol, root));
 	
@@ -580,16 +598,22 @@ bool Language::ParseFile(SyntaxTree** tree, FileScanner* fileScanner) {
 			}
 
 			ParsingTable::iterator pos = parsingTable_->find(symbol, tokenSymbol);
-			if (pos != parsingTable_->end()) {
+			if (pos == parsingTable_->end()) {
+				if (!fileScanner->GetToken(&token, &tokenPosition)) {
+					Debug::LogError("failed to read token");
+					return false;
+				}
+			}
+			else {
 				Condinate* cond = pos->second.second;
 				s.pop();
 
 				for (Condinate::reverse_iterator rite = cond->rbegin(); rite != cond->rend(); ++rite) {
-					s.push(std::make_pair(*rite, answer->AddNode(root, rite->ToString())));
+					s.push(std::make_pair(*rite, tree->AddNode(root, rite->ToString())));
 				}
-
-				continue;
 			}
+
+			continue;
 		}
 
 		error = std::string("unexpected token ") + token.text + " at " + tokenPosition.ToString();
@@ -597,16 +621,83 @@ bool Language::ParseFile(SyntaxTree** tree, FileScanner* fileScanner) {
 	}
 
 	if (s.empty() && token.tokenType == ScannerTokenEndOfFile) {
-		*tree = answer;
 		return true;
 	}
 	
-	delete answer;
 	Debug::LogError(error);
 	return false;
 }
 
+/*
+bool Language::ParseFile(SyntaxTree* tree, FileScanner* fileScanner) {
+ScannerToken token;
+TokenPosition tokenPosition = { 0 };
+if (!fileScanner->GetToken(&token, &tokenPosition)) {
+Debug::LogError("failed to read token");
+return false;
+}
+
+std::string error = "invalid syntax";
+
+typedef std::pair<GrammarSymbol, SyntaxNode*> StackItem;
+std::stack<StackItem> s;
+GrammarSymbol symbol = grammars_.front()->GetLeft();
+SyntaxNode* root = nullptr;
+root = tree->AddNode(root, symbol.ToString());
+
+s.push(std::make_pair(symbol, root));
+
+for (; !s.empty();) {
+StackItem& item = s.top();
+symbol = item.first;
+root = item.second;
+
+if (symbol.SymbolType() == GrammarSymbolTerminal) {
+s.pop();
+
+if (symbol.Match(token.text)) {
+if (symbol != GrammarSymbol::epsilon && !fileScanner->GetToken(&token, &tokenPosition)) {
+Debug::LogError("failed to read token");
+return false;
+}
+}
+}
+else {
+GrammarSymbol tokenSymbol = FindSymbol(token);
+if (!tokenSymbol) {
+error = std::string("invalid token ") + token.text + " at " + tokenPosition.ToString();
+break;
+}
+
+ParsingTable::iterator pos = parsingTable_->find(symbol, tokenSymbol);
+if (pos == parsingTable_->end()) {
+if (!fileScanner->GetToken(&token, &tokenPosition)) {
+Debug::LogError("failed to read token");
+return false;
+}
+}
+else {
+s.pop();
+
+if (pos->second.first != GrammarSymbol::synch) {
+Condinate* cond = pos->second.second;
+for (Condinate::reverse_iterator rite = cond->rbegin(); rite != cond->rend(); ++rite) {
+s.push(std::make_pair(*rite, tree->AddNode(root, rite->ToString())));
+}
+}
+}
+}
+}
+
+if (s.empty() && token.tokenType == ScannerTokenEndOfFile) {
+return true;
+}
+
+Debug::LogError(error);
+return false;
+}
+*/
+
 bool Language::IsTerminal(const char* token) {
 	return *token != '$';
 }
-

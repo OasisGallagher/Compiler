@@ -2,6 +2,7 @@
 #include "grammar_symbol.h"
 
 GrammarSymbol GrammarSymbol::zero = new Zero();
+GrammarSymbol GrammarSymbol::synch = new Synch();
 GrammarSymbol GrammarSymbol::number = new Number();
 GrammarSymbol GrammarSymbol::string = new String();
 GrammarSymbol GrammarSymbol::epsilon = new Epsilon();

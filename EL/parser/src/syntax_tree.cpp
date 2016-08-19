@@ -1,3 +1,4 @@
+ï»¿#include <stack>
 #include "debug.h"
 #include "syntax_tree.h"
 
@@ -36,12 +37,13 @@ const std::string& SyntaxNode::ToString() const {
 	return name_;
 }
 
-SyntaxTree::SyntaxTree() {
+SyntaxTree::SyntaxTree() 
+	: root_(nullptr) {
 
 }
 
 SyntaxTree::~SyntaxTree() {
-
+	PreorderTreeWalk(&SyntaxTree::DeleteTreeNode);
 }
 
 SyntaxNode* SyntaxTree::AddNode(SyntaxNode* parent, const std::string& name) {
@@ -54,37 +56,7 @@ SyntaxNode* SyntaxTree::AddNode(SyntaxNode* parent, const std::string& name) {
 	parent->AddChild(node);
 	return node;
 }
-/*
-class TreeNode {
 
-	String name;
-	List<TreeNode> children;
-
-	public TreeNode(String name, List<TreeNode> children) {
-		this.name = name;
-		this.children = children;
-	}
-
-	public void print() {
-		print("", true);
-	}
-
-	private void print(String prefix, boolean isTail) {
-		System.out.println(prefix + (isTail ? "©¸©¤©¤ " : "©À©¤©¤ ") + name);
-		for (int i = 0; i < children.size() - 1; i++) {
-			children.get(i).print(prefix + (isTail ? "    " : "©¦   "), false);
-		}
-		if (children.size() > 0) {
-			children.get(children.size() - 1).print(prefix + (isTail ? "    " : "©¦   "), true);
-		}
-	}
-}*/
-/*
-ret = "\t"*level+repr(self.value)+"\n"
-for child in self.children:
-ret += child.__str__(level+1)
-return ret
-*/
 std::string SyntaxTree::ToString() const {
 	std::ostringstream oss;
 	if (root_ != nullptr) {
@@ -94,9 +66,35 @@ std::string SyntaxTree::ToString() const {
 	return oss.str();
 }
 
+void SyntaxTree::DeleteTreeNode(SyntaxNode* node) {
+	delete node;
+}
+
+void SyntaxTree::PreorderTreeWalk(TreeWalkCallback callback) {
+	if (root_ == nullptr) {
+		return;
+	}
+
+	std::stack<SyntaxNode*> s;
+	s.push(root_);
+
+	for (; !s.empty();) {
+		SyntaxNode* cur = s.top();
+		s.pop();
+
+		for (int i = cur->ChildCount() - 1; i >= 0; --i) {
+			s.push(cur->GetChild(i));
+		}
+
+		(this->*callback)(cur);
+	}
+
+	root_ = nullptr;
+}
+
 void SyntaxTree::SyntaxNodeToString(std::ostringstream& oss, const std::string& prefix, SyntaxNode* current, bool tail) const {
-	oss << prefix << (tail ? "©¸©¤©¤©¤ " : "©À©¤©¤©¤ ") << current->ToString() << "\n";
+	oss << prefix << (tail ? "â””â”€â”€â”€ " : "â”œâ”€â”€â”€ ") << current->ToString() << "\n";
 	for (int i = 0; i < current->ChildCount(); ++i) {
-		SyntaxNodeToString(oss, prefix + (tail ? "     " : "©¦    "), current->GetChild(i), i == current->ChildCount() - 1);
+		SyntaxNodeToString(oss, prefix + (tail ? "     " : "â”‚    "), current->GetChild(i), i == current->ChildCount() - 1);
 	}
 }

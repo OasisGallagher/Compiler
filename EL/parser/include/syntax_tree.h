@@ -5,6 +5,8 @@
 
 class SyntaxNode {
 private:
+	friend class SyntaxTree;
+
 	SyntaxNode(const std::string& name);
 	~SyntaxNode();
 
@@ -14,7 +16,6 @@ private:
 
 	const std::string& ToString() const;
 
-	friend class SyntaxTree;
 private:
 	int index_;
 	std::string name_;
@@ -33,7 +34,14 @@ public:
 	std::string ToString() const;
 
 private:
+	SyntaxTree(const SyntaxTree&);
+	SyntaxTree& operator = (const SyntaxTree&);
+
 	void SyntaxNodeToString(std::ostringstream& oss, const std::string& prefix, SyntaxNode* current, bool tail) const;
+	void DeleteTreeNode(SyntaxNode* node);
+
+	typedef void (SyntaxTree::*TreeWalkCallback)(SyntaxNode* node);
+	void PreorderTreeWalk(TreeWalkCallback callback);
 
 private:
 	SyntaxNode* root_;

@@ -26,7 +26,7 @@ public:
 	~Language();
 
 public:
-	bool Parse(SyntaxTree** tree, const std::string& file);
+	bool Parse(SyntaxTree* tree, const std::string& file);
 	std::string ToString();
 
 private:
@@ -59,8 +59,9 @@ private:
 
 	bool BuildParingTable(Grammar* g);
 	bool CreateParsingTable();
+	void AddAsyncSymbol();
 
-	bool ParseFile(SyntaxTree** tree, FileScanner* fileScanner);
+	bool ParseFile(SyntaxTree* tree, FileScanner* fileScanner);
 
 private:
 	GrammarContainer grammars_;

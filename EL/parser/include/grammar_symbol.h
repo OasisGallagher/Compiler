@@ -103,6 +103,17 @@ public:
 	}
 };
 
+class Synch : public TerminalSymbol {
+public:
+	Synch()
+		: TerminalSymbol("synch") {
+	}
+
+	virtual bool Match(const std::string& text) const {
+		return true;
+	}
+};
+
 class String : public TerminalSymbol{
 public:
 	String()
@@ -161,6 +172,7 @@ public:
 
 public:
 	static GrammarSymbol zero;
+	static GrammarSymbol synch;
 	static GrammarSymbol number;
 	static GrammarSymbol string;
 	static GrammarSymbol epsilon;
@@ -176,14 +188,27 @@ private:
 typedef std::set<GrammarSymbol> GrammarSymbolSet;
 
 class GrammarSymbolSetTable {
+private:
+	typedef std::map<GrammarSymbol, GrammarSymbolSet> Container;
+
 public:
 	GrammarSymbolSetTable();
 
 public:
+	typedef Container::iterator iterator;
+	typedef Container::const_iterator const_iterator;
+
+public:
+	const_iterator find(const GrammarSymbol& key) const {
+		return cont_.find(key);
+	}
+
+	const_iterator begin() const { return cont_.begin(); }
+	const_iterator end() const { return cont_.end(); }
+
 	GrammarSymbolSet& operator[] (const GrammarSymbol& key);
 	std::string ToString() const;
-
+	
 private:
-	typedef std::map<GrammarSymbol, GrammarSymbolSet> Container;
 	Container cont_;
 };

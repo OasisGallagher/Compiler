@@ -42,9 +42,12 @@ std::string ParsingTable::ToString() const {
 		oss.width(28);
 		oss.setf(std::ios::left);
 		oss << "[" + key.first.ToString() + ", " + key.second.ToString() + "]";
-		oss << value.first.ToString() << " : ";
-
-		oss << value.second->ToString();
+		oss << value.first.ToString();
+		
+		if (value.second != nullptr) {
+			oss << " : ";
+			oss << value.second->ToString();
+		}
 	}
 
 	return oss.str();

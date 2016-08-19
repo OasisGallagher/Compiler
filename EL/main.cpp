@@ -43,22 +43,27 @@ const char* grammar8[] = {
 	"$exp : $exp + number | number"
 };
 
+const char* grammar9[] = {
+	"$E : $E + $T | $T",
+	"$T : $T * $F | $F",
+	"$F : ($E) | i",
+};
+
 #define SetLanguage(_Ans, _Prod) if (true) { _Ans.productions = _Prod; _Ans.nproductions = sizeof(_Prod) / sizeof(_Prod[0]); } else (void)0
 
 int main() {
 	LanguageParameter lp;
 
-	SetLanguage(lp, grammar);
+	SetLanguage(lp, grammar9);
 	Language lang(&lp);
 
 	Debug::Log(lang.ToString());
 
-	SyntaxTree* tree = nullptr;
-	lang.Parse(&tree, "test.el");
+	SyntaxTree tree;
 
-	if (tree != nullptr) {
+	if (lang.Parse(&tree, "test.el")) {
 		Debug::Log("\n" + Utility::Heading(" SyntaxTree ", 48));
-		Debug::Log(tree->ToString());
+		Debug::Log(tree.ToString());
 	}
 	
 	return 0;
