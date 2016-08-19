@@ -2,6 +2,7 @@
 #include "parser.h"
 #include "syntax_tree.h"
 #include "debug.h"
+#include "utilities.h"
 
 const char* grammar[] = {
 	"$exp : $exp $addop $term | $term",
@@ -44,25 +45,20 @@ const char* grammar8[] = {
 
 #define SetLanguage(_Ans, _Prod) if (true) { _Ans.productions = _Prod; _Ans.nproductions = sizeof(_Prod) / sizeof(_Prod[0]); } else (void)0
 
-#include <fstream>
-
 int main() {
 	LanguageParameter lp;
 
-	SetLanguage(lp, grammar8);
+	SetLanguage(lp, grammar);
 	Language lang(&lp);
 
 	Debug::Log(lang.ToString());
-
-	std::ofstream ofs("debug.txt");
-	ofs << lang.ToString() << std::endl;
 
 	SyntaxTree* tree = nullptr;
 	lang.Parse(&tree, "test.el");
 
 	if (tree != nullptr) {
+		Debug::Log("\n" + Utility::Heading(" SyntaxTree ", 48));
 		Debug::Log(tree->ToString());
-		ofs << tree->ToString();
 	}
 	
 	return 0;

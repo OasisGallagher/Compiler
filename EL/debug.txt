@@ -1,20 +1,75 @@
-=================== Grammars ===================
-$exp                  number $exp_2
-$exp_2                + number $exp_2|epsilon
+================ LL(1)Grammars =================
+$exp                  $term $exp_2
+$exp_2                $addop $term $exp_2|epsilon
+$addop                +|-
+$term                 $factor $term_2
+$term_2               $mulop $factor $term_2|epsilon
+$mulop                *
+$factor               ( $exp )|number
 
 ================ BuildinSymbols ================
 epsilon identifier number string
 
 ==================== First =====================
-$exp                  {number}
-$exp_2                {epsilon +}
+$exp                  {number (}
+$mulop                {*}
+$exp_2                {epsilon - +}
+$factor               {number (}
+$term                 {number (}
+$term_2               {epsilon *}
+$addop                {- +}
 
 ==================== Follow ====================
-$exp                  {zero}
-$exp_2                {zero}
+$exp                  {zero )}
+$mulop                {number (}
+$exp_2                {zero )}
+$factor               {zero - * ) +}
+$term                 {zero - ) +}
+$term_2               {zero - ) +}
+$addop                {number (}
 
 ================= ParsingTable =================
-[$exp, number]              $exp : number $exp_2
+[$exp, number]              $exp : $term $exp_2
+[$exp, (]                   $exp : $term $exp_2
+[$mulop, *]                 $mulop : *
 [$exp_2, zero]              $exp_2 : epsilon
 [$exp_2, epsilon]           $exp_2 : epsilon
-[$exp_2, +]                 $exp_2 : + number $exp_2
+[$exp_2, -]                 $exp_2 : $addop $term $exp_2
+[$exp_2, )]                 $exp_2 : epsilon
+[$exp_2, +]                 $exp_2 : $addop $term $exp_2
+[$factor, number]           $factor : number
+[$factor, (]                $factor : ( $exp )
+[$term, number]             $term : $factor $term_2
+[$term, (]                  $term : $factor $term_2
+[$term_2, zero]             $term_2 : epsilon
+[$term_2, epsilon]          $term_2 : epsilon
+[$term_2, -]                $term_2 : epsilon
+[$term_2, *]                $term_2 : $mulop $factor $term_2
+[$term_2, )]                $term_2 : epsilon
+[$term_2, +]                $term_2 : epsilon
+[$addop, -]                 $addop : -
+[$addop, +]                 $addop : +
+
+================== SyntaxTree ==================
+©À©¤©¤©¤ $exp
+©¦    ©À©¤©¤©¤ $exp_2
+©¦    ©¦    ©À©¤©¤©¤ $exp_2
+©¦    ©¦    ©¦    ©¸©¤©¤©¤ epsilon
+©¦    ©¦    ©À©¤©¤©¤ $term
+©¦    ©¦    ©¦    ©À©¤©¤©¤ $term_2
+©¦    ©¦    ©¦    ©¦    ©À©¤©¤©¤ $term_2
+©¦    ©¦    ©¦    ©¦    ©¦    ©¸©¤©¤©¤ epsilon
+©¦    ©¦    ©¦    ©¦    ©À©¤©¤©¤ $factor
+©¦    ©¦    ©¦    ©¦    ©¦    ©¸©¤©¤©¤ number
+©¦    ©¦    ©¦    ©¦    ©¸©¤©¤©¤ $mulop
+©¦    ©¦    ©¦    ©¦         ©¸©¤©¤©¤ *
+©¦    ©¦    ©¦    ©¸©¤©¤©¤ $factor
+©¦    ©¦    ©¦         ©¸©¤©¤©¤ number
+©¦    ©¦    ©¸©¤©¤©¤ $addop
+©¦    ©¦         ©¸©¤©¤©¤ -
+©¦    ©¸©¤©¤©¤ $term
+©¦         ©À©¤©¤©¤ $term_2
+©¦         ©¦    ©¸©¤©¤©¤ epsilon
+©¦         ©¸©¤©¤©¤ $factor
+©¦              ©¸©¤©¤©¤ number
+

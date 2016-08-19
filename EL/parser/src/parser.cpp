@@ -72,7 +72,7 @@ std::string Language::ToString() {
 	const int headingLength = 48;
 	const char* newline = "";
 	std::ostringstream oss;
-	oss << Utility::Heading(" Grammars ", headingLength) << "\n";
+	oss << Utility::Heading(" LL(1)Grammars ", headingLength) << "\n";
 	
 	for (GrammarContainer::iterator ite = grammars_.begin(); ite != grammars_.end(); ++ite) {
 		oss << newline;
@@ -540,61 +540,68 @@ bool Language::Parse(SyntaxTree** tree, const std::string& file) {
 bool Language::ParseFile(SyntaxTree** tree, FileScanner* fileScanner) {
 	ScannerToken token;
 	TokenPosition tokenPosition = { 0 };
-	bool hasToken = fileScanner->GetToken(&token, &tokenPosition);
+	if (!fileScanner->GetToken(&token, &tokenPosition)) {
+		Debug::LogError("failed to read token");
+		return false;
+	}
 
 	std::string error = "invalid syntax";
 	SyntaxTree* answer = new SyntaxTree();
 
-	std::stack<GrammarSymbol> s;
-	s.push(grammars_.front()->GetLeft());
+	typedef std::pair<GrammarSymbol, SyntaxNode*> StackItem;
+	std::stack<StackItem> s;
+	GrammarSymbol symbol = grammars_.front()->GetLeft();
 	SyntaxNode* root = nullptr;
+	root = answer->AddNode(root, symbol.ToString());
 
-	std::stack<SyntaxNode*> nodeStack;
-
-	for (; !s.empty() && hasToken;) {
-		GrammarSymbol symbol = s.top();
+	s.push(std::make_pair(symbol, root));
+	
+	for (; !s.empty();) {
+		StackItem& item = s.top();
+		symbol = item.first;
+		root = item.second;
 
 		if (symbol.SymbolType() == GrammarSymbolTerminal && symbol.Match(token.text)) {
 			s.pop();
-			nodeStack.pop();
-			root = nodeStack.top();
-			hasToken = fileScanner->GetToken(&token, &tokenPosition);
+
+			if (symbol != GrammarSymbol::epsilon && !fileScanner->GetToken(&token, &tokenPosition)) {
+				Debug::LogError("failed to read token");
+				return false;
+			}
+
 			continue;
 		}
 
 		if (symbol.SymbolType() == GrammarSymbolNonterminal) {
 			GrammarSymbol tokenSymbol = FindSymbol(token);
 			if (!tokenSymbol) {
-				error = std::string("unexpected token ") + token.text + "at " + tokenPosition.ToString();
+				error = std::string("unexpected token ") + token.text + " at " + tokenPosition.ToString();
 				break;
 			}
 
 			ParsingTable::iterator pos = parsingTable_->find(symbol, tokenSymbol);
 			if (pos != parsingTable_->end()) {
-				root = answer->AddNode(root, symbol);
-				nodeStack.push(root);
-
 				Condinate* cond = pos->second.second;
 				s.pop();
+
 				for (Condinate::reverse_iterator rite = cond->rbegin(); rite != cond->rend(); ++rite) {
-					nodeStack.push(answer->AddNode(root, *rite));
-					s.push(*rite);
+					s.push(std::make_pair(*rite, answer->AddNode(root, rite->ToString())));
 				}
 
 				continue;
 			}
 		}
 
+		error = std::string("unexpected token ") + token.text + " at " + tokenPosition.ToString();
 		break;
 	}
-	*tree = answer;
-	if (s.empty() && !hasToken) {
-		Debug::Log("Accept");
+
+	if (s.empty() && token.tokenType == ScannerTokenEndOfFile) {
 		*tree = answer;
 		return true;
 	}
 	
-	//delete answer;
+	delete answer;
 	Debug::LogError(error);
 	return false;
 }

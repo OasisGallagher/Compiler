@@ -9,7 +9,7 @@ enum GrammarSymbolType {
 	GrammarSymbolNonterminal,
 };
 
-class _GrammarSymbol : public RefCountable {
+class GrammarSymbolBase : public RefCountable {
 public:
 	friend class GrammarSymbol;
 
@@ -21,21 +21,21 @@ public:
 	virtual bool Match(const std::string& text) const = 0;
 
 protected:
-	_GrammarSymbol(const std::string& text)
+	GrammarSymbolBase(const std::string& text)
 		: text_(text) {
 	}
 
-	~_GrammarSymbol() {
+	~GrammarSymbolBase() {
 	}
 
 protected:
 	std::string text_;
 };
 
-class TerminalSymbol : public _GrammarSymbol {
+class TerminalSymbol : public GrammarSymbolBase {
 public:
 	TerminalSymbol(const std::string& text)
-		: _GrammarSymbol(text) {
+		: GrammarSymbolBase(text) {
 	}
 
 	virtual GrammarSymbolType SymbolType() const {
@@ -47,10 +47,10 @@ public:
 	}
 };
 
-class NonterminalSymbol : public _GrammarSymbol {
+class NonterminalSymbol : public GrammarSymbolBase {
 public:
 	NonterminalSymbol(const std::string& text)
-		: _GrammarSymbol(text) {
+		: GrammarSymbolBase(text) {
 	}
 
 	virtual GrammarSymbolType SymbolType() const {
@@ -139,7 +139,7 @@ private:
 class GrammarSymbol {
 public:
 	GrammarSymbol();
-	GrammarSymbol(_GrammarSymbol* symbol);
+	GrammarSymbol(GrammarSymbolBase* symbol);
 
 	GrammarSymbol(const GrammarSymbol& other);
 
@@ -170,7 +170,7 @@ private:
 	void* operator new(size_t);
 
 private:
-	_GrammarSymbol* symbol_;
+	GrammarSymbolBase* symbol_;
 };
 
 typedef std::set<GrammarSymbol> GrammarSymbolSet;

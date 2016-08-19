@@ -11,7 +11,7 @@ GrammarSymbol::GrammarSymbol()
 	: symbol_(nullptr) {
 }
 
-GrammarSymbol::GrammarSymbol(_GrammarSymbol* symbol)
+GrammarSymbol::GrammarSymbol(GrammarSymbolBase* symbol)
 	: symbol_(symbol) {
 }
 

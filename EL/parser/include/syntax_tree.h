@@ -2,23 +2,22 @@
 #include <string>
 #include <sstream>
 #include "constants.h"
-#include "grammar_symbol.h"
 
 class SyntaxNode {
-public:
-	SyntaxNode();
+private:
+	SyntaxNode(const std::string& name);
 	~SyntaxNode();
 
-public:
 	void AddChild(SyntaxNode* child);
 	SyntaxNode* GetChild(int index);
 	int ChildCount() const;
 
-	std::string ToString() const;
+	const std::string& ToString() const;
 
 	friend class SyntaxTree;
 private:
 	int index_;
+	std::string name_;
 	SyntaxNode* children_[Constants::kMaxSyntaxNodeChildren];
 	SyntaxNode* sibling_;
 };
@@ -28,7 +27,7 @@ public:
 	SyntaxTree();
 	~SyntaxTree();
 
-	SyntaxNode* AddNode(SyntaxNode* parent, const GrammarSymbol& symbol);
+	SyntaxNode* AddNode(SyntaxNode* parent, const std::string& name);
 
 public:
 	std::string ToString() const;

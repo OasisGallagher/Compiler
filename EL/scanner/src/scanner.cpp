@@ -23,7 +23,7 @@ enum ScannerStateType {
 
 std::string TokenPosition::ToString() const {
 	std::ostringstream oss;
-	oss << lineno << ": " << linepos;
+	oss << lineno << ":" << linepos;
 	return oss.str();
 }
 
@@ -238,7 +238,7 @@ ScannerTokenType LineScanner::GetToken(char* token, int* pos) {
 }
 
 FileScanner::FileScanner(const char* path) 
-	: reader_(new FileReader(path)), endOfFile_(false), lineno_(0){
+	: reader_(new FileReader(path)), lineno_(0){
 	/*symbols_ = new Table < Symbol >();
 	numberLiterals_ = new Table < NumberLiteral >();
 	stringLiterals_ = new Table < StringLiteral >();*/
@@ -254,17 +254,12 @@ FileScanner::~FileScanner() {
 }
 
 bool FileScanner::GetToken(ScannerToken* token, TokenPosition* pos) {
-	if (endOfFile_) {
-		return false;
-	}
-
 	char buffer[Constants::kMaxTokenCharacters] = { 0 };
 	ScannerTokenType tokenType = lineScanner_.GetToken(buffer, &pos->linepos);
 
 	char line[Constants::kMaxLineCharacters];
 	for (; tokenType == ScannerTokenEndOfFile; ) {
 		if (!reader_->ReadLine(line, Constants::kMaxLineCharacters)) {
-			endOfFile_ = true;
 			tokenType = ScannerTokenEndOfFile;
 			break;
 		}

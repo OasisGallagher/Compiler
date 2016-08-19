@@ -78,7 +78,6 @@ private:
 
 private:
 	int lineno_;
-	bool endOfFile_;
 	FileReader* reader_;
 	LineScanner lineScanner_;
 };

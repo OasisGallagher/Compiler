@@ -1,11 +1,13 @@
 #include "debug.h"
 #include "syntax_tree.h"
 
-SyntaxNode::SyntaxNode()
+SyntaxNode::SyntaxNode(const std::string& name)
 	: sibling_(nullptr), index_(0) {
 	for (int i = 0; i < Constants::kMaxSyntaxNodeChildren; ++i) {
 		children_[i] = nullptr;
 	}
+
+	name_ = name;
 }
 
 SyntaxNode::~SyntaxNode() {
@@ -30,8 +32,8 @@ int SyntaxNode::ChildCount() const {
 	return index_;
 }
 
-std::string SyntaxNode::ToString() const {
-	return "x";
+const std::string& SyntaxNode::ToString() const {
+	return name_;
 }
 
 SyntaxTree::SyntaxTree() {
@@ -42,13 +44,13 @@ SyntaxTree::~SyntaxTree() {
 
 }
 
-SyntaxNode* SyntaxTree::AddNode(SyntaxNode* parent, const GrammarSymbol& symbol) {
+SyntaxNode* SyntaxTree::AddNode(SyntaxNode* parent, const std::string& name) {
 	if (parent == nullptr) {
 		Assert(root_ == nullptr, "root already exists");
-		return root_ = new SyntaxNode();
+		return root_ = new SyntaxNode(name);
 	}
 
-	SyntaxNode* node = new SyntaxNode();
+	SyntaxNode* node = new SyntaxNode(name);
 	parent->AddChild(node);
 	return node;
 }
@@ -93,8 +95,8 @@ std::string SyntaxTree::ToString() const {
 }
 
 void SyntaxTree::SyntaxNodeToString(std::ostringstream& oss, const std::string& prefix, SyntaxNode* current, bool tail) const {
-	oss << prefix + (tail ? "©¸©¤©¤" : "©À©¤©¤") + current->ToString() + "\n";
+	oss << prefix << (tail ? "©¸©¤©¤©¤ " : "©À©¤©¤©¤ ") << current->ToString() << "\n";
 	for (int i = 0; i < current->ChildCount(); ++i) {
-		SyntaxNodeToString(oss, prefix + (tail ? "    " : "©¦   "), current->GetChild(i), i == current->ChildCount() - 1);
+		SyntaxNodeToString(oss, prefix + (tail ? "     " : "©¦    "), current->GetChild(i), i == current->ChildCount() - 1);
 	}
 }
