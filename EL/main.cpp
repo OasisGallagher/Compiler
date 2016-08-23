@@ -1,8 +1,7 @@
-#include "scanner.h"
-#include "parser.h"
 #include "syntax_tree.h"
 #include "debug.h"
 #include "utilities.h"
+#include "language.h"
 
 const char* grammar[] = {
 	"$exp : $exp $addop $term | $term",
@@ -46,7 +45,7 @@ const char* grammar8[] = {
 const char* grammar9[] = {
 	"$E : $E + $T | $T",
 	"$T : $T * $F | $F",
-	"$F : ($E) | i",
+	"$F : ($E) | number",
 };
 
 #define SetLanguage(_Ans, _Prod) if (true) { _Ans.productions = _Prod; _Ans.nproductions = sizeof(_Prod) / sizeof(_Prod[0]); } else (void)0

@@ -60,7 +60,7 @@ SyntaxNode* SyntaxTree::AddNode(SyntaxNode* parent, const std::string& name) {
 std::string SyntaxTree::ToString() const {
 	std::ostringstream oss;
 	if (root_ != nullptr) {
-		SyntaxNodeToString(oss, "", root_, false);
+		SyntaxNodeToString(oss, "", root_);
 	}
 
 	return oss.str();
@@ -88,13 +88,12 @@ void SyntaxTree::PreorderTreeWalk(TreeWalkCallback callback) {
 
 		(this->*callback)(cur);
 	}
-
-	root_ = nullptr;
 }
 
-void SyntaxTree::SyntaxNodeToString(std::ostringstream& oss, const std::string& prefix, SyntaxNode* current, bool tail) const {
+void SyntaxTree::SyntaxNodeToString(std::ostringstream& oss, const std::string& prefix, SyntaxNode* current) const {
+	bool tail = (current->sibling_ == nullptr);
 	oss << prefix << (tail ? "└─── " : "├─── ") << current->ToString() << "\n";
 	for (int i = 0; i < current->ChildCount(); ++i) {
-		SyntaxNodeToString(oss, prefix + (tail ? "     " : "│    "), current->GetChild(i), i == current->ChildCount() - 1);
+		SyntaxNodeToString(oss, prefix + (tail ? "     " : "│    "), current->GetChild(i));
 	}
 }

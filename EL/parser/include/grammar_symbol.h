@@ -125,26 +125,12 @@ public:
 	}
 };
 
-class GrammarSymbolContainer {
-private:
-	typedef std::map<std::string, GrammarSymbol> Container;
-
-public: 
-	typedef Container::const_iterator const_iterator;
-
+class GrammarSymbolContainer : public std::map<std::string, GrammarSymbol> {
 public:
 	GrammarSymbolContainer();
 
 public:
 	GrammarSymbol AddSymbol(const std::string& text, bool terminal);
-
-	
-	GrammarSymbol& operator[](const std::string& text);
-	const_iterator begin() const;
-	const_iterator end() const;
-	const_iterator find(const std::string& text) const;
-private:
-	Container cont_;
 };
 
 class GrammarSymbol {
@@ -187,28 +173,7 @@ private:
 
 typedef std::set<GrammarSymbol> GrammarSymbolSet;
 
-class GrammarSymbolSetTable {
-private:
-	typedef std::map<GrammarSymbol, GrammarSymbolSet> Container;
-
+class GrammarSymbolSetTable : public std::map<GrammarSymbol, GrammarSymbolSet> {
 public:
-	GrammarSymbolSetTable();
-
-public:
-	typedef Container::iterator iterator;
-	typedef Container::const_iterator const_iterator;
-
-public:
-	const_iterator find(const GrammarSymbol& key) const {
-		return cont_.find(key);
-	}
-
-	const_iterator begin() const { return cont_.begin(); }
-	const_iterator end() const { return cont_.end(); }
-
-	GrammarSymbolSet& operator[] (const GrammarSymbol& key);
 	std::string ToString() const;
-	
-private:
-	Container cont_;
 };

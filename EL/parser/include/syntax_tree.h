@@ -37,7 +37,7 @@ private:
 	SyntaxTree(const SyntaxTree&);
 	SyntaxTree& operator = (const SyntaxTree&);
 
-	void SyntaxNodeToString(std::ostringstream& oss, const std::string& prefix, SyntaxNode* current, bool tail) const;
+	void SyntaxNodeToString(std::ostringstream& oss, const std::string& prefix, SyntaxNode* current) const;
 	void DeleteTreeNode(SyntaxNode* node);
 
 	typedef void (SyntaxTree::*TreeWalkCallback)(SyntaxNode* node);

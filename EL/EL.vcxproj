@@ -19,6 +19,8 @@
     <ClInclude Include="global\include\utilities.h" />
     <ClInclude Include="parser\include\grammar.h" />
     <ClInclude Include="parser\include\grammar_symbol.h" />
+    <ClInclude Include="parser\include\language.h" />
+    <ClInclude Include="parser\include\ll_parser.h" />
     <ClInclude Include="parser\include\parser.h" />
     <ClInclude Include="parser\include\parsing_table.h" />
     <ClInclude Include="parser\include\syntax_tree.h" />
@@ -31,6 +33,8 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="parser\src\grammar.cpp" />
     <ClCompile Include="parser\src\grammar_symbol.cpp" />
+    <ClCompile Include="parser\src\language.cpp" />
+    <ClCompile Include="parser\src\ll_parser.cpp" />
     <ClCompile Include="parser\src\parser.cpp" />
     <ClCompile Include="parser\src\parsing_table.cpp" />
     <ClCompile Include="parser\src\syntax_tree.cpp" />

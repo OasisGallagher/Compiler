@@ -76,34 +76,18 @@ std::string GrammarSymbol::ToString() const {
 }
 
 GrammarSymbolContainer::GrammarSymbolContainer() {
-	cont_[GrammarSymbol::zero.ToString()] = GrammarSymbol::zero;
-	cont_[GrammarSymbol::number.ToString()] = GrammarSymbol::number;
-	cont_[GrammarSymbol::string.ToString()] = GrammarSymbol::string;
-	cont_[GrammarSymbol::epsilon.ToString()] = GrammarSymbol::epsilon;
-	cont_[GrammarSymbol::identifier.ToString()] = GrammarSymbol::identifier;
-}
-
-GrammarSymbol& GrammarSymbolContainer::operator[] (const std::string& text) {
-	return cont_[text];
-}
-
-GrammarSymbolContainer::const_iterator GrammarSymbolContainer::begin() const {
-	return cont_.begin();
-}
-
-GrammarSymbolContainer::const_iterator GrammarSymbolContainer::end() const {
-	return cont_.end();
-}
-
-GrammarSymbolContainer::const_iterator GrammarSymbolContainer::find(const std::string& text) const {
-	return cont_.find(text);
+	insert(std::make_pair(GrammarSymbol::zero.ToString(), GrammarSymbol::zero));
+	insert(std::make_pair(GrammarSymbol::number.ToString(), GrammarSymbol::number));
+	insert(std::make_pair(GrammarSymbol::string.ToString(), GrammarSymbol::string));
+	insert(std::make_pair(GrammarSymbol::epsilon.ToString(), GrammarSymbol::epsilon));
+	insert(std::make_pair(GrammarSymbol::identifier.ToString(), GrammarSymbol::identifier));
 }
 
 GrammarSymbol GrammarSymbolContainer::AddSymbol(const std::string& text, bool terminal) {
-	Container::iterator ite = cont_.find(text);
+	iterator ite = find(text);
 	GrammarSymbol ans;
 
-	if (ite == cont_.end()) {
+	if (ite == end()) {
 		if (terminal) {
 			ans = new TerminalSymbol(text);
 		}
@@ -111,7 +95,7 @@ GrammarSymbol GrammarSymbolContainer::AddSymbol(const std::string& text, bool te
 			ans = new NonterminalSymbol(text);
 		}
 
-		cont_[text] = ans;
+		insert(std::make_pair(text, ans));
 	}
 	else {
 		ans = ite->second;
@@ -120,16 +104,11 @@ GrammarSymbol GrammarSymbolContainer::AddSymbol(const std::string& text, bool te
 	return ans;
 }
 
-GrammarSymbolSetTable::GrammarSymbolSetTable() {
-// 	cont_[GrammarSymbol::null].insert(GrammarSymbol::null);
-// 	cont_[GrammarSymbol::epsilon].insert(GrammarSymbol::epsilon);
-}
-
 std::string GrammarSymbolSetTable::ToString() const {
 	std::ostringstream oss;
 
 	const char* newline = "";
-	for (Container::const_iterator ite = cont_.begin(); ite != cont_.end(); ++ite) {
+	for (const_iterator ite = begin(); ite != end(); ++ite) {
 		if (ite->first.SymbolType() == GrammarSymbolTerminal) {
 			continue;
 		}
@@ -154,19 +133,4 @@ std::string GrammarSymbolSetTable::ToString() const {
 	}
 
 	return oss.str();
-}
-
-GrammarSymbolSet& GrammarSymbolSetTable::operator [](const GrammarSymbol& key) {
-	Container::iterator ite = cont_.find(key);
-	if (ite != cont_.end()) {
-		return ite->second;
-	}
-
-	GrammarSymbolSet& ans = cont_[key];
-
-	if (key.SymbolType() == GrammarSymbolTerminal) {
-		ans.insert(key);
-	}
-
-	return ans;
 }

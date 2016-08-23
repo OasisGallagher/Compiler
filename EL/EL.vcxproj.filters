@@ -69,6 +69,12 @@
     <ClInclude Include="global\include\static_vector.h">
       <Filter>global\include</Filter>
     </ClInclude>
+    <ClInclude Include="parser\include\ll_parser.h">
+      <Filter>parser\include</Filter>
+    </ClInclude>
+    <ClInclude Include="parser\include\language.h">
+      <Filter>parser\include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
@@ -94,6 +100,12 @@
       <Filter>global\src</Filter>
     </ClCompile>
     <ClCompile Include="parser\src\syntax_tree.cpp">
+      <Filter>parser\src</Filter>
+    </ClCompile>
+    <ClCompile Include="parser\src\ll_parser.cpp">
+      <Filter>parser\src</Filter>
+    </ClCompile>
+    <ClCompile Include="parser\src\language.cpp">
       <Filter>parser\src</Filter>
     </ClCompile>
   </ItemGroup>
