@@ -4,7 +4,7 @@
 
 SyntaxNode::SyntaxNode(const std::string& name)
 	: sibling_(nullptr), index_(0) {
-	for (int i = 0; i < Constants::kMaxSyntaxNodeChildren; ++i) {
+	for (int i = 0; i < MAX_SYNTAX_NODE_CHILDREN; ++i) {
 		children_[i] = nullptr;
 	}
 
@@ -16,7 +16,7 @@ SyntaxNode::~SyntaxNode() {
 }
 
 void SyntaxNode::AddChild(SyntaxNode* child) {
-	Assert(index_ < Constants::kMaxSyntaxNodeChildren, "out of memory");
+	Assert(index_ < MAX_SYNTAX_NODE_CHILDREN, "out of memory");
 	if (index_ > 0) {
 		children_[index_ - 1]->sibling_ = child;
 	}
@@ -25,7 +25,7 @@ void SyntaxNode::AddChild(SyntaxNode* child) {
 }
 
 SyntaxNode* SyntaxNode::GetChild(int index) {
-	Assert(index >= 0 && index < Constants::kMaxSyntaxNodeChildren, "index out of range");
+	Assert(index >= 0 && index < MAX_SYNTAX_NODE_CHILDREN, "index out of range");
 	return children_[index];
 }
 

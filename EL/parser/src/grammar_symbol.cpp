@@ -1,8 +1,9 @@
 #include <sstream>
 #include "grammar_symbol.h"
 
+int GrammarSymbolBase::ninstance = 0;
+
 GrammarSymbol GrammarSymbol::zero = new Zero();
-GrammarSymbol GrammarSymbol::synch = new Synch();
 GrammarSymbol GrammarSymbol::number = new Number();
 GrammarSymbol GrammarSymbol::string = new String();
 GrammarSymbol GrammarSymbol::epsilon = new Epsilon();
@@ -75,33 +76,16 @@ std::string GrammarSymbol::ToString() const {
 	return symbol_->ToString();
 }
 
-GrammarSymbolContainer::GrammarSymbolContainer() {
-	insert(std::make_pair(GrammarSymbol::zero.ToString(), GrammarSymbol::zero));
-	insert(std::make_pair(GrammarSymbol::number.ToString(), GrammarSymbol::number));
-	insert(std::make_pair(GrammarSymbol::string.ToString(), GrammarSymbol::string));
-	insert(std::make_pair(GrammarSymbol::epsilon.ToString(), GrammarSymbol::epsilon));
-	insert(std::make_pair(GrammarSymbol::identifier.ToString(), GrammarSymbol::identifier));
-}
-
-GrammarSymbol GrammarSymbolContainer::AddSymbol(const std::string& text, bool terminal) {
-	iterator ite = find(text);
-	GrammarSymbol ans;
-
-	if (ite == end()) {
-		if (terminal) {
-			ans = new TerminalSymbol(text);
-		}
-		else {
-			ans = new NonterminalSymbol(text);
-		}
-
-		insert(std::make_pair(text, ans));
-	}
-	else {
-		ans = ite->second;
+std::string GrammarSymbolContainer::ToString() const {
+	std::ostringstream oss;
+	const char* seperator = "";
+	for (const_iterator ite = begin(); ite != end(); ++ite) {
+		oss << seperator;
+		seperator = " ";
+		oss << ite->second.ToString();
 	}
 
-	return ans;
+	return oss.str();
 }
 
 std::string GrammarSymbolSetTable::ToString() const {
@@ -133,4 +117,11 @@ std::string GrammarSymbolSetTable::ToString() const {
 	}
 
 	return oss.str();
+}
+GrammarSymbol SymbolFactory::Create(const std::string& text) {
+	if (Utility::IsTerminal(text)) {
+		return new TerminalSymbol(text);
+	}
+
+	return new NonterminalSymbol(text);
 }

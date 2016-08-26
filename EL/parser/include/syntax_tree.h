@@ -19,7 +19,7 @@ private:
 private:
 	int index_;
 	std::string name_;
-	SyntaxNode* children_[Constants::kMaxSyntaxNodeChildren];
+	SyntaxNode* children_[MAX_SYNTAX_NODE_CHILDREN];
 	SyntaxNode* sibling_;
 };
 

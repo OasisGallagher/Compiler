@@ -3,12 +3,12 @@
 #include <vector>
 #include "grammar_symbol.h"
 
-class Condinate : public std::vector < GrammarSymbol > {
+class Condinate : public std::vector<GrammarSymbol> {
 public:
 	std::string ToString() const;
 };
 
-class CondinateContainer :public std::vector < Condinate* > {
+class CondinateContainer :public std::vector<Condinate*> {
 public:
 	std::string ToString() const;
 };

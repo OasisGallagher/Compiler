@@ -31,8 +31,8 @@ std::string TokenPosition::ToString() const {
 
 LineScanner::LineScanner() 
 	: current_(nullptr), dest_(nullptr) {
-	lineBuffer_ = new char[Constants::kMaxLineCharacters]();
-	tokenBuffer_ = new char[Constants::kMaxTokenCharacters]();
+	lineBuffer_ = new char[MAX_LINE_CHARACTERS]();
+	tokenBuffer_ = new char[MAX_TOKEN_CHARACTERS]();
 }
 
 LineScanner::~LineScanner() {
@@ -42,7 +42,7 @@ LineScanner::~LineScanner() {
 
 void LineScanner::SetText(const char* text) {
 	size_t length = strlen(text);
-	Assert(length > 0 && length < Constants::kMaxLineCharacters, "invalid line text");
+	Assert(length > 0 && length < MAX_LINE_CHARACTERS, "invalid line text");
 
 	std::copy(text, text + length, lineBuffer_);
 	lineBuffer_[length] = 0;
@@ -222,7 +222,7 @@ ScannerTokenType LineScanner::GetToken(char* token, int* pos) {
 		}
 
 		if (savech) {
-			Assert(index < Constants::kMaxTokenCharacters, "invalid token. buffer too small.");
+			Assert(index < MAX_TOKEN_CHARACTERS, "invalid token. buffer too small.");
 			tokenBuffer_[index++] = ch;
 		}
 	}
@@ -254,12 +254,12 @@ FileScanner::~FileScanner() {
 }
 
 bool FileScanner::GetToken(ScannerToken* token, TokenPosition* pos) {
-	char buffer[Constants::kMaxTokenCharacters] = { 0 };
+	char buffer[MAX_TOKEN_CHARACTERS] = { 0 };
 	ScannerTokenType tokenType = lineScanner_.GetToken(buffer, &pos->linepos);
 
-	char line[Constants::kMaxLineCharacters];
+	char line[MAX_LINE_CHARACTERS];
 	for (; tokenType == ScannerTokenEndOfFile; ) {
-		if (!reader_->ReadLine(line, Constants::kMaxLineCharacters)) {
+		if (!reader_->ReadLine(line, MAX_LINE_CHARACTERS)) {
 			tokenType = ScannerTokenEndOfFile;
 			break;
 		}

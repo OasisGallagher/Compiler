@@ -5,8 +5,11 @@ $T                    $F $T_2
 $T_2                  * $F $T_2|epsilon
 $F                    ( $E )|number
 
-================ BuildinSymbols ================
-epsilon identifier number string
+=============== TerminalSymbols ================
+( ) * + epsilon identifier number string
+
+============== NonterminalSymbols ==============
+$E $E_2 $F $T $T_2
 
 ==================== First =====================
 $E                    {number (}

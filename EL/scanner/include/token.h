@@ -132,5 +132,5 @@ enum ScannerTokenType {
 
 struct ScannerToken {
 	ScannerTokenType tokenType;
-	char text[Constants::kMaxTokenCharacters];
+	char text[MAX_TOKEN_CHARACTERS];
 };

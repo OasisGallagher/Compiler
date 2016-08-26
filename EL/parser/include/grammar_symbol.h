@@ -12,6 +12,7 @@ enum GrammarSymbolType {
 class GrammarSymbolBase : public RefCountable {
 public:
 	friend class GrammarSymbol;
+	friend class SymbolFactory;
 
 	const std::string& ToString() {
 		return text_;
@@ -23,12 +24,15 @@ public:
 protected:
 	GrammarSymbolBase(const std::string& text)
 		: text_(text) {
+		printf("symbol %d\n", ++ninstance);
 	}
 
 	~GrammarSymbolBase() {
+		printf("symbol %d\n", --ninstance);
 	}
 
 protected:
+	static int ninstance;
 	std::string text_;
 };
 
@@ -68,6 +72,11 @@ public:
 	Zero()
 		: TerminalSymbol("zero") {
 	}
+
+	virtual bool Match(const std::string& text) const {
+		Assert(false, "unable to compare zero with text");
+		return false;
+	}
 };
 
 class Epsilon : public TerminalSymbol {
@@ -103,18 +112,7 @@ public:
 	}
 };
 
-class Synch : public TerminalSymbol {
-public:
-	Synch()
-		: TerminalSymbol("synch") {
-	}
-
-	virtual bool Match(const std::string& text) const {
-		return true;
-	}
-};
-
-class String : public TerminalSymbol{
+class String : public TerminalSymbol {
 public:
 	String()
 		: TerminalSymbol("string") {
@@ -125,27 +123,28 @@ public:
 	}
 };
 
+class SymbolFactory {
+public:
+	static GrammarSymbol Create(const std::string& text);
+};
+
 class GrammarSymbolContainer : public std::map<std::string, GrammarSymbol> {
 public:
-	GrammarSymbolContainer();
-
-public:
-	GrammarSymbol AddSymbol(const std::string& text, bool terminal);
+	std::string ToString() const;
 };
 
 class GrammarSymbol {
 public:
 	GrammarSymbol();
 	GrammarSymbol(GrammarSymbolBase* symbol);
-
 	GrammarSymbol(const GrammarSymbol& other);
-
-	GrammarSymbol& operator = (const GrammarSymbol& other);
-
 	~GrammarSymbol();
 
 public:
 	operator bool() const;
+	GrammarSymbol& operator = (const GrammarSymbol& other);
+
+public:
 	bool operator == (const GrammarSymbol& other) const;
 	bool operator != (const GrammarSymbol& other) const;
 	bool operator < (const GrammarSymbol& other) const;
@@ -158,7 +157,6 @@ public:
 
 public:
 	static GrammarSymbol zero;
-	static GrammarSymbol synch;
 	static GrammarSymbol number;
 	static GrammarSymbol string;
 	static GrammarSymbol epsilon;
@@ -166,6 +164,7 @@ public:
 
 private:
 	void* operator new(size_t);
+	static GrammarSymbol synch;
 
 private:
 	GrammarSymbolBase* symbol_;

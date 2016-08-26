@@ -20,13 +20,16 @@ public:
 	virtual std::string ToString() const;
 
 private:
-	bool SetGrammars(const char** productions, int count);
+	void InitializeTerminalSymbolContainer();
 
-	bool IsTerminal(const char* token);
+	GrammarSymbol CreateSymbol(const std::string& text);
+
+	bool SetGrammars(const char** productions, int count);
 
 	bool ParseProductions(LineScanner* lineScanner);
 	bool ParseGrammars();
 
+	// 移除简单, 直观的左递归.
 	void RemoveLeftRecursion();
 	bool RemoveImmidiateLeftRecursion(Grammar* g, GrammarContainer* newGrammars);
 
@@ -55,8 +58,8 @@ private:
 	GrammarContainer grammars_;
 	ParsingTable* parsingTable_;
 
-	BuildinSymbolContainer buildinSymbols_;
-	GrammarSymbolContainer symbolContainer_;
+	GrammarSymbolContainer terminalSymbols_;
+	GrammarSymbolContainer nonterminalSymbols_;
 
 	// Vn的first集合.
 	GrammarSymbolSetTable firstSetContainer_;

@@ -1,3 +1,5 @@
+#include <conio.h>
+#include <crtdbg.h>
 #include "syntax_tree.h"
 #include "debug.h"
 #include "utilities.h"
@@ -50,20 +52,31 @@ const char* grammar9[] = {
 
 #define SetLanguage(_Ans, _Prod) if (true) { _Ans.productions = _Prod; _Ans.nproductions = sizeof(_Prod) / sizeof(_Prod[0]); } else (void)0
 
+static void EnableMemoryLeakCheck() {
+	_CrtSetDbgFlag(_CrtSetDbgFlag(_CRTDBG_REPORT_FLAG) | _CRTDBG_LEAK_CHECK_DF);
+}
+
+#ifdef _DEBUG
+#define new new(_NORMAL_BLOCK, __FILE__, __LINE__)
+#endif
+
 int main() {
+	EnableMemoryLeakCheck();
 	LanguageParameter lp;
 
 	SetLanguage(lp, grammar9);
-	Language lang(&lp);
+	Language* lang = new Language(&lp);
 
-	Debug::Log(lang.ToString());
+	Debug::Log(lang->ToString());
 
 	SyntaxTree tree;
 
-	if (lang.Parse(&tree, "test.el")) {
+	if (lang->Parse(&tree, "test.el")) {
 		Debug::Log("\n" + Utility::Heading(" SyntaxTree ", 48));
 		Debug::Log(tree.ToString());
 	}
-	
+
+	delete lang;
+
 	return 0;
 }

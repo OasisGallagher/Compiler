@@ -9,6 +9,8 @@ public:
 	static int Loword(int dword);
 	static int Highword(int dword);
 
+	static bool IsTerminal(const std::string& token);
+
 	static std::string Heading(const std::string& text, int length);
 private:
 	Utility();
@@ -24,4 +26,8 @@ inline int Utility::Highword(int dword) {
 
 inline int Utility::MakeDword(int low, int high) {
 	return (low & 0xffff) | ((high & 0xffff) << 16);
+}
+
+inline bool Utility::IsTerminal(const std::string& token) {
+	return token.front() != '$';
 }
