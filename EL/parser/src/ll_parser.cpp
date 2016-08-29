@@ -4,66 +4,46 @@
 #include <functional>
 
 #include "token.h"
+#include "matrix.h"
 #include "scanner.h"
 #include "ll_parser.h"
 #include "syntax_tree.h"
-#include "parsing_table.h"
 
-LLParser::LLParser(const char** productions, int nproductions) {
-	InitializeTerminalSymbolContainer();
+class ParsingTable : public matrix<GrammarSymbol, GrammarSymbol, std::pair<GrammarSymbol, Condinate*>> {
+public:
+	std::string ToString() const;
+};
 
+std::string ParsingTable::ToString() const {
+	std::ostringstream oss;
+	const char* seperator = "";
+	for (const_iterator ite = cont_.begin(); ite != cont_.end(); ++ite) {
+		const key_type& key = ite->first;
+		const value_type& value = ite->second;
+
+		oss << seperator;
+		seperator = "\n";
+
+		oss.width(28);
+		oss.setf(std::ios::left);
+		oss << "[" + key.first.ToString() + ", " + key.second.ToString() + "]";
+		oss << value.first.ToString();
+
+		if (value.second != nullptr) {
+			oss << " : ";
+			oss << value.second->ToString();
+		}
+	}
+
+	return oss.str();
+}
+
+LLParser::LLParser() {
 	parsingTable_ = new ParsingTable();
-	SetGrammars(productions, nproductions);
 }
 
 LLParser::~LLParser() {
 	delete parsingTable_;
-	for (GrammarContainer::iterator ite = grammars_.begin();
-		ite != grammars_.end(); ++ite) {
-		delete *ite;
-	}
-}
-
-void LLParser::InitializeTerminalSymbolContainer() {
-	terminalSymbols_.insert(std::make_pair(GrammarSymbol::number.ToString(), GrammarSymbol::number));
-	terminalSymbols_.insert(std::make_pair(GrammarSymbol::string.ToString(), GrammarSymbol::string));
-	terminalSymbols_.insert(std::make_pair(GrammarSymbol::epsilon.ToString(), GrammarSymbol::epsilon));
-	terminalSymbols_.insert(std::make_pair(GrammarSymbol::identifier.ToString(), GrammarSymbol::identifier));
-}
-
-GrammarSymbol LLParser::CreateSymbol(const std::string& text) {
-	GrammarSymbolContainer* target = nullptr;
-	if (Utility::IsTerminal(text)) {
-		target = &terminalSymbols_;
-	}
-	else {
-		target = &nonterminalSymbols_;
-	}
-
-	GrammarSymbolContainer::iterator ite = target->find(text);
-	GrammarSymbol ans;
-
-	if (ite == target->end()) {
-		ans = SymbolFactory::Create(text);
-		target->insert(std::make_pair(text, ans));
-	}
-	else {
-		ans = ite->second;
-	}
-
-	return ans;
-}
-
-bool LLParser::SetGrammars(const char** productions, int count) {
-	LineScanner lineScanner;
-	for (int i = 0; i < count; ++i) {
-		lineScanner.SetText(productions[i]);
-		if (!ParseProductions(&lineScanner)) {
-			return false;
-		}
-	}
-
-	return ParseGrammars();
 }
 
 bool LLParser::ParseGrammars() {
@@ -76,41 +56,30 @@ bool LLParser::ParseGrammars() {
 	return CreateParsingTable();
 }
 
+void LLParser::Clear() {
+	Parser::Clear();
+	parsingTable_->clear();
+	firstSetContainer_.clear();
+	followSetContainer_.clear();
+}
+
 std::string LLParser::ToString() const {
-	const int headingLength = 48;
-	const char* newline = "";
 	std::ostringstream oss;
-	oss << Utility::Heading(" LL(1)Grammars ", headingLength) << "\n";
-
-	for (GrammarContainer::const_iterator ite = grammars_.begin(); ite != grammars_.end(); ++ite) {
-		oss << newline;
-		oss << (*ite)->ToString();
-		newline = "\n";
-	}
+	oss << Parser::ToString();
 
 	oss << "\n\n";
 
-	oss << Utility::Heading(" TerminalSymbols ", headingLength) << "\n";
-	oss << terminalSymbols_.ToString();
-
-	oss << "\n\n";
-
-	oss << Utility::Heading(" NonterminalSymbols ", headingLength) << "\n";
-	oss << nonterminalSymbols_.ToString();
-
-	oss << "\n\n";
-
-	oss << Utility::Heading(" First ", headingLength) << "\n";
+	oss << Utility::Heading(" First ") << "\n";
 	oss << firstSetContainer_.ToString();
 
 	oss << "\n\n";
 
-	oss << Utility::Heading(" Follow ", headingLength) << "\n";
+	oss << Utility::Heading(" Follow ") << "\n";
 	oss << followSetContainer_.ToString();
 
 	oss << "\n\n";
 
-	oss << Utility::Heading(" ParsingTable ", headingLength) << "\n";
+	oss << Utility::Heading(" ParsingTable ") << "\n";
 	oss << parsingTable_->ToString();
 
 	return oss.str();
@@ -121,6 +90,7 @@ void LLParser::RemoveLeftRecursion() {
 
 	for (GrammarContainer::iterator ite = grammars_.begin(); ite != grammars_.end();) {
 		if (RemoveImmidiateLeftRecursion(*ite, &newGrammars)) {
+			delete *ite;
 			ite = grammars_.erase(ite);
 			grammars_.insert(ite, newGrammars.begin(), newGrammars.end());
 			newGrammars.clear();
@@ -297,48 +267,6 @@ bool LLParser::LeftFactoringOnGrammar(Grammar* g, GrammarContainer* newGrammars)
 	}
 
 	return false;
-}
-
-bool LLParser::ParseProductions(LineScanner* lineScanner) {
-	char token[MAX_TOKEN_CHARACTERS];
-
-	ScannerTokenType tokenType = lineScanner->GetToken(token);
-	Assert(tokenType != ScannerTokenEndOfFile, "invalid production. missing left part.");
-
-	Grammar* grammar = new Grammar(CreateSymbol(token));
-
-	Condinate cond;
-
-	lineScanner->GetToken(token);
-	Assert(strcmp(token, ":") == 0, "invalid production. missing \":\".");
-
-	for (; (tokenType = lineScanner->GetToken(token)) != ScannerTokenEndOfFile;) {
-		if (tokenType == ScannerTokenSign && strcmp(token, "|") == 0) {
-			Assert(!cond.empty(), "empty production");
-			grammar->AddCondinate(cond);
-			cond.clear();
-			continue;
-		}
-
-		cond.push_back(CreateSymbol(token));
-	}
-
-	grammar->AddCondinate(cond);
-
-	grammars_.push_back(grammar);
-
-	return true;
-}
-
-bool LLParser::MergeNonEpsilonElements(GrammarSymbolSet& dest, const GrammarSymbolSet& src) {
-	bool modified = false;
-	for (GrammarSymbolSet::const_iterator ite = src.begin(); ite != src.end(); ++ite) {
-		if (*ite != GrammarSymbol::epsilon) {
-			modified = dest.insert(*ite).second || modified;
-		}
-	}
-
-	return modified;
 }
 
 void LLParser::CreateFirstSets() {
@@ -521,50 +449,6 @@ void LLParser::GetFirstSet(GrammarSymbolSet* answer, Condinate::iterator first, 
 			}
 		}
 	}
-}
-
-Grammar* LLParser::FindGrammar(const GrammarSymbol& left) {
-	Grammar* g = nullptr;
-	for (GrammarContainer::iterator ite = grammars_.begin(); ite != grammars_.end(); ++ite) {
-		if ((*ite)->GetLeft() == left) {
-			g = *ite;
-			break;
-		}
-	}
-
-	return g;
-}
-
-GrammarSymbol LLParser::FindSymbol(const ScannerToken& token) {
-	GrammarSymbol answer;
-	if (token.tokenType == ScannerTokenEndOfFile) {
-		answer = GrammarSymbol::zero;
-	}
-	else if (token.tokenType == ScannerTokenNumber) {
-		answer = GrammarSymbol::number;
-	}
-	else if (token.tokenType == ScannerTokenString) {
-		answer = GrammarSymbol::string;
-	}
-	else {
-		if (Utility::IsTerminal(token.text)) {
-			GrammarSymbolContainer::const_iterator pos = terminalSymbols_.find(token.text);
-			if (pos != terminalSymbols_.end()) {
-				answer = pos->second;
-			}
-			else {
-				answer = GrammarSymbol::identifier;
-			}
-		}
-		else {
-			GrammarSymbolContainer::const_iterator ite = nonterminalSymbols_.find(token.text);
-			if (ite != nonterminalSymbols_.end()) {
-				answer = ite->second;
-			}
-		}
-	}
-
-	return answer;
 }
 
 bool LLParser::ParseFile(SyntaxTree* tree, FileScanner* fileScanner) {

@@ -11,7 +11,7 @@ public:
 
 	static bool IsTerminal(const std::string& token);
 
-	static std::string Heading(const std::string& text, int length);
+	static std::string Heading(const std::string& text);
 private:
 	Utility();
 };

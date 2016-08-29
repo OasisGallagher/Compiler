@@ -1,9 +1,10 @@
 #pragma once
-#include <map>
-#include "grammar_symbol.h"
+#include "grammar.h"
 
 class SyntaxTree;
 class FileScanner;
+class LineScanner;
+struct ScannerToken;
 
 class Parser {
 public:
@@ -12,5 +13,28 @@ public:
 
 public:
 	virtual bool ParseFile(SyntaxTree* tree, FileScanner* fileScanner) = 0;
-	virtual std::string ToString() const = 0;
+	virtual std::string ToString() const;
+
+public:
+	bool SetGrammars(const char** productions, int nproductions);
+
+protected:
+	virtual bool ParseGrammars() = 0;
+	virtual void Clear();
+
+protected:
+	GrammarSymbol FindSymbol(const ScannerToken& token);
+	Grammar* FindGrammar(const GrammarSymbol& left);
+	GrammarSymbol CreateSymbol(const std::string& text);
+	bool MergeNonEpsilonElements(GrammarSymbolSet& dest, const GrammarSymbolSet& src);
+
+protected:
+	GrammarContainer grammars_;
+	GrammarSymbolContainer terminalSymbols_;
+	GrammarSymbolContainer nonterminalSymbols_;
+
+private:
+	void InitializeTerminalSymbolContainer();
+	bool ParseProductions(LineScanner* lineScanner);
+	void DestroyGammars();
 };

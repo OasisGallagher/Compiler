@@ -1,5 +1,8 @@
 #pragma once
 #include <string>
+#include <crtdbg.h>
+
+#define new new(_NORMAL_BLOCK, __FILE__, __LINE__)
 
 class Debug {
 public:
@@ -9,6 +12,7 @@ public:
 
 	static void Break(const std::string& message, const char* file, int line);
 
+	static void EnableMemoryLeakCheck();
 private:
 	Debug();
 	static void SetConsoleColor(int color);

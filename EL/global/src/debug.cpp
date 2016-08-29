@@ -44,3 +44,7 @@ void Debug::Break(const std::string& message, const char* file, int line) {
 
 	abort();
 }
+
+void Debug::EnableMemoryLeakCheck() {
+	_CrtSetDbgFlag(_CrtSetDbgFlag(_CRTDBG_REPORT_FLAG) | _CRTDBG_LEAK_CHECK_DF);
+}

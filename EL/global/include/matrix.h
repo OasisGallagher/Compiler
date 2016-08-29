@@ -45,6 +45,10 @@ public:
 		return cont_.end();
 	}
 
+	void clear() {
+		cont_.clear();
+	}
+
 	std::string ToString() const;
 
 protected:

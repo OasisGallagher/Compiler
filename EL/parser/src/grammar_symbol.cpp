@@ -1,8 +1,6 @@
 #include <sstream>
 #include "grammar_symbol.h"
 
-int GrammarSymbolBase::ninstance = 0;
-
 GrammarSymbol GrammarSymbol::zero = new Zero();
 GrammarSymbol GrammarSymbol::number = new Number();
 GrammarSymbol GrammarSymbol::string = new String();

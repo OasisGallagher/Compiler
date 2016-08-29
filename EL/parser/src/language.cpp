@@ -1,9 +1,12 @@
 #include "scanner.h"
 #include "language.h"
+
 #include "ll_parser.h"
+#include "operator_precedence_parser.h"
 
 Language::Language(LanguageParameter* parameter) {
-	parser_ = new LLParser(parameter->productions, parameter->nproductions);
+	parser_ = new OperatorPrecedenceParser();
+	parser_->SetGrammars(parameter->productions, parameter->nproductions);
 }
 
 Language::~Language() {

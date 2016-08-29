@@ -24,11 +24,9 @@ public:
 protected:
 	GrammarSymbolBase(const std::string& text)
 		: text_(text) {
-		printf("symbol %d\n", ++ninstance);
 	}
 
 	~GrammarSymbolBase() {
-		printf("symbol %d\n", --ninstance);
 	}
 
 protected:
@@ -163,7 +161,12 @@ public:
 	static GrammarSymbol identifier;
 
 private:
+#pragma push_macro("new")
+#undef new
+	// GrammarSymbol不可以通过new分配.
 	void* operator new(size_t);
+#pragma pop_macro("new")
+
 	static GrammarSymbol synch;
 
 private:

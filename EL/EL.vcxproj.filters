@@ -54,9 +54,6 @@
     <ClInclude Include="parser\include\grammar_symbol.h">
       <Filter>parser\include</Filter>
     </ClInclude>
-    <ClInclude Include="parser\include\parsing_table.h">
-      <Filter>parser\include</Filter>
-    </ClInclude>
     <ClInclude Include="parser\include\syntax_tree.h">
       <Filter>parser\include</Filter>
     </ClInclude>
@@ -97,9 +94,6 @@
       <Filter>parser\src</Filter>
     </ClCompile>
     <ClCompile Include="parser\src\grammar_symbol.cpp">
-      <Filter>parser\src</Filter>
-    </ClCompile>
-    <ClCompile Include="parser\src\parsing_table.cpp">
       <Filter>parser\src</Filter>
     </ClCompile>
     <ClCompile Include="global\src\utilities.cpp">
