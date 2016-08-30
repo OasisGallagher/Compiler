@@ -19,6 +19,9 @@ protected:
 private:
 	void CreateFirstVt();
 	void CreateLastVt();
+	void CreateParsingTable();
+	void BuildParsingTable(Condinate* c);
+
 	bool IsOperatorGrammar() const;
 
 private:
@@ -26,4 +29,3 @@ private:
 	GrammarSymbolSetTable lastVtContainer_;
 	OperatorPrecedenceTable* operatorPrecedenceTable_;
 };
-

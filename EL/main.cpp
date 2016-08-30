@@ -49,6 +49,13 @@ const char* grammar9[] = {
 	"$F : ($E) | number",
 };
 
+const char* grammar10[] = {
+	"$E : $E + $T | $T",
+	"$T : $T * $F | $F",
+	"$F : $P / $F | $P",
+	"$P : ($E) | i",
+};
+
 #define SetLanguage(_Ans, _Prod) if (true) { _Ans.productions = _Prod; _Ans.nproductions = sizeof(_Prod) / sizeof(_Prod[0]); } else (void)0
 
 int main() {
@@ -56,7 +63,7 @@ int main() {
 
 	LanguageParameter lp;
 
-	SetLanguage(lp, grammar9);
+	SetLanguage(lp, grammar10);
 	Language* lang = new Language(&lp);
 
 	Debug::Log(lang->ToString());

@@ -33,6 +33,10 @@ public:
 		return cont_[std::make_pair(k1, k2)];
 	}
 
+	void insert(const first_key_type& k1, const second_key_type& k2, const value_type& val) {
+		cont_.insert(std::make_pair(std::make_pair(k1, k2), val));
+	}
+
 	iterator find(const first_key_type& k1, const second_key_type& k2) {
 		return cont_.find(std::make_pair(k1, k2));
 	}

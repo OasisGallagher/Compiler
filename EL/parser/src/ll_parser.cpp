@@ -381,7 +381,7 @@ bool LLParser::BuildParingTable(Grammar* g) {
 				Debug::LogWarning("invalid LL(1) grammar at " + slot + "\n(1) " + p1 + "\n(2) " + p2);
 			}
 			else {
-				parsingTable_->at(left, *ite2) = std::make_pair(left, c);
+				parsingTable_->insert(left, *ite2, std::make_pair(left, c));
 			}
 		}
 
@@ -396,7 +396,7 @@ bool LLParser::BuildParingTable(Grammar* g) {
 					Debug::LogWarning("invalid LL(1) grammar at " + slot + "\n(1) " + p1 + "\n(2) " + p2);
 				}
 				else {
-					parsingTable_->at(left, *ite3) = std::make_pair(left, c);
+					parsingTable_->insert(left, *ite3, std::make_pair(left, c));
 				}
 			}
 		}
