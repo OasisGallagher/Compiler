@@ -16,21 +16,21 @@ public:
 class Grammar {
 public:
 	Grammar();
-	Grammar(const GrammarSymbol& left);
+	Grammar(const GrammarSymbol& lhs);
 	~Grammar();
 
 public:
-	void SetLeft(const GrammarSymbol& symbol);
+	void SetLhs(const GrammarSymbol& symbol);
 	void AddCondinate(const Condinate& cond);
 	void SortCondinates();
 
-	const GrammarSymbol& GetLeft() const;
+	const GrammarSymbol& GetLhs() const;
 	const CondinateContainer& GetCondinates() const;
 
 	std::string ToString() const;
 
 private:
-	GrammarSymbol left_;
+	GrammarSymbol lhs_;
 	CondinateContainer condinates_;
 };
 

@@ -28,6 +28,7 @@ public:
 	SyntaxTree();
 	~SyntaxTree();
 
+public:
 	SyntaxNode* AddNode(SyntaxNode* parent, const std::string& name);
 
 public:

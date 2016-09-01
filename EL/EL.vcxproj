@@ -13,10 +13,12 @@
   <ItemGroup>
     <ClInclude Include="global\include\constants.h" />
     <ClInclude Include="global\include\debug.h" />
+    <ClInclude Include="global\include\disjoint_sets.h" />
     <ClInclude Include="global\include\file_reader.h" />
     <ClInclude Include="global\include\matrix.h" />
     <ClInclude Include="global\include\reference_countable.h" />
     <ClInclude Include="global\include\static_vector.h" />
+    <ClInclude Include="global\include\table_printer.h" />
     <ClInclude Include="global\include\utilities.h" />
     <ClInclude Include="parser\include\grammar.h" />
     <ClInclude Include="parser\include\grammar_symbol.h" />
@@ -30,6 +32,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="global\src\debug.cpp" />
+    <ClCompile Include="global\src\table_printer.cpp" />
     <ClCompile Include="global\src\utilities.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="parser\src\grammar.cpp" />

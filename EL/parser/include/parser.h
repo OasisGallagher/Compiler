@@ -24,7 +24,7 @@ protected:
 
 protected:
 	GrammarSymbol FindSymbol(const ScannerToken& token);
-	Grammar* FindGrammar(const GrammarSymbol& left);
+	Grammar* FindGrammar(const GrammarSymbol& lhs);
 	GrammarSymbol CreateSymbol(const std::string& text);
 	bool MergeNonEpsilonElements(GrammarSymbolSet& dest, const GrammarSymbolSet& src);
 

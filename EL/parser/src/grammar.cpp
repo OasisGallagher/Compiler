@@ -35,8 +35,8 @@ std::string CondinateContainer::ToString() const {
 Grammar::Grammar() {
 }
 
-Grammar::Grammar(const GrammarSymbol& left)
-	: left_(left) {
+Grammar::Grammar(const GrammarSymbol& lhs)
+	: lhs_(lhs) {
 }
 
 Grammar::~Grammar() {
@@ -46,18 +46,18 @@ Grammar::~Grammar() {
 	}
 }
 
-void Grammar::SetLeft(const GrammarSymbol& symbol) {
-	left_ = symbol;
+void Grammar::SetLhs(const GrammarSymbol& symbol) {
+	lhs_ = symbol;
 }
 
-const GrammarSymbol& Grammar::GetLeft() const {
-	return left_;
+const GrammarSymbol& Grammar::GetLhs() const {
+	return lhs_;
 }
 
 void Grammar::AddCondinate(const Condinate& cond) {
 	Assert(!cond.empty(), "empty condinate");
 	Condinate* ptr = new Condinate(cond);
-	if (ptr->front() == left_) {
+	if (ptr->front() == lhs_) {
 		// Add left recursion condinate to front.
 		// TODO: O(n).
 		condinates_.insert(condinates_.begin(), ptr);
@@ -98,7 +98,7 @@ std::string Grammar::ToString() const {
 	std::ostringstream oss;
 	oss.width(22);
 	oss.setf(std::ios::left);
-	oss << left_.ToString();
+	oss << lhs_.ToString();
 
 	oss << condinates_.ToString();
 

@@ -78,6 +78,12 @@
     <ClInclude Include="global\include\matrix.h">
       <Filter>global\include</Filter>
     </ClInclude>
+    <ClInclude Include="global\include\table_printer.h">
+      <Filter>global\include</Filter>
+    </ClInclude>
+    <ClInclude Include="global\include\disjoint_sets.h">
+      <Filter>global\include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
@@ -110,6 +116,9 @@
     </ClCompile>
     <ClCompile Include="parser\src\operator_precedence_parser.cpp">
       <Filter>parser\src</Filter>
+    </ClCompile>
+    <ClCompile Include="global\src\table_printer.cpp">
+      <Filter>global\src</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

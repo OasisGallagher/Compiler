@@ -5,10 +5,8 @@
 #include "language.h"
 
 const char* grammar[] = {
-	"$exp : $exp $addop $term | $term",
-	"$addop : + | -",
-	"$term : $term $mulop $factor | $factor",
-	"$mulop : *",
+	"$exp : $exp + $term | $exp - $term | $term",
+	"$term : $term * $factor | $factor",
 	"$factor : ($exp) | number",
 };
 
@@ -34,8 +32,7 @@ const char* grammar6[] = {
 
 const char* grammar7[] = {
 	"$statement : $if_stmt | other",
-	"$if_stmt : if($exp) $statement $else_part",
-	"$else_part : else $statement | epsilon",
+	"$if_stmt : if($exp) $statement | if($exp) $statement else $statement",
 	"$exp : 0 | 1",
 };
 
@@ -63,7 +60,7 @@ int main() {
 
 	LanguageParameter lp;
 
-	SetLanguage(lp, grammar10);
+	SetLanguage(lp, grammar7);
 	Language* lang = new Language(&lp);
 
 	Debug::Log(lang->ToString());
@@ -75,7 +72,7 @@ int main() {
 		Debug::Log(tree.ToString());
 	}
 
-	delete lang;
+ 	delete lang;
 
 	return 0;
 }

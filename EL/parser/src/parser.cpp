@@ -12,6 +12,7 @@ Parser::~Parser() {
 }
 
 void Parser::InitializeTerminalSymbolContainer() {
+	terminalSymbols_.insert(std::make_pair(GrammarSymbol::zero.ToString(), GrammarSymbol::zero));
 	terminalSymbols_.insert(std::make_pair(GrammarSymbol::number.ToString(), GrammarSymbol::number));
 	terminalSymbols_.insert(std::make_pair(GrammarSymbol::string.ToString(), GrammarSymbol::string));
 	terminalSymbols_.insert(std::make_pair(GrammarSymbol::epsilon.ToString(), GrammarSymbol::epsilon));
@@ -55,10 +56,10 @@ bool Parser::SetGrammars(const char** productions, int count) {
 	return ParseGrammars();
 }
 
-Grammar* Parser::FindGrammar(const GrammarSymbol& left) {
+Grammar* Parser::FindGrammar(const GrammarSymbol& lhs) {
 	Grammar* g = nullptr;
 	for (GrammarContainer::iterator ite = grammars_.begin(); ite != grammars_.end(); ++ite) {
-		if ((*ite)->GetLeft() == left) {
+		if ((*ite)->GetLhs() == lhs) {
 			g = *ite;
 			break;
 		}
@@ -68,7 +69,7 @@ Grammar* Parser::FindGrammar(const GrammarSymbol& left) {
 }
 
 GrammarSymbol Parser::FindSymbol(const ScannerToken& token) {
-	GrammarSymbol answer;
+	GrammarSymbol answer = GrammarSymbol::null;
 	if (token.tokenType == ScannerTokenEndOfFile) {
 		answer = GrammarSymbol::zero;
 	}
@@ -114,7 +115,7 @@ bool Parser::ParseProductions(LineScanner* lineScanner) {
 	char token[MAX_TOKEN_CHARACTERS];
 
 	ScannerTokenType tokenType = lineScanner->GetToken(token);
-	Assert(tokenType != ScannerTokenEndOfFile, "invalid production. missing left part.");
+	Assert(tokenType != ScannerTokenEndOfFile, "invalid production. missing left hand side.");
 
 	Grammar* grammar = new Grammar(CreateSymbol(token));
 
@@ -161,7 +162,7 @@ void Parser::DestroyGammars() {
 
 std::string Parser::ToString() const {
 	std::ostringstream oss;
-	oss << Utility::Heading(" LL(1)Grammars ") << "\n";
+	oss << Utility::Heading(" Grammars ") << "\n";
 	
 	const char* newline = "";
 	for (GrammarContainer::const_iterator ite = grammars_.begin(); ite != grammars_.end(); ++ite) {

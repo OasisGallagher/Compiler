@@ -154,6 +154,7 @@ public:
 	std::string ToString() const;
 
 public:
+	static GrammarSymbol null;
 	static GrammarSymbol zero;
 	static GrammarSymbol number;
 	static GrammarSymbol string;

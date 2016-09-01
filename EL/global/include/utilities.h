@@ -11,6 +11,9 @@ public:
 
 	static bool IsTerminal(const std::string& token);
 
+	template <class Iterator>
+	static std::string Concat(Iterator first, Iterator last, const char* seperator = " ");
+
 	static std::string Heading(const std::string& text);
 private:
 	Utility();
@@ -30,4 +33,18 @@ inline int Utility::MakeDword(int low, int high) {
 
 inline bool Utility::IsTerminal(const std::string& token) {
 	return token.front() != '$';
+}
+
+template <class Iterator>
+std::string Utility::Concat(Iterator first, Iterator last, const char* seperator) {
+	const char* sep = "";
+	std::ostringstream oss;
+
+	for (; first != last; ++first) {
+		oss << sep;
+		oss << first->ToString();
+		sep = seperator;
+	}
+
+	return oss.str();
 }

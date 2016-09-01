@@ -102,12 +102,12 @@ void LLParser::RemoveLeftRecursion() {
 }
 
 bool LLParser::RemoveImmidiateLeftRecursion(Grammar* g, GrammarContainer* newGrammars) {
-	const GrammarSymbol& left = g->GetLeft();
+	const GrammarSymbol& lhs = g->GetLhs();
 	const CondinateContainer& condinates = g->GetCondinates();
 
 	CondinateContainer::const_iterator pos = condinates.begin();
 	for (; pos != condinates.end(); ++pos) {
-		if ((*pos)->front() != left) {
+		if ((*pos)->front() != lhs) {
 			break;
 		}
 	}
@@ -117,16 +117,16 @@ bool LLParser::RemoveImmidiateLeftRecursion(Grammar* g, GrammarContainer* newGra
 	}
 
 	Assert(pos != condinates.end(), "invalid production");
-	Grammar* grammar = new Grammar(left);
+	Grammar* grammar = new Grammar(lhs);
 
-	GrammarSymbol left2 = CreateSymbol(left.ToString() + "_2");
+	GrammarSymbol lhs2 = CreateSymbol(lhs.ToString() + "_2");
 	
-	Grammar* grammar2 = new Grammar(left2);
+	Grammar* grammar2 = new Grammar(lhs2);
 	Condinate cond;
 
 	for (CondinateContainer::const_iterator ite = pos; ite != condinates.end(); ++ite) {
 		cond.insert(cond.end(), (*ite)->begin(), (*ite)->end());
-		cond.push_back(left2);
+		cond.push_back(lhs2);
 
 		grammar->AddCondinate(cond);
 		cond.clear();
@@ -134,7 +134,7 @@ bool LLParser::RemoveImmidiateLeftRecursion(Grammar* g, GrammarContainer* newGra
 
 	for (CondinateContainer::const_iterator ite = condinates.begin(); ite != pos; ++ite) {
 		cond.insert(cond.end(), (*ite)->begin() + 1, (*ite)->end());
-		cond.push_back(left2);
+		cond.push_back(lhs2);
 
 		grammar2->AddCondinate(cond);
 		cond.clear();
@@ -213,9 +213,9 @@ bool LLParser::LeftFactoringOnGrammar(Grammar* g, GrammarContainer* newGrammars)
 	Grammar* seed = g;
 	for (; CalculateLongestFactor(g, &range, &length);) {
 		int from = Utility::Loword(range), to = Utility::Highword(range);
-		Grammar* grammar = new Grammar(g->GetLeft());
+		Grammar* grammar = new Grammar(g->GetLhs());
 
-		GrammarSymbol left2 = CreateSymbol(g->GetLeft().ToString() + "_" + std::to_string(++nsindex));
+		GrammarSymbol lhs2 = CreateSymbol(g->GetLhs().ToString() + "_" + std::to_string(++nsindex));
 
 		Condinate cond;
 		const CondinateContainer& oldCondinates = g->GetCondinates();
@@ -224,7 +224,7 @@ bool LLParser::LeftFactoringOnGrammar(Grammar* g, GrammarContainer* newGrammars)
 		std::advance(last, length);
 		cond.insert(cond.end(), first, last);
 
-		cond.push_back(left2);
+		cond.push_back(lhs2);
 		grammar->AddCondinate(cond);
 
 		for (int i = 0; i < from; ++i) {
@@ -235,7 +235,7 @@ bool LLParser::LeftFactoringOnGrammar(Grammar* g, GrammarContainer* newGrammars)
 			grammar->AddCondinate(*oldCondinates[i]);
 		}
 
-		Grammar* grammar2 = new Grammar(left2);
+		Grammar* grammar2 = new Grammar(lhs2);
 		for (int i = from; i < to; ++i) {
 			Assert(length <= (int)oldCondinates[i]->size(), "logic error");
 			first = oldCondinates[i]->begin();
@@ -280,7 +280,7 @@ bool LLParser::CreateFirstSetsOnePass() {
 	for (GrammarContainer::iterator ite = grammars_.begin(); ite != grammars_.end(); ++ite) {
 		Grammar* g = *ite;
 		const CondinateContainer& conds = g->GetCondinates();
-		GrammarSymbolSet& firstSet = firstSetContainer_[g->GetLeft()];
+		GrammarSymbolSet& firstSet = firstSetContainer_[g->GetLhs()];
 
 		for (CondinateContainer::const_iterator ite2 = conds.begin(); ite2 != conds.end(); ++ite2) {
 			Condinate* c = *ite2;
@@ -316,7 +316,7 @@ bool LLParser::CreateFirstSetsOnePass() {
 }
 
 void LLParser::CreateFollowSets() {
-	followSetContainer_[grammars_.front()->GetLeft()].insert(GrammarSymbol::zero);
+	followSetContainer_[grammars_.front()->GetLhs()].insert(GrammarSymbol::zero);
 
 	for (; CreateFollowSetsOnePass();) {
 	}
@@ -343,7 +343,7 @@ bool LLParser::CreateFollowSetsOnePass() {
 				anySetModified = MergeNonEpsilonElements(followSetContainer_[symbol], gss) || anySetModified;
 
 				if (gss.find(GrammarSymbol::epsilon) != gss.end()) {
-					anySetModified = MergeNonEpsilonElements(followSetContainer_[symbol], followSetContainer_[g->GetLeft()]) || anySetModified;
+					anySetModified = MergeNonEpsilonElements(followSetContainer_[symbol], followSetContainer_[g->GetLhs()]) || anySetModified;
 				}
 
 				gss.clear();
@@ -365,7 +365,7 @@ bool LLParser::CreateParsingTable() {
 }
 
 bool LLParser::BuildParingTable(Grammar* g) {
-	const GrammarSymbol& left = g->GetLeft();
+	const GrammarSymbol& lhs = g->GetLhs();
 	const CondinateContainer& conds = g->GetCondinates();
 	GrammarSymbolSet firstSet;
 
@@ -373,30 +373,30 @@ bool LLParser::BuildParingTable(Grammar* g) {
 		Condinate* c = *ite;
 		GetFirstSet(&firstSet, c->begin(), c->end());
 		for (GrammarSymbolSet::iterator ite2 = firstSet.begin(); ite2 != firstSet.end(); ++ite2) {
-			ParsingTable::iterator pos = parsingTable_->find(left, *ite2);
+			ParsingTable::iterator pos = parsingTable_->find(lhs, *ite2);
 			if (pos != parsingTable_->end()) {
 				std::string slot = "[" + pos->first.first.ToString() + ", " + pos->first.second.ToString() + "]";
 				std::string p1 = pos->second.first.ToString() + " : " + pos->second.second->ToString();
-				std::string p2 = left.ToString() + " : " + c->ToString();
+				std::string p2 = lhs.ToString() + " : " + c->ToString();
 				Debug::LogWarning("invalid LL(1) grammar at " + slot + "\n(1) " + p1 + "\n(2) " + p2);
 			}
 			else {
-				parsingTable_->insert(left, *ite2, std::make_pair(left, c));
+				parsingTable_->insert(lhs, *ite2, std::make_pair(lhs, c));
 			}
 		}
 
 		if (firstSet.find(GrammarSymbol::epsilon) != firstSet.end()) {
-			const GrammarSymbolSet& follow = followSetContainer_[left];
+			const GrammarSymbolSet& follow = followSetContainer_[lhs];
 			for (GrammarSymbolSet::const_iterator ite3 = follow.begin(); ite3 != follow.end(); ++ite3) {
-				ParsingTable::iterator pos = parsingTable_->find(left, *ite3);
+				ParsingTable::iterator pos = parsingTable_->find(lhs, *ite3);
 				if (pos != parsingTable_->end()) {
 					std::string slot = "[" + pos->first.first.ToString() + ", " + pos->first.second.ToString() + "]";
 					std::string p1 = pos->second.first.ToString() + " : " + pos->second.second->ToString();
-					std::string p2 = left.ToString() + " : " + c->ToString();
+					std::string p2 = lhs.ToString() + " : " + c->ToString();
 					Debug::LogWarning("invalid LL(1) grammar at " + slot + "\n(1) " + p1 + "\n(2) " + p2);
 				}
 				else {
-					parsingTable_->insert(left, *ite3, std::make_pair(left, c));
+					parsingTable_->insert(lhs, *ite3, std::make_pair(lhs, c));
 				}
 			}
 		}
@@ -408,21 +408,22 @@ bool LLParser::BuildParingTable(Grammar* g) {
 }
 
 void LLParser::AddAsyncSymbol() {
-// 	for (GrammarContainer::iterator ite = grammars_.begin(); ite != grammars_.end(); ++ite) {
-// 		Grammar* g = *ite;
-// 		const GrammarSymbol& left = g->GetLeft();
-// 		GrammarSymbolSetTable::const_iterator pos = followSetContainer_.find(left);
-// 		if (pos == followSetContainer_.end()) {
-// 			continue;
-// 		}
-// 
-// 		const GrammarSymbolSet& follow = pos->second;
-// 		for (GrammarSymbolSet::const_iterator ite2 = follow.begin(); ite2 != follow.end(); ++ite2) {
-// 			if (parsingTable_->find(left, *ite2) == parsingTable_->end()) {
-// 				parsingTable_->at(left, *ite2) = std::make_pair(GrammarSymbol::synch, nullptr);
-// 			}
-// 		}
-// 	}
+	/*
+	for (GrammarContainer::iterator ite = grammars_.begin(); ite != grammars_.end(); ++ite) {
+		Grammar* g = *ite;
+		const GrammarSymbol& lhs = g->GetLhs();
+		GrammarSymbolSetTable::const_iterator pos = followSetContainer_.find(lhs);
+		if (pos == followSetContainer_.end()) {
+			continue;
+		}
+
+		const GrammarSymbolSet& follow = pos->second;
+		for (GrammarSymbolSet::const_iterator ite2 = follow.begin(); ite2 != follow.end(); ++ite2) {
+			if (parsingTable_->find(lhs, *ite2) == parsingTable_->end()) {
+				parsingTable_->at(lhs, *ite2) = std::make_pair(GrammarSymbol::synch, nullptr);
+			}
+		}
+	}*/
 }
 
 void LLParser::GetFirstSet(GrammarSymbolSet* answer, Condinate::iterator first, Condinate::iterator last) {
@@ -463,7 +464,7 @@ bool LLParser::ParseFile(SyntaxTree* tree, FileScanner* fileScanner) {
 
 	typedef std::pair<GrammarSymbol, SyntaxNode*> StackItem;
 	std::stack<StackItem> s;
-	GrammarSymbol symbol = grammars_.front()->GetLeft();
+	GrammarSymbol symbol = grammars_.front()->GetLhs();
 	SyntaxNode* root = nullptr;
 	root = tree->AddNode(root, symbol.ToString());
 

@@ -14,6 +14,7 @@ enum ScannerStateType {
 	ScannerStateLess,
 	ScannerStateGreater,
 
+	ScannerStateMinus,
 	ScannerStateDoubleQuotes,
 
 	ScannerStateID,
@@ -106,6 +107,9 @@ ScannerTokenType LineScanner::GetToken(char* token, int* pos) {
 			else if (ch == '>') {
 				state = ScannerStateGreater;
 			}
+			else if (ch == '-') {
+				state = ScannerStateMinus;
+			}
 			else if (ch == '"') {
 				state = ScannerStateDoubleQuotes;
 				savech = false;
@@ -163,6 +167,21 @@ ScannerTokenType LineScanner::GetToken(char* token, int* pos) {
 			else {
 				//tokenType = ScannerTokenAssign;
 				unget = true;
+			}
+			break;
+
+		case ScannerStateMinus:
+			if (isdigit(ch)) {
+				state = ScannerStateNumber;
+			}
+			else if (ch == ' ') {
+				savech = false;
+			}
+			else {
+				state = ScannerStateDone;
+				tokenType = ScannerTokenSign;
+				unget = true;
+				savech = false;
 			}
 			break;
 
