@@ -1,7 +1,10 @@
-if (1) 
-	if (0)
-		other
-	else
-		other
-
+#read x;
+if 0 < x then
+#  fact = 1;
+#repeat
+#    fact = fact * x;
+#    x = x + 1;
+#  until x = 0;
+#  write fact;
+end
 

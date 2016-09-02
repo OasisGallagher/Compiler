@@ -364,6 +364,19 @@ bool LLParser::CreateParsingTable() {
 	return true;
 }
 
+void LLParser::InsertParsingTable(const GrammarSymbol& k1, const GrammarSymbol& k2, Condinate* c) {
+	ParsingTable::iterator pos = parsingTable_->find(k1, k2);
+	if (pos != parsingTable_->end()) {
+		std::string slot = "[" + pos->first.first.ToString() + ", " + pos->first.second.ToString() + "]";
+		std::string p1 = pos->second.first.ToString() + " : " + pos->second.second->ToString();
+		std::string p2 = k1.ToString() + " : " + c->ToString();
+		Debug::LogWarning("invalid LL(1) grammar at " + slot + "\n(1) " + p1 + "\n(2) " + p2);
+	}
+	else {
+		parsingTable_->insert(k1, k2, std::make_pair(k1, c));
+	}
+}
+
 bool LLParser::BuildParingTable(Grammar* g) {
 	const GrammarSymbol& lhs = g->GetLhs();
 	const CondinateContainer& conds = g->GetCondinates();
@@ -373,31 +386,13 @@ bool LLParser::BuildParingTable(Grammar* g) {
 		Condinate* c = *ite;
 		GetFirstSet(&firstSet, c->begin(), c->end());
 		for (GrammarSymbolSet::iterator ite2 = firstSet.begin(); ite2 != firstSet.end(); ++ite2) {
-			ParsingTable::iterator pos = parsingTable_->find(lhs, *ite2);
-			if (pos != parsingTable_->end()) {
-				std::string slot = "[" + pos->first.first.ToString() + ", " + pos->first.second.ToString() + "]";
-				std::string p1 = pos->second.first.ToString() + " : " + pos->second.second->ToString();
-				std::string p2 = lhs.ToString() + " : " + c->ToString();
-				Debug::LogWarning("invalid LL(1) grammar at " + slot + "\n(1) " + p1 + "\n(2) " + p2);
-			}
-			else {
-				parsingTable_->insert(lhs, *ite2, std::make_pair(lhs, c));
-			}
+			InsertParsingTable(lhs, *ite2, c);
 		}
 
 		if (firstSet.find(GrammarSymbol::epsilon) != firstSet.end()) {
 			const GrammarSymbolSet& follow = followSetContainer_[lhs];
 			for (GrammarSymbolSet::const_iterator ite3 = follow.begin(); ite3 != follow.end(); ++ite3) {
-				ParsingTable::iterator pos = parsingTable_->find(lhs, *ite3);
-				if (pos != parsingTable_->end()) {
-					std::string slot = "[" + pos->first.first.ToString() + ", " + pos->first.second.ToString() + "]";
-					std::string p1 = pos->second.first.ToString() + " : " + pos->second.second->ToString();
-					std::string p2 = lhs.ToString() + " : " + c->ToString();
-					Debug::LogWarning("invalid LL(1) grammar at " + slot + "\n(1) " + p1 + "\n(2) " + p2);
-				}
-				else {
-					parsingTable_->insert(lhs, *ite3, std::make_pair(lhs, c));
-				}
+				InsertParsingTable(lhs, *ite3, c);
 			}
 		}
 

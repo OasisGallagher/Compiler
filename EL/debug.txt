@@ -1,0 +1,133 @@
+=================== Grammars ===================
+$stmt_seq             $stmt $stmt_seq_2
+$stmt_seq_2           ; $stmt $stmt_seq_2|epsilon
+$stmt                 $write_stmt|$read_stmt|$assign_stmt|$repeat_stmt|$if_stmt
+$if_stmt              if $exp then $stmt_seq $if_stmt_2
+$if_stmt_2            else $stmt_seq end|end
+$repeat_stmt          repeat $stmt_seq until $exp
+$assign_stmt          identifier =  $exp
+$read_stmt            read identifier
+$write_stmt           write identifier
+$exp                  $simple_exp $exp_2
+$exp_2                == $simple_exp|<  $simple_exp|epsilon
+$simple_exp           $term $simple_exp_2
+$simple_exp_2         - $term $simple_exp_2|+ $term $simple_exp_2|epsilon
+$term                 $factor $term_2
+$term_2               / $factor $term_2|* $factor $term_2|epsilon
+$factor               ( $exp )|identifier|number
+
+=============== TerminalSymbols ================
+( ) * + - / ; <  =  == else end epsilon identifier if number read repeat string then until write zero
+
+============== NonterminalSymbols ==============
+$assign_stmt $exp $exp_2 $factor $if_stmt $if_stmt_2 $read_stmt $repeat_stmt $simple_exp $simple_exp_2 $stmt $stmt_seq $stmt_seq_2 $term $term_2 $write_stmt
+
+==================== First =====================
+$stmt_seq             {identifier if repeat read write}
+$simple_exp_2         {epsilon + -}
+$stmt                 {identifier if repeat read write}
+$if_stmt              {if}
+$repeat_stmt          {repeat}
+$assign_stmt          {identifier}
+$read_stmt            {read}
+$write_stmt           {write}
+$exp                  {number identifier (}
+$exp_2                {epsilon <  ==}
+$simple_exp           {number identifier (}
+$term                 {number identifier (}
+$term_2               {epsilon * /}
+$if_stmt_2            {end else}
+$factor               {number identifier (}
+$stmt_seq_2           {epsilon ;}
+
+==================== Follow ====================
+$stmt_seq             {zero end else until}
+$simple_exp_2         {zero ; then end else until <  == )}
+$stmt                 {zero ; end else until}
+$if_stmt              {zero ; end else until}
+$repeat_stmt          {zero ; end else until}
+$assign_stmt          {zero ; end else until}
+$read_stmt            {zero ; end else until}
+$write_stmt           {zero ; end else until}
+$exp                  {zero ; then end else until )}
+$exp_2                {zero ; then end else until )}
+$simple_exp           {zero ; then end else until <  == )}
+$term                 {zero ; then end else until <  == + - )}
+$term_2               {zero ; then end else until <  == + - )}
+$if_stmt_2            {zero ; end else until}
+$factor               {zero ; then end else until <  == + - * / )}
+$stmt_seq_2           {zero end else until}
+
+================= ParsingTable =================
+[$stmt_seq, identifier]     $stmt_seq : $stmt $stmt_seq_2
+[$stmt_seq, if]             $stmt_seq : $stmt $stmt_seq_2
+[$stmt_seq, repeat]         $stmt_seq : $stmt $stmt_seq_2
+[$stmt_seq, read]           $stmt_seq : $stmt $stmt_seq_2
+[$stmt_seq, write]          $stmt_seq : $stmt $stmt_seq_2
+[$simple_exp_2, zero]       $simple_exp_2 : epsilon
+[$simple_exp_2, epsilon]    $simple_exp_2 : epsilon
+[$simple_exp_2, ;]          $simple_exp_2 : epsilon
+[$simple_exp_2, then]       $simple_exp_2 : epsilon
+[$simple_exp_2, end]        $simple_exp_2 : epsilon
+[$simple_exp_2, else]       $simple_exp_2 : epsilon
+[$simple_exp_2, until]      $simple_exp_2 : epsilon
+[$simple_exp_2, < ]         $simple_exp_2 : epsilon
+[$simple_exp_2, ==]         $simple_exp_2 : epsilon
+[$simple_exp_2, +]          $simple_exp_2 : + $term $simple_exp_2
+[$simple_exp_2, -]          $simple_exp_2 : - $term $simple_exp_2
+[$simple_exp_2, )]          $simple_exp_2 : epsilon
+[$stmt, identifier]         $stmt : $assign_stmt
+[$stmt, if]                 $stmt : $if_stmt
+[$stmt, repeat]             $stmt : $repeat_stmt
+[$stmt, read]               $stmt : $read_stmt
+[$stmt, write]              $stmt : $write_stmt
+[$if_stmt, if]              $if_stmt : if $exp then $stmt_seq $if_stmt_2
+[$repeat_stmt, repeat]      $repeat_stmt : repeat $stmt_seq until $exp
+[$assign_stmt, identifier]  $assign_stmt : identifier =  $exp
+[$read_stmt, read]          $read_stmt : read identifier
+[$write_stmt, write]        $write_stmt : write identifier
+[$exp, number]              $exp : $simple_exp $exp_2
+[$exp, identifier]          $exp : $simple_exp $exp_2
+[$exp, (]                   $exp : $simple_exp $exp_2
+[$exp_2, zero]              $exp_2 : epsilon
+[$exp_2, epsilon]           $exp_2 : epsilon
+[$exp_2, ;]                 $exp_2 : epsilon
+[$exp_2, then]              $exp_2 : epsilon
+[$exp_2, end]               $exp_2 : epsilon
+[$exp_2, else]              $exp_2 : epsilon
+[$exp_2, until]             $exp_2 : epsilon
+[$exp_2, < ]                $exp_2 : <  $simple_exp
+[$exp_2, ==]                $exp_2 : == $simple_exp
+[$exp_2, )]                 $exp_2 : epsilon
+[$simple_exp, number]       $simple_exp : $term $simple_exp_2
+[$simple_exp, identifier]   $simple_exp : $term $simple_exp_2
+[$simple_exp, (]            $simple_exp : $term $simple_exp_2
+[$term, number]             $term : $factor $term_2
+[$term, identifier]         $term : $factor $term_2
+[$term, (]                  $term : $factor $term_2
+[$term_2, zero]             $term_2 : epsilon
+[$term_2, epsilon]          $term_2 : epsilon
+[$term_2, ;]                $term_2 : epsilon
+[$term_2, then]             $term_2 : epsilon
+[$term_2, end]              $term_2 : epsilon
+[$term_2, else]             $term_2 : epsilon
+[$term_2, until]            $term_2 : epsilon
+[$term_2, < ]               $term_2 : epsilon
+[$term_2, ==]               $term_2 : epsilon
+[$term_2, +]                $term_2 : epsilon
+[$term_2, -]                $term_2 : epsilon
+[$term_2, *]                $term_2 : * $factor $term_2
+[$term_2, /]                $term_2 : / $factor $term_2
+[$term_2, )]                $term_2 : epsilon
+[$if_stmt_2, end]           $if_stmt_2 : end
+[$if_stmt_2, else]          $if_stmt_2 : else $stmt_seq end
+[$factor, number]           $factor : number
+[$factor, identifier]       $factor : identifier
+[$factor, (]                $factor : ( $exp )
+[$stmt_seq_2, zero]         $stmt_seq_2 : epsilon
+[$stmt_seq_2, epsilon]      $stmt_seq_2 : epsilon
+[$stmt_seq_2, ;]            $stmt_seq_2 : ; $stmt $stmt_seq_2
+[$stmt_seq_2, end]          $stmt_seq_2 : epsilon
+[$stmt_seq_2, else]         $stmt_seq_2 : epsilon
+[$stmt_seq_2, until]        $stmt_seq_2 : epsilon
+[E] unexpected token end at 9:1

@@ -42,8 +42,10 @@ private:
 
 	bool BuildParingTable(Grammar* g);
 	bool CreateParsingTable();
-	void AddAsyncSymbol();
+	void InsertParsingTable(const GrammarSymbol& k1, const GrammarSymbol& k2, Condinate* c);
 
+	void AddAsyncSymbol();
+	
 private:
 	ParsingTable* parsingTable_;
 
