@@ -61,7 +61,7 @@ const char* grammar10[] = {
 
 const char* grammar11[] = {	// LL(1) Grammar.
 	"$program : $stmt_seq",
-	"$stmt_seq : $stmt_seq ; $stmt | $stmt",
+	"$stmt_seq : $stmt_seq ; $stmt | $stmt | $stmt_seq newline $stmt",
 	"$stmt : $if_stmt | $repeat_stmt | $assign_stmt | $read_stmt | $write_stmt | epsilon",
 	"$if_stmt : if $exp then $stmt_seq end | if $exp then $stmt_seq else $stmt_seq end",
 	"$repeat_stmt : repeat $stmt_seq until $exp",
@@ -79,7 +79,9 @@ const char* grammar12[] = {	// Operator Precedence Grammar.
 		"$stmt_seq",
 	"$stmt_seq : "
 		"$stmt_seq ; "
+		//"| $stmt_seq newline"
 		"| $stmt_seq ; $stmt "
+		"| $stmt_seq newline $stmt "
 		"| $stmt",
 	"$stmt : "
 		"$if_stmt "
@@ -132,7 +134,7 @@ int main() {
 
 	LanguageParameter lp;
 
-	SetLanguage(lp, grammar12);
+	SetLanguage(lp, grammar11);
 	Language* lang = new Language(&lp);
 
 	Debug::Log(lang->ToString());

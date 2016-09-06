@@ -1,5 +1,7 @@
 #include <algorithm>
 #include <functional>
+
+#include "debug.h"
 #include "file_reader.h"
 
 FileReader::FileReader(const char* path) :ifs_(path), lineNumber_(0) {
@@ -26,6 +28,13 @@ bool FileReader::ReadLine(char* buffer, size_t length, int* lineNumber) {
 		if (!IsBlankLine(buffer)) {
 			break;
 		}
+	}
+
+	if (!ifs_.eof()) {
+		size_t ctext = strlen(buffer);
+		Assert(ctext + 1 < length, "buffer too small");
+		buffer[ctext] = '\n';
+		buffer[ctext + 1] = 0;
 	}
 
 	if (lineNumber != nullptr) {

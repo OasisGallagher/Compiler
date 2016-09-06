@@ -9,25 +9,22 @@ enum GrammarSymbolType {
 	GrammarSymbolNonterminal,
 };
 
+struct ScannerToken;
+
 class GrammarSymbolBase : public RefCountable {
 public:
 	friend class GrammarSymbol;
 	friend class SymbolFactory;
 
-	const std::string& ToString() {
-		return text_;
-	}
+	const std::string& ToString();
 
 	virtual GrammarSymbolType SymbolType() const = 0;
-	virtual bool Match(const std::string& text) const = 0;
+	virtual bool Match(const ScannerToken& token) const = 0;
 
 protected:
-	GrammarSymbolBase(const std::string& text)
-		: text_(text) {
-	}
+	GrammarSymbolBase(const std::string& text);
 
-	~GrammarSymbolBase() {
-	}
+	~GrammarSymbolBase();
 
 protected:
 	static int ninstance;
@@ -40,13 +37,9 @@ public:
 		: GrammarSymbolBase(text) {
 	}
 
-	virtual GrammarSymbolType SymbolType() const {
-		return GrammarSymbolTerminal;
-	}
+	virtual GrammarSymbolType SymbolType() const;
 
-	virtual bool Match(const std::string& text) const {
-		return text_ == text;
-	}
+	virtual bool Match(const ScannerToken& token) const;
 };
 
 class NonterminalSymbol : public GrammarSymbolBase {
@@ -55,14 +48,9 @@ public:
 		: GrammarSymbolBase(text) {
 	}
 
-	virtual GrammarSymbolType SymbolType() const {
-		return GrammarSymbolNonterminal;
-	}
+	virtual GrammarSymbolType SymbolType() const;
 
-	virtual bool Match(const std::string& text) const {
-		Assert(false, "match nonterminal symbol");
-		return false;
-	}
+	virtual bool Match(const ScannerToken& token) const;
 };
 
 class Zero : public TerminalSymbol {
@@ -71,10 +59,7 @@ public:
 		: TerminalSymbol("zero") {
 	}
 
-	virtual bool Match(const std::string& text) const {
-		Assert(false, "unable to compare zero with text");
-		return false;
-	}
+	virtual bool Match(const ScannerToken& token) const;
 };
 
 class Epsilon : public TerminalSymbol {
@@ -83,9 +68,7 @@ public:
 		: TerminalSymbol("epsilon") {
 	}
 
-	virtual bool Match(const std::string& text) const {
-		return true;
-	}
+	virtual bool Match(const ScannerToken& token) const;
 };
 
 class Identifier : public TerminalSymbol {
@@ -94,9 +77,7 @@ public:
 		: TerminalSymbol("identifier") {
 	}
 
-	virtual bool Match(const std::string& text) const {
-		return true;
-	}
+	virtual bool Match(const ScannerToken& token) const;
 };
 
 class Number : public TerminalSymbol {
@@ -105,9 +86,7 @@ public:
 		: TerminalSymbol("number") {
 	}
 
-	virtual bool Match(const std::string& text) const {
-		return true;
-	}
+	virtual bool Match(const ScannerToken& token) const;
 };
 
 class String : public TerminalSymbol {
@@ -116,9 +95,16 @@ public:
 		: TerminalSymbol("string") {
 	}
 
-	virtual bool Match(const std::string& text) const {
-		return true;
+	virtual bool Match(const ScannerToken& token) const;
+};
+
+class Newline : public TerminalSymbol {
+public:
+	Newline()
+		: TerminalSymbol("newline") {
 	}
+
+	virtual bool Match(const ScannerToken& token) const;
 };
 
 class SymbolFactory {
@@ -150,7 +136,7 @@ public:
 
 public:
 	GrammarSymbolType SymbolType() const;
-	bool Match(const std::string& text) const;
+	bool Match(const ScannerToken& token) const;
 	std::string ToString() const;
 
 public:
@@ -158,6 +144,7 @@ public:
 	static GrammarSymbol zero;
 	static GrammarSymbol number;
 	static GrammarSymbol string;
+	static GrammarSymbol newline;
 	static GrammarSymbol epsilon;
 	static GrammarSymbol identifier;
 

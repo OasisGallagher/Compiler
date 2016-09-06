@@ -488,7 +488,7 @@ bool LLParser::ParseFile(SyntaxTree* tree, FileScanner* fileScanner) {
 		symbol = item.first;
 		root = item.second;
 
-		if (symbol.SymbolType() == GrammarSymbolTerminal && symbol.Match(token.text)) {
+		if (symbol.SymbolType() == GrammarSymbolTerminal && symbol.Match(token)) {
 			s.pop();
 			TraceStack("Match " + std::string(token.text), s);
 			if (symbol != GrammarSymbol::epsilon && !fileScanner->GetToken(&token, &tokenPosition)) {
@@ -519,6 +519,16 @@ bool LLParser::ParseFile(SyntaxTree* tree, FileScanner* fileScanner) {
 
 				continue;
 			}
+		}
+
+		// 忽略无法匹配的换行符.
+		if (token.tokenType == ScannerTokenNewline) {
+			if (!fileScanner->GetToken(&token, &tokenPosition)) {
+				Debug::LogError("failed to read token");
+				return false;
+			}
+
+			continue;
 		}
 
 		error = std::string("unexpected token ") + token.text + " at " + tokenPosition.ToString();

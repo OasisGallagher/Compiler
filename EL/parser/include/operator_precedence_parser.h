@@ -2,6 +2,7 @@
 #include "parser.h"
 
 class OperatorPrecedenceTable;
+class SymbolStack;
 
 class OperatorPrecedenceParser : public Parser {
 public:
@@ -18,6 +19,7 @@ public:
 
 public:
 	virtual bool ParseFile(SyntaxTree* tree, FileScanner* fileScanner);
+
 	virtual std::string ToString() const;
 
 protected:
@@ -39,10 +41,13 @@ private:
 	template <class Iterator>
 	bool MatchProduction(const Condinate* c, Iterator first, Iterator last) const;
 
+	template <class FindTerminalSymbol, class GetEnds>
+	void CreateVt(GrammarSymbolSetTable& target, FindTerminalSymbol findTerminalSymbol, GetEnds getEnds);
+
+	bool OnUnexpectedToken(GrammarSymbol &a, const SymbolStack &container, const TokenPosition &position);
 	bool CheckOperatorGrammar() const;
 	bool ComparePrecedence(const GrammarSymbol& lhs, const GrammarSymbol& rhs, OperatorPrecedence precedence) const;
 	void InsertOperatorPrecedence(const GrammarSymbol& k1, const GrammarSymbol& k2, OperatorPrecedence precedence);
-
 private:
 	GrammarSymbolSetTable firstVtContainer_;
 	GrammarSymbolSetTable lastVtContainer_;

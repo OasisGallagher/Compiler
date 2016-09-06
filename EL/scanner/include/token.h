@@ -10,7 +10,7 @@ enum ScannerTokenType {
 	ScannerTokenEndOfFile,
 
 	// ID(this, 符号表指针).
-	ScannerTokenID,
+	ScannerTokenIdentifier,
 	// 数字(this, 常数表指针).
 	ScannerTokenNumber,
 	
@@ -44,6 +44,9 @@ enum ScannerTokenType {
 
 	// 字符串.
 	ScannerTokenString,
+
+	// 换行符.
+	ScannerTokenNewline,
 	/*
 	// 左括号.
 	ScannerTokenLeftParenthesis,

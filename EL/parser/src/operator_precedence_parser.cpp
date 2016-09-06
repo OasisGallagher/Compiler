@@ -38,6 +38,9 @@ struct IsTerminalSymbol : std::unary_function<GrammarSymbol, bool> {
 	}
 };
 
+class SymbolStack : public std::vector<GrammarSymbol> {
+};
+
 class OperatorPrecedenceTable : public matrix <GrammarSymbol, GrammarSymbol, OperatorPrecedence> {
 public:
 	std::string ToString(const GrammarSymbolContainer& terminalSymbols) const;
@@ -92,6 +95,36 @@ std::string OperatorPrecedenceTable::ToString(const GrammarSymbolContainer& term
 	return oss.str();
 }
 
+struct CreateVtHelper {
+	static bool FindFirstTerminalSymbol(GrammarSymbol& symbol, const Condinate* c) {
+		Condinate::const_iterator ntpos = std::find_if(c->begin(), c->end(), IsTerminalSymbol());
+		if (ntpos == c->end()) {
+			return false;
+		}
+
+		symbol = *ntpos;
+		return true;
+	}
+
+	static GrammarSymbol Front(const Condinate* c) {
+		return c->front();
+	}
+
+	static bool FindLastTerminalSymbol(GrammarSymbol& symbol, const Condinate* c) {
+		Condinate::const_reverse_iterator ntpos = std::find_if(c->rbegin(), c->rend(), IsTerminalSymbol());
+		if (ntpos == c->rend()) {
+			return false;
+		}
+
+		symbol = *ntpos;
+		return true;
+	}
+
+	static GrammarSymbol Back(const Condinate* c) {
+		return c->back();
+	}
+};
+
 OperatorPrecedenceParser::OperatorPrecedenceParser() {
 	operatorPrecedenceTable_ = new OperatorPrecedenceTable();
 }
@@ -102,6 +135,7 @@ OperatorPrecedenceParser::~OperatorPrecedenceParser() {
 
 bool OperatorPrecedenceParser::ComparePrecedence(const GrammarSymbol& lhs, const GrammarSymbol& rhs, OperatorPrecedence precedence) const {
 	OperatorPrecedenceTable::const_iterator pos = operatorPrecedenceTable_->find(lhs, rhs);
+
 	if (pos == operatorPrecedenceTable_->end()) {
 		return false;
 	}
@@ -109,8 +143,44 @@ bool OperatorPrecedenceParser::ComparePrecedence(const GrammarSymbol& lhs, const
 	return pos->second == precedence;
 }
 
+template <class Iterator>
+bool OperatorPrecedenceParser::MatchProduction(const Condinate* c, Iterator first, Iterator last) const {
+	Condinate::const_iterator pos = c->begin();
+	for (; first != last && pos != c->end(); ++first, ++pos) {
+		if (first->SymbolType() != pos->SymbolType()) {
+			return false;
+		}
+
+		if (first->SymbolType() == GrammarSymbolTerminal && *first != *pos) {
+			return false;
+		}
+	}
+
+	return (first == last) && (pos == c->end());
+}
+
+template <class Iterator>
+GrammarSymbol OperatorPrecedenceParser::Reduce(Iterator first, Iterator last) {
+	for (GrammarContainer::const_iterator ite = grammars_.begin();
+		ite != grammars_.end(); ++ite) {
+		Grammar* g = *ite;
+		const CondinateContainer& conds = g->GetCondinates();
+		for (CondinateContainer::const_iterator ite = conds.begin();
+			ite != conds.end(); ++ite) {
+			Condinate* c = *ite;
+			if (MatchProduction(c, first, last)) {
+				return g->GetLhs();
+			}
+		}
+	}
+
+	return GrammarSymbol::null;
+}
+
 bool OperatorPrecedenceParser::ParseFile(SyntaxTree* tree, FileScanner* fileScanner) {
-	std::vector<GrammarSymbol> container(1, GrammarSymbol::zero);
+	SymbolStack container;
+	container.push_back(GrammarSymbol::zero);
+
 	int k = 0;
 
 	ScannerToken token;
@@ -160,45 +230,14 @@ bool OperatorPrecedenceParser::ParseFile(SyntaxTree* tree, FileScanner* fileScan
 			++k;
 			container.push_back(a);
 		}
+		else if (!OnUnexpectedToken(a, container, position)) {
+			return false;
+		}
 
 	} while (a != GrammarSymbol::zero);
 
 	Debug::Log("Accept");
 	return true;
-}
-
-template <class Iterator>
-GrammarSymbol OperatorPrecedenceParser::Reduce(Iterator first, Iterator last) {
-	for (GrammarContainer::const_iterator ite = grammars_.begin();
-		ite != grammars_.end(); ++ite) {
-		Grammar* g = *ite;
-		const CondinateContainer& conds = g->GetCondinates();
-		for (CondinateContainer::const_iterator ite = conds.begin();
-			ite != conds.end(); ++ite) {
-			Condinate* c = *ite;
-			if (MatchProduction(c, first, last)) {
-				return g->GetLhs();
-			}
-		}
-	}
-
-	return GrammarSymbol::null;
-}
-
-template <class Iterator>
-bool OperatorPrecedenceParser::MatchProduction(const Condinate* c, Iterator first, Iterator last) const {
-	Condinate::const_iterator pos = c->begin();
-	for (; first != last && pos != c->end(); ++first, ++pos) {
-		if (first->SymbolType() != pos->SymbolType()) {
-			return false;
-		}
-
-		if (first->SymbolType() == GrammarSymbolTerminal && *first != *pos) {
-			return false;
-		}
-	}
-
-	return (first == last) && (pos == c->end());
 }
 
 std::string OperatorPrecedenceParser::ToString() const {
@@ -238,7 +277,8 @@ void OperatorPrecedenceParser::Clear() {
 	lastVtContainer_.clear();
 }
 
-void OperatorPrecedenceParser::CreateFirstVt() {
+template <class FindTerminalSymbol, class GetEnds>
+void OperatorPrecedenceParser::CreateVt(GrammarSymbolSetTable& target, FindTerminalSymbol findTerminalSymbol, GetEnds getEnds) {
 	SymbolPairStack s;
 
 	for (GrammarContainer::const_iterator ite = grammars_.begin();
@@ -248,57 +288,13 @@ void OperatorPrecedenceParser::CreateFirstVt() {
 		for (CondinateContainer::const_iterator ite = conds.begin();
 			ite != conds.end(); ++ite) {
 			Condinate* c = *ite;
-			Condinate::iterator ntpos = std::find_if(c->begin(), c->end(), IsTerminalSymbol());
-			if (ntpos == c->end()) {
+			GrammarSymbol symbol;
+			if (!findTerminalSymbol(symbol, c)) {
 				continue;
 			}
 
-			if (firstVtContainer_[g->GetLhs()].insert(*ntpos).second) {
-				s.push(std::make_pair(g->GetLhs(), *ntpos));
-			}
-		}
-	}
-
-	for (; !s.empty(); ) {
-		SymbolPair item = s.top();
-		s.pop();
-
-		for (GrammarContainer::const_iterator ite = grammars_.begin();
-			ite != grammars_.end(); ++ite) {
-			Grammar* g = *ite;
-			const CondinateContainer& conds = g->GetCondinates();
-			for (CondinateContainer::const_iterator ite = conds.begin(); ite != conds.end(); ++ite) {
-				Condinate* c = *ite;
-				if (c->front() != item.first) {
-					continue;
-				}
-
-				if(firstVtContainer_[g->GetLhs()].insert(item.second).second) {
-					s.push(std::make_pair(g->GetLhs(), item.second));
-				}
-			}
-		}
-	}
-}
-
-void OperatorPrecedenceParser::CreateLastVt() {
-	// TODO: 流程与CreateFirstVt相似.
-	SymbolPairStack s;
-
-	for (GrammarContainer::const_iterator ite = grammars_.begin();
-		ite != grammars_.end(); ++ite) {
-		Grammar* g = *ite;
-		const CondinateContainer& conds = g->GetCondinates();
-		for (CondinateContainer::const_iterator ite = conds.begin();
-			ite != conds.end(); ++ite) {
-			Condinate* c = *ite;
-			Condinate::reverse_iterator ntpos = std::find_if(c->rbegin(), c->rend(), IsTerminalSymbol());
-			if (ntpos == c->rend()) {
-				continue;
-			}
-
-			if (lastVtContainer_[g->GetLhs()].insert(*ntpos).second) {
-				s.push(std::make_pair(g->GetLhs(), *ntpos));
+			if (target[g->GetLhs()].insert(symbol).second) {
+				s.push(std::make_pair(g->GetLhs(), symbol));
 			}
 		}
 	}
@@ -313,16 +309,24 @@ void OperatorPrecedenceParser::CreateLastVt() {
 			const CondinateContainer& conds = g->GetCondinates();
 			for (CondinateContainer::const_iterator ite = conds.begin(); ite != conds.end(); ++ite) {
 				Condinate* c = *ite;
-				if (c->back() != item.first) {
+				if (getEnds(c) != item.first) {
 					continue;
 				}
 
-				if (lastVtContainer_[g->GetLhs()].insert(item.second).second) {
+				if (target[g->GetLhs()].insert(item.second).second) {
 					s.push(std::make_pair(g->GetLhs(), item.second));
 				}
 			}
 		}
 	}
+}
+
+void OperatorPrecedenceParser::CreateFirstVt() {
+	CreateVt(firstVtContainer_, CreateVtHelper::FindFirstTerminalSymbol, CreateVtHelper::Front);
+}
+
+void OperatorPrecedenceParser::CreateLastVt() {
+	CreateVt(lastVtContainer_, CreateVtHelper::FindLastTerminalSymbol, CreateVtHelper::Back);
 }
 
 void OperatorPrecedenceParser::CreateParsingTable() {
@@ -442,4 +446,23 @@ bool OperatorPrecedenceParser::CheckOperatorGrammar() const {
 	}
 
 	return true;
+}
+
+bool OperatorPrecedenceParser::OnUnexpectedToken(GrammarSymbol &a, const SymbolStack &container, const TokenPosition &position) {
+	if (a == GrammarSymbol::newline) {
+		// 忽略无法匹配的换行符.
+		return true;
+	}
+
+	if (a == GrammarSymbol::zero) {
+		if (container.size() != 2 || container.front() != GrammarSymbol::zero || container.back().SymbolType() != GrammarSymbolNonterminal) {
+			Debug::LogError("unexpected end of file.");
+			return false;
+		}
+
+		return true;
+	}
+
+	Debug::LogError("unexpected token " + a.ToString() + " at " + position.ToString());
+	return false;
 }

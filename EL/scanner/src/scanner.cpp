@@ -93,7 +93,7 @@ ScannerTokenType TextScanner::GetToken(char* token, int* pos) {
 				return ScannerTokenEndOfFile;
 			}
 
-			if (ch == ' ' || ch == '\t' || ch == '\n' || ch == 0) {
+			if (ch == ' ' || ch == '\t' || ch == 0) {
 				savech = false;
 			}
 			else if (isdigit(ch)) {
@@ -113,10 +113,14 @@ ScannerTokenType TextScanner::GetToken(char* token, int* pos) {
 			}
 			/*else if (ch == '-') {
 				state = ScannerStateMinus;
-			}*/
+				}*/
 			else if (ch == '"') {
 				state = ScannerStateDoubleQuotes;
 				savech = false;
+			}
+			else if (ch == '\n') {
+				state = ScannerStateDone;
+				tokenType = ScannerTokenNewline;
 			}
 			else {
 				state = ScannerStateDone;
@@ -225,7 +229,7 @@ ScannerTokenType TextScanner::GetToken(char* token, int* pos) {
 		case ScannerStateID:
 			if (!isdigit(ch) && !isalpha(ch) && ch != '_' && ch != '$') {
 				state = ScannerStateDone;
-				tokenType = ScannerTokenID;
+				tokenType = ScannerTokenIdentifier;
 				unget = true;
 				savech = false;
 			}

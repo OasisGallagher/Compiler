@@ -1,10 +1,12 @@
 #include <sstream>
+#include "token.h"
 #include "grammar_symbol.h"
 
 GrammarSymbol GrammarSymbol::null;
 GrammarSymbol GrammarSymbol::zero = new Zero();
 GrammarSymbol GrammarSymbol::number = new Number();
 GrammarSymbol GrammarSymbol::string = new String();
+GrammarSymbol GrammarSymbol::newline = new Newline();
 GrammarSymbol GrammarSymbol::epsilon = new Epsilon();
 GrammarSymbol GrammarSymbol::identifier = new Identifier();
 
@@ -67,8 +69,8 @@ GrammarSymbolType GrammarSymbol::SymbolType() const {
 	return symbol_->SymbolType();
 }
 
-bool GrammarSymbol::Match(const std::string& text) const {
-	return symbol_->Match(text);
+bool GrammarSymbol::Match(const ScannerToken& token) const {
+	return symbol_->Match(token);
 }
 
 std::string GrammarSymbol::ToString() const {
@@ -123,4 +125,58 @@ GrammarSymbol SymbolFactory::Create(const std::string& text) {
 	}
 
 	return new NonterminalSymbol(text);
+}
+
+bool TerminalSymbol::Match(const ScannerToken& token) const {
+	return text_ == token.text;
+}
+
+GrammarSymbolType TerminalSymbol::SymbolType() const {
+	return GrammarSymbolTerminal;
+}
+
+bool NonterminalSymbol::Match(const ScannerToken& token) const {
+	Assert(false, "match nonterminal symbol");
+	return false;
+}
+
+GrammarSymbolType NonterminalSymbol::SymbolType() const {
+	return GrammarSymbolNonterminal;
+}
+
+bool Zero::Match(const ScannerToken& token) const {
+	Assert(false, "unable to compare zero with text");
+	return false;
+}
+
+bool Epsilon::Match(const ScannerToken& token) const {
+	return true;
+}
+
+bool Identifier::Match(const ScannerToken& token) const {
+	return token.tokenType == ScannerTokenIdentifier;
+}
+
+bool Number::Match(const ScannerToken& token) const {
+	return token.tokenType == ScannerTokenNumber;
+}
+
+bool String::Match(const ScannerToken& token) const {
+	return token.tokenType == ScannerTokenString;
+}
+
+bool Newline::Match(const ScannerToken& token) const {
+	return token.tokenType == ScannerTokenNewline;
+}
+
+const std::string& GrammarSymbolBase::ToString() {
+	return text_;
+}
+
+GrammarSymbolBase::GrammarSymbolBase(const std::string& text) : text_(text) {
+
+}
+
+GrammarSymbolBase::~GrammarSymbolBase() {
+
 }

@@ -16,6 +16,7 @@ void Parser::InitializeTerminalSymbolContainer() {
 	terminalSymbols_.insert(std::make_pair(GrammarSymbol::number.ToString(), GrammarSymbol::number));
 	terminalSymbols_.insert(std::make_pair(GrammarSymbol::string.ToString(), GrammarSymbol::string));
 	terminalSymbols_.insert(std::make_pair(GrammarSymbol::epsilon.ToString(), GrammarSymbol::epsilon));
+	terminalSymbols_.insert(std::make_pair(GrammarSymbol::newline.ToString(), GrammarSymbol::newline));
 	terminalSymbols_.insert(std::make_pair(GrammarSymbol::identifier.ToString(), GrammarSymbol::identifier));
 }
 
@@ -78,6 +79,9 @@ GrammarSymbol Parser::FindSymbol(const ScannerToken& token) {
 	}
 	else if (token.tokenType == ScannerTokenString) {
 		answer = GrammarSymbol::string;
+	}
+	else if (token.tokenType == ScannerTokenNewline) {
+		answer = GrammarSymbol::newline;
 	}
 	else {
 		if (Utility::IsTerminal(token.text)) {
