@@ -59,18 +59,70 @@ const char* grammar10[] = {
 	"$P : ($E) | i",
 };
 
-const char* grammar11[] = {
+const char* grammar11[] = {	// LL(1) Grammar.
+	"$program : $stmt_seq",
 	"$stmt_seq : $stmt_seq ; $stmt | $stmt",
-	"$stmt : $if_stmt | $repeat_stmt | $assign_stmt | $read_stmt | $write_stmt",
+	"$stmt : $if_stmt | $repeat_stmt | $assign_stmt | $read_stmt | $write_stmt | epsilon",
 	"$if_stmt : if $exp then $stmt_seq end | if $exp then $stmt_seq else $stmt_seq end",
 	"$repeat_stmt : repeat $stmt_seq until $exp",
 	"$assign_stmt : identifier = $exp",
 	"$read_stmt : read identifier",
 	"$write_stmt : write identifier",
-	"$exp : $simple_exp < $simple_exp | $simple_exp == $simple_exp | $simple_exp",
+	"$exp : $simple_exp < $simple_exp | $simple_exp <= $simple_exp | $simple_exp == $simple_exp | $simple_exp >= $simple_exp | $simple_exp > $simple_exp | $simple_exp",
 	"$simple_exp : $simple_exp + $term | $simple_exp - $term | $term",
 	"$term : $term * $factor | $term / $factor | $factor",
 	"$factor : ( $exp ) | number | identifier",
+};
+
+const char* grammar12[] = {	// Operator Precedence Grammar.
+	"$program : "
+		"$stmt_seq",
+	"$stmt_seq : "
+		"$stmt_seq ; "
+		"| $stmt_seq ; $stmt "
+		"| $stmt",
+	"$stmt : "
+		"$if_stmt "
+		"| $repeat_stmt "
+		"| $assign_stmt "
+		"| $read_stmt "
+		"| $write_stmt "
+		"| ;",
+	"$if_stmt : "
+		"if $exp then end "
+		"| if $exp then $stmt_seq end "
+		"| if $exp then else end "
+		"| if $exp then else $stmt_seq end "
+		"| if $exp then $stmt_seq else end "
+		"| if $exp then $stmt_seq else $stmt_seq end",
+	"$repeat_stmt : "
+		"repeat until $exp "
+		"| repeat $stmt_seq until $exp",
+	"$assign_stmt : "
+		"identifier = $exp",
+	"$read_stmt : "
+		"read identifier",
+	"$write_stmt : "
+		"write identifier",
+	"$exp :" 
+		"$simple_exp < $simple_exp "
+		"| $simple_exp <= $simple_exp "
+		"| $simple_exp == $simple_exp "
+		"| $simple_exp >= $simple_exp "
+		"| $simple_exp > $simple_exp "
+		"| $simple_exp",
+	"$simple_exp : "
+		"$simple_exp + $term "
+		"| $simple_exp - $term "
+		"| $term",
+	"$term : "
+		"$term * $factor "
+		"| $term / $factor "
+		"| $factor",
+	"$factor : "
+		"( $exp ) "
+		"| number "
+		"| identifier",
 };
 
 #define SetLanguage(_Ans, _Prod) if (true) { _Ans.productions = _Prod; _Ans.nproductions = sizeof(_Prod) / sizeof(_Prod[0]); } else (void)0
@@ -80,7 +132,7 @@ int main() {
 
 	LanguageParameter lp;
 
-	SetLanguage(lp, grammar11);
+	SetLanguage(lp, grammar12);
 	Language* lang = new Language(&lp);
 
 	Debug::Log(lang->ToString());

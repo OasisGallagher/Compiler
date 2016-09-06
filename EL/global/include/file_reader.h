@@ -3,18 +3,16 @@
 
 class FileReader {
 public:
-	FileReader(const char* path) :ifs_(path) {
-	}
-
-	~FileReader() {
-		ifs_.close();
-	}
+	FileReader(const char* path);
+	~FileReader();
 
 public:
-	bool ReadLine(char* buffer, size_t length) {
-		return !!ifs_.getline(buffer, length);
-	}
+	bool ReadLine(char* buffer, size_t length, int* lineNumber);
 
 private:
+	bool IsBlankLine(const char* text);
+
+private:
+	int lineNumber_;
 	std::ifstream ifs_;
 };

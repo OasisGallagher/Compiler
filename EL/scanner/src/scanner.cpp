@@ -30,18 +30,18 @@ std::string TokenPosition::ToString() const {
 
 //static DummyToken dummyToken;
 
-LineScanner::LineScanner() 
+TextScanner::TextScanner() 
 	: current_(nullptr), dest_(nullptr) {
 	lineBuffer_ = new char[MAX_LINE_CHARACTERS]();
 	tokenBuffer_ = new char[MAX_TOKEN_CHARACTERS]();
 }
 
-LineScanner::~LineScanner() {
+TextScanner::~TextScanner() {
 	delete[] lineBuffer_;
 	delete[] tokenBuffer_;
 }
 
-void LineScanner::SetText(const char* text) {
+void TextScanner::SetText(const char* text) {
 	size_t length = strlen(text);
 	Assert(length > 0 && length < MAX_LINE_CHARACTERS, "invalid line text");
 
@@ -52,7 +52,7 @@ void LineScanner::SetText(const char* text) {
 	dest_ = lineBuffer_ + length + 1;
 }
 
-bool LineScanner::GetChar(int* ch) {
+bool TextScanner::GetChar(int* ch) {
 	if (current_ == nullptr || current_ == dest_) {
 		return false;
 	}
@@ -61,12 +61,12 @@ bool LineScanner::GetChar(int* ch) {
 	return true;
 }
 
-void LineScanner::UngetChar() {
+void TextScanner::UngetChar() {
 	Assert(current_ != nullptr && current_ > lineBuffer_, "unget failed. invalid state");
 	--current_;
 }
 
-ScannerTokenType LineScanner::GetToken(char* token, int* pos) {
+ScannerTokenType TextScanner::GetToken(char* token, int* pos) {
 	ScannerStateType state = ScannerStateStart;
 	ScannerTokenType tokenType = ScannerTokenError;
 
@@ -77,6 +77,10 @@ ScannerTokenType LineScanner::GetToken(char* token, int* pos) {
 
 	for (; state != ScannerStateDone;) {
 		if (!GetChar(&ch)) {
+			if (pos != nullptr) {
+				*pos = -1;
+			}
+
 			return ScannerTokenEndOfFile;
 		}
 
@@ -107,9 +111,9 @@ ScannerTokenType LineScanner::GetToken(char* token, int* pos) {
 			else if (ch == '>') {
 				state = ScannerStateGreater;
 			}
-			else if (ch == '-') {
+			/*else if (ch == '-') {
 				state = ScannerStateMinus;
-			}
+			}*/
 			else if (ch == '"') {
 				state = ScannerStateDoubleQuotes;
 				savech = false;
@@ -117,6 +121,7 @@ ScannerTokenType LineScanner::GetToken(char* token, int* pos) {
 			else {
 				state = ScannerStateDone;
 				tokenType = ScannerTokenSign;
+
 				/*
 				switch (ch) {
 				case '+':
@@ -169,7 +174,7 @@ ScannerTokenType LineScanner::GetToken(char* token, int* pos) {
 				unget = true;
 			}
 			break;
-
+			/*
 		case ScannerStateMinus:
 			if (isdigit(ch)) {
 				state = ScannerStateNumber;
@@ -184,7 +189,7 @@ ScannerTokenType LineScanner::GetToken(char* token, int* pos) {
 				savech = false;
 			}
 			break;
-
+			*/
 		case ScannerStateLess:
 			state = ScannerStateDone;
 			tokenType = ScannerTokenSign;
@@ -241,12 +246,12 @@ ScannerTokenType LineScanner::GetToken(char* token, int* pos) {
 		}
 
 		if (savech) {
-			Assert(index < MAX_TOKEN_CHARACTERS, "invalid token. buffer too small.");
+			Assert(index < MAX_TOKEN_CHARACTERS, "invalid token.");
 			tokenBuffer_[index++] = ch;
 		}
 	}
 	
-	std::copy(tokenBuffer_, tokenBuffer_ + index, token);
+	strncpy(token, tokenBuffer_, index);
 	token[index] = 0;
 
 	if (pos != nullptr) {
@@ -257,7 +262,7 @@ ScannerTokenType LineScanner::GetToken(char* token, int* pos) {
 }
 
 FileScanner::FileScanner(const char* path) 
-	: reader_(new FileReader(path)), lineno_(0){
+	: reader_(new FileReader(path)), lineno_(0) {
 	/*symbols_ = new Table < Symbol >();
 	numberLiterals_ = new Table < NumberLiteral >();
 	stringLiterals_ = new Table < StringLiteral >();*/
@@ -274,23 +279,21 @@ FileScanner::~FileScanner() {
 
 bool FileScanner::GetToken(ScannerToken* token, TokenPosition* pos) {
 	char buffer[MAX_TOKEN_CHARACTERS] = { 0 };
-	ScannerTokenType tokenType = lineScanner_.GetToken(buffer, &pos->linepos);
+	ScannerTokenType tokenType = textScanner_.GetToken(buffer, &pos->linepos);
 
 	char line[MAX_LINE_CHARACTERS];
 	for (; tokenType == ScannerTokenEndOfFile; ) {
-		if (!reader_->ReadLine(line, MAX_LINE_CHARACTERS)) {
+		if (!reader_->ReadLine(line, MAX_LINE_CHARACTERS, &lineno_)) {
 			tokenType = ScannerTokenEndOfFile;
 			break;
 		}
-
-		++lineno_;
 
 		if (strlen(line) == 0) {
 			continue;
 		}
 
-		lineScanner_.SetText(line);
-		tokenType = lineScanner_.GetToken(buffer, &pos->linepos);
+		textScanner_.SetText(line);
+		tokenType = textScanner_.GetToken(buffer, &pos->linepos);
 	}
 
 	pos->lineno = lineno_;

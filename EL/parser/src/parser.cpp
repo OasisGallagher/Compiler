@@ -45,10 +45,10 @@ GrammarSymbol Parser::CreateSymbol(const std::string& text) {
 bool Parser::SetGrammars(const char** productions, int count) {
 	Clear();
 
-	LineScanner lineScanner;
+	TextScanner textScanner;
 	for (int i = 0; i < count; ++i) {
-		lineScanner.SetText(productions[i]);
-		if (!ParseProductions(&lineScanner)) {
+		textScanner.SetText(productions[i]);
+		if (!ParseProductions(&textScanner)) {
 			return false;
 		}
 	}
@@ -111,20 +111,20 @@ bool Parser::MergeNonEpsilonElements(GrammarSymbolSet& dest, const GrammarSymbol
 	return modified;
 }
 
-bool Parser::ParseProductions(LineScanner* lineScanner) {
+bool Parser::ParseProductions(TextScanner* textScanner) {
 	char token[MAX_TOKEN_CHARACTERS];
 
-	ScannerTokenType tokenType = lineScanner->GetToken(token);
+	ScannerTokenType tokenType = textScanner->GetToken(token);
 	Assert(tokenType != ScannerTokenEndOfFile, "invalid production. missing left hand side.");
 
 	Grammar* grammar = new Grammar(CreateSymbol(token));
 
 	Condinate cond;
 
-	lineScanner->GetToken(token);
+	textScanner->GetToken(token);
 	Assert(strcmp(token, ":") == 0, "invalid production. missing \":\".");
 
-	for (; (tokenType = lineScanner->GetToken(token)) != ScannerTokenEndOfFile;) {
+	for (; (tokenType = textScanner->GetToken(token)) != ScannerTokenEndOfFile;) {
 		if (tokenType == ScannerTokenSign && strcmp(token, "|") == 0) {
 			Assert(!cond.empty(), "empty production");
 			grammar->AddCondinate(cond);

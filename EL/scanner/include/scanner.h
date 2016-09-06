@@ -4,10 +4,10 @@
 #include <string>
 #include "token.h"
 
-class LineScanner {
+class TextScanner {
 public:
-	LineScanner();
-	~LineScanner();
+	TextScanner();
+	~TextScanner();
 
 	void SetText(const char* text);
 	ScannerTokenType GetToken(char* token, int* pos = nullptr);
@@ -79,5 +79,5 @@ private:
 private:
 	int lineno_;
 	FileReader* reader_;
-	LineScanner lineScanner_;
+	TextScanner textScanner_;
 };

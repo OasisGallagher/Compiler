@@ -120,5 +120,8 @@
     <ClCompile Include="global\src\table_printer.cpp">
       <Filter>global\src</Filter>
     </ClCompile>
+    <ClCompile Include="global\src\file_reader.cpp">
+      <Filter>global\src</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

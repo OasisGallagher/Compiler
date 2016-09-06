@@ -45,7 +45,7 @@ public:
 
 std::string OperatorPrecedenceTable::ToString(const GrammarSymbolContainer& terminalSymbols) const {
 	std::ostringstream oss;
-	const char* seperator = "";
+	/*const char* seperator = "";
 	for (const_iterator ite = cont_.begin(); ite != cont_.end(); ++ite) {
 		const key_type& key = ite->first;
 		const value_type& value = ite->second;
@@ -60,7 +60,7 @@ std::string OperatorPrecedenceTable::ToString(const GrammarSymbolContainer& term
 	}
 
 	oss << "\n\n";
-
+	*/
 	TablePrinter tp;
 
 	int maxlength = 0;
@@ -116,6 +116,8 @@ bool OperatorPrecedenceParser::ParseFile(SyntaxTree* tree, FileScanner* fileScan
 	ScannerToken token;
 	TokenPosition position = { 0 };
 
+	int reduceCount = 0;
+
 	GrammarSymbol a;
 	do {
 		a = GrammarSymbol::zero;
@@ -146,7 +148,7 @@ bool OperatorPrecedenceParser::ParseFile(SyntaxTree* tree, FileScanner* fileScan
 				return false;
 			}
 
-			Debug::Log("Reduce `" + Utility::Concat(container.begin() + j + 1, container.begin() + k + 1) + "` to `" + n.ToString() + "`");
+			Debug::Log(std::to_string(++reduceCount) + "\tReduce `" + Utility::Concat(container.begin() + j + 1, container.begin() + k + 1) + "` to `" + n.ToString() + "`");
 
 			container.erase(container.begin() + j + 1, container.begin() + k + 1);
 			
@@ -161,6 +163,7 @@ bool OperatorPrecedenceParser::ParseFile(SyntaxTree* tree, FileScanner* fileScan
 
 	} while (a != GrammarSymbol::zero);
 
+	Debug::Log("Accept");
 	return true;
 }
 
@@ -221,7 +224,7 @@ std::string OperatorPrecedenceParser::ToString() const {
 }
 
 bool OperatorPrecedenceParser::ParseGrammars() {
-	Assert(IsOperatorGrammar(), "invalid operator grammar");
+	Assert(CheckOperatorGrammar(), "invalid operator grammar");
 
 	CreateFirstVt();
 	CreateLastVt();
@@ -407,7 +410,7 @@ void OperatorPrecedenceParser::BuildParsingTable(Condinate* c) {
 	}
 }
 
-bool OperatorPrecedenceParser::IsOperatorGrammar() const {
+bool OperatorPrecedenceParser::CheckOperatorGrammar() const {
 	struct GrammarSymbolTypeComparer : std::binary_function<GrammarSymbol, GrammarSymbol, bool> {
 		bool operator ()(const GrammarSymbol& lhs, const GrammarSymbol& rhs) const {
 			return lhs.SymbolType() == GrammarSymbolNonterminal && rhs.SymbolType() == GrammarSymbolNonterminal;
@@ -423,10 +426,12 @@ bool OperatorPrecedenceParser::IsOperatorGrammar() const {
 			Condinate* c = *ite;
 
 			if (c->size() == 1 && c->front() == GrammarSymbol::epsilon) {
+				Debug::LogError("Production is epsilon.");
 				return false;
 			}
 
 			if (std::adjacent_find(c->begin(), c->end(), GrammarSymbolTypeComparer()) != c->end()) {
+				Debug::LogError("Adjacent non-terminal grammar symbol.");
 				return false;
 			}
 

@@ -39,7 +39,7 @@ private:
 	template <class Iterator>
 	bool MatchProduction(const Condinate* c, Iterator first, Iterator last) const;
 
-	bool IsOperatorGrammar() const;
+	bool CheckOperatorGrammar() const;
 	bool ComparePrecedence(const GrammarSymbol& lhs, const GrammarSymbol& rhs, OperatorPrecedence precedence) const;
 	void InsertOperatorPrecedence(const GrammarSymbol& k1, const GrammarSymbol& k2, OperatorPrecedence precedence);
 

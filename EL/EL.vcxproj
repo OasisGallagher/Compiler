@@ -32,6 +32,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="global\src\debug.cpp" />
+    <ClCompile Include="global\src\file_reader.cpp" />
     <ClCompile Include="global\src\table_printer.cpp" />
     <ClCompile Include="global\src\utilities.cpp" />
     <ClCompile Include="main.cpp" />

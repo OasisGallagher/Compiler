@@ -1,133 +1,125 @@
+[W] production $program : $stmt_seq will be omitted.
+[W] production $stmt_seq : $stmt will be omitted.
+[W] production $stmt : $if_stmt will be omitted.
+[W] production $stmt : $repeat_stmt will be omitted.
+[W] production $stmt : $assign_stmt will be omitted.
+[W] production $stmt : $read_stmt will be omitted.
+[W] production $stmt : $write_stmt will be omitted.
+[W] production $exp : $simple_exp will be omitted.
+[W] production $simple_exp : $term will be omitted.
+[W] production $term : $factor will be omitted.
+[W] invalid operator precedence grammar, precedence (;, ;) : (>, <)
 =================== Grammars ===================
-$stmt_seq             $stmt $stmt_seq_2
-$stmt_seq_2           ; $stmt $stmt_seq_2|epsilon
-$stmt                 $write_stmt|$read_stmt|$assign_stmt|$repeat_stmt|$if_stmt
-$if_stmt              if $exp then $stmt_seq $if_stmt_2
-$if_stmt_2            else $stmt_seq end|end
-$repeat_stmt          repeat $stmt_seq until $exp
+$program              $stmt_seq
+$stmt_seq             $stmt_seq ; $stmt|$stmt_seq ;|$stmt
+$stmt                 $if_stmt|$repeat_stmt|$assign_stmt|$read_stmt|$write_stmt|;
+$if_stmt              if $exp then end|if $exp then $stmt_seq end|if $exp then else end|if $exp then else $stmt_seq end|if $exp then $stmt_seq else end|if $exp then $stmt_seq else $stmt_seq end
+$repeat_stmt          repeat until $exp|repeat $stmt_seq until $exp
 $assign_stmt          identifier =  $exp
 $read_stmt            read identifier
 $write_stmt           write identifier
-$exp                  $simple_exp $exp_2
-$exp_2                == $simple_exp|<  $simple_exp|epsilon
-$simple_exp           $term $simple_exp_2
-$simple_exp_2         - $term $simple_exp_2|+ $term $simple_exp_2|epsilon
-$term                 $factor $term_2
-$term_2               / $factor $term_2|* $factor $term_2|epsilon
-$factor               ( $exp )|identifier|number
+$exp                  $simple_exp <  $simple_exp|$simple_exp <= $simple_exp|$simple_exp == $simple_exp|$simple_exp >= $simple_exp|$simple_exp >  $simple_exp|$simple_exp
+$simple_exp           $simple_exp - $term|$simple_exp + $term|$term
+$term                 $term / $factor|$term * $factor|$factor
+$factor               ( $exp )|number|identifier
 
 =============== TerminalSymbols ================
-( ) * + - / ; <  =  == else end epsilon identifier if number read repeat string then until write zero
+( ) * + - / ; <  <= =  == >  >= else end epsilon identifier if number read repeat string then until write zero
 
 ============== NonterminalSymbols ==============
-$assign_stmt $exp $exp_2 $factor $if_stmt $if_stmt_2 $read_stmt $repeat_stmt $simple_exp $simple_exp_2 $stmt $stmt_seq $stmt_seq_2 $term $term_2 $write_stmt
+$assign_stmt $exp $factor $if_stmt $program $read_stmt $repeat_stmt $simple_exp $stmt $stmt_seq $term $write_stmt
 
-==================== First =====================
-$stmt_seq             {identifier if repeat read write}
-$simple_exp_2         {epsilon + -}
-$stmt                 {identifier if repeat read write}
-$if_stmt              {if}
-$repeat_stmt          {repeat}
-$assign_stmt          {identifier}
+=================== FirstVt ====================
 $read_stmt            {read}
+$program              {repeat ; identifier read write if}
+$stmt_seq             {repeat ; identifier read write if}
+$assign_stmt          {identifier}
+$exp                  {number identifier <  / >  ( - <= + >= == *}
+$simple_exp           {number identifier / ( - + *}
+$if_stmt              {if}
+$stmt                 {repeat ; identifier read write if}
+$repeat_stmt          {repeat}
 $write_stmt           {write}
-$exp                  {number identifier (}
-$exp_2                {epsilon <  ==}
-$simple_exp           {number identifier (}
-$term                 {number identifier (}
-$term_2               {epsilon * /}
-$if_stmt_2            {end else}
 $factor               {number identifier (}
-$stmt_seq_2           {epsilon ;}
+$term                 {number identifier / ( *}
 
-==================== Follow ====================
-$stmt_seq             {zero end else until}
-$simple_exp_2         {zero ; then end else until <  == )}
-$stmt                 {zero ; end else until}
-$if_stmt              {zero ; end else until}
-$repeat_stmt          {zero ; end else until}
-$assign_stmt          {zero ; end else until}
-$read_stmt            {zero ; end else until}
-$write_stmt           {zero ; end else until}
-$exp                  {zero ; then end else until )}
-$exp_2                {zero ; then end else until )}
-$simple_exp           {zero ; then end else until <  == )}
-$term                 {zero ; then end else until <  == + - )}
-$term_2               {zero ; then end else until <  == + - )}
-$if_stmt_2            {zero ; end else until}
-$factor               {zero ; then end else until <  == + - * / )}
-$stmt_seq_2           {zero end else until}
+==================== LastVt ====================
+$read_stmt            {identifier}
+$program              {number ; end =  identifier <  until / >  - <= + >= ) == *}
+$stmt_seq             {number ; end =  identifier <  until / >  - <= + >= ) == *}
+$assign_stmt          {number =  identifier <  / >  - <= + >= ) == *}
+$exp                  {number identifier <  / >  - <= + >= ) == *}
+$simple_exp           {number identifier / - + ) *}
+$if_stmt              {end}
+$stmt                 {number ; end =  identifier <  until / >  - <= + >= ) == *}
+$repeat_stmt          {number identifier <  until / >  - <= + >= ) == *}
+$write_stmt           {identifier}
+$factor               {number identifier )}
+$term                 {number identifier / ) *}
 
-================= ParsingTable =================
-[$stmt_seq, identifier]     $stmt_seq : $stmt $stmt_seq_2
-[$stmt_seq, if]             $stmt_seq : $stmt $stmt_seq_2
-[$stmt_seq, repeat]         $stmt_seq : $stmt $stmt_seq_2
-[$stmt_seq, read]           $stmt_seq : $stmt $stmt_seq_2
-[$stmt_seq, write]          $stmt_seq : $stmt $stmt_seq_2
-[$simple_exp_2, zero]       $simple_exp_2 : epsilon
-[$simple_exp_2, epsilon]    $simple_exp_2 : epsilon
-[$simple_exp_2, ;]          $simple_exp_2 : epsilon
-[$simple_exp_2, then]       $simple_exp_2 : epsilon
-[$simple_exp_2, end]        $simple_exp_2 : epsilon
-[$simple_exp_2, else]       $simple_exp_2 : epsilon
-[$simple_exp_2, until]      $simple_exp_2 : epsilon
-[$simple_exp_2, < ]         $simple_exp_2 : epsilon
-[$simple_exp_2, ==]         $simple_exp_2 : epsilon
-[$simple_exp_2, +]          $simple_exp_2 : + $term $simple_exp_2
-[$simple_exp_2, -]          $simple_exp_2 : - $term $simple_exp_2
-[$simple_exp_2, )]          $simple_exp_2 : epsilon
-[$stmt, identifier]         $stmt : $assign_stmt
-[$stmt, if]                 $stmt : $if_stmt
-[$stmt, repeat]             $stmt : $repeat_stmt
-[$stmt, read]               $stmt : $read_stmt
-[$stmt, write]              $stmt : $write_stmt
-[$if_stmt, if]              $if_stmt : if $exp then $stmt_seq $if_stmt_2
-[$repeat_stmt, repeat]      $repeat_stmt : repeat $stmt_seq until $exp
-[$assign_stmt, identifier]  $assign_stmt : identifier =  $exp
-[$read_stmt, read]          $read_stmt : read identifier
-[$write_stmt, write]        $write_stmt : write identifier
-[$exp, number]              $exp : $simple_exp $exp_2
-[$exp, identifier]          $exp : $simple_exp $exp_2
-[$exp, (]                   $exp : $simple_exp $exp_2
-[$exp_2, zero]              $exp_2 : epsilon
-[$exp_2, epsilon]           $exp_2 : epsilon
-[$exp_2, ;]                 $exp_2 : epsilon
-[$exp_2, then]              $exp_2 : epsilon
-[$exp_2, end]               $exp_2 : epsilon
-[$exp_2, else]              $exp_2 : epsilon
-[$exp_2, until]             $exp_2 : epsilon
-[$exp_2, < ]                $exp_2 : <  $simple_exp
-[$exp_2, ==]                $exp_2 : == $simple_exp
-[$exp_2, )]                 $exp_2 : epsilon
-[$simple_exp, number]       $simple_exp : $term $simple_exp_2
-[$simple_exp, identifier]   $simple_exp : $term $simple_exp_2
-[$simple_exp, (]            $simple_exp : $term $simple_exp_2
-[$term, number]             $term : $factor $term_2
-[$term, identifier]         $term : $factor $term_2
-[$term, (]                  $term : $factor $term_2
-[$term_2, zero]             $term_2 : epsilon
-[$term_2, epsilon]          $term_2 : epsilon
-[$term_2, ;]                $term_2 : epsilon
-[$term_2, then]             $term_2 : epsilon
-[$term_2, end]              $term_2 : epsilon
-[$term_2, else]             $term_2 : epsilon
-[$term_2, until]            $term_2 : epsilon
-[$term_2, < ]               $term_2 : epsilon
-[$term_2, ==]               $term_2 : epsilon
-[$term_2, +]                $term_2 : epsilon
-[$term_2, -]                $term_2 : epsilon
-[$term_2, *]                $term_2 : * $factor $term_2
-[$term_2, /]                $term_2 : / $factor $term_2
-[$term_2, )]                $term_2 : epsilon
-[$if_stmt_2, end]           $if_stmt_2 : end
-[$if_stmt_2, else]          $if_stmt_2 : else $stmt_seq end
-[$factor, number]           $factor : number
-[$factor, identifier]       $factor : identifier
-[$factor, (]                $factor : ( $exp )
-[$stmt_seq_2, zero]         $stmt_seq_2 : epsilon
-[$stmt_seq_2, epsilon]      $stmt_seq_2 : epsilon
-[$stmt_seq_2, ;]            $stmt_seq_2 : ; $stmt $stmt_seq_2
-[$stmt_seq_2, end]          $stmt_seq_2 : epsilon
-[$stmt_seq_2, else]         $stmt_seq_2 : epsilon
-[$stmt_seq_2, until]        $stmt_seq_2 : epsilon
-[E] unexpected token end at 9:1
+=========== OperatorPrecedenceTable ============
++-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+|            |  (|  )|  *|  +|  -|  /|  ;|  < |  <=|  = |  ==|  > |  >=|  else|  end|  epsilon|  identifier|  if|  number|  read|  repeat|  string|  then|  until|  write|  zero|
++-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+|           (|  <|  =|  <|  <|  <|  <|   |   <|   <|    |   <|   <|   <|      |     |         |           <|    |       <|      |        |        |      |       |       |     >|
+|           )|   |  >|  >|  >|  >|  >|  >|   >|   >|    |   >|   >|   >|     >|    >|         |            |    |        |      |        |        |     >|      >|       |     >|
+|           *|  <|  >|  >|  >|  >|  >|  >|   >|   >|    |   >|   >|   >|     >|    >|         |           <|    |       <|      |        |        |     >|      >|       |     >|
+|           +|  <|  >|  <|  >|  >|  <|  >|   >|   >|    |   >|   >|   >|     >|    >|         |           <|    |       <|      |        |        |     >|      >|       |     >|
+|           -|  <|  >|  <|  >|  >|  <|  >|   >|   >|    |   >|   >|   >|     >|    >|         |           <|    |       <|      |        |        |     >|      >|       |     >|
+|           /|  <|  >|  >|  >|  >|  >|  >|   >|   >|    |   >|   >|   >|     >|    >|         |           <|    |       <|      |        |        |     >|      >|       |     >|
+|           ;|   |   |   |   |   |   |  >|    |    |    |    |    |    |     >|    >|         |           <|   <|        |     <|       <|        |      |      >|      <|     >|
+|          < |  <|  >|  <|  <|  <|  <|  >|    |    |    |    |    |    |     >|    >|         |           <|    |       <|      |        |        |     >|      >|       |     >|
+|          <=|  <|  >|  <|  <|  <|  <|  >|    |    |    |    |    |    |     >|    >|         |           <|    |       <|      |        |        |     >|      >|       |     >|
+|          = |  <|   |  <|  <|  <|  <|  >|   <|   <|    |   <|   <|   <|     >|    >|         |           <|    |       <|      |        |        |      |      >|       |     >|
+|          ==|  <|  >|  <|  <|  <|  <|  >|    |    |    |    |    |    |     >|    >|         |           <|    |       <|      |        |        |     >|      >|       |     >|
+|          > |  <|  >|  <|  <|  <|  <|  >|    |    |    |    |    |    |     >|    >|         |           <|    |       <|      |        |        |     >|      >|       |     >|
+|          >=|  <|  >|  <|  <|  <|  <|  >|    |    |    |    |    |    |     >|    >|         |           <|    |       <|      |        |        |     >|      >|       |     >|
+|        else|   |   |   |   |   |   |  <|    |    |    |    |    |    |      |    =|         |           <|   <|        |     <|       <|        |      |       |      <|     >|
+|         end|   |   |   |   |   |   |  >|    |    |    |    |    |    |     >|    >|         |            |    |        |      |        |        |      |      >|       |     >|
+|     epsilon|   |   |   |   |   |   |   |    |    |    |    |    |    |      |     |         |            |    |        |      |        |        |      |       |       |     >|
+|  identifier|   |  >|  >|  >|  >|  >|  >|   >|   >|   =|   >|   >|   >|     >|    >|         |            |    |        |      |        |        |     >|      >|       |     >|
+|          if|  <|   |  <|  <|  <|  <|   |   <|   <|    |   <|   <|   <|      |     |         |           <|    |       <|      |        |        |     =|       |       |     >|
+|      number|   |  >|  >|  >|  >|  >|  >|   >|   >|    |   >|   >|   >|     >|    >|         |            |    |        |      |        |        |     >|      >|       |     >|
+|        read|   |   |   |   |   |   |   |    |    |    |    |    |    |      |     |         |           =|    |        |      |        |        |      |       |       |     >|
+|      repeat|   |   |   |   |   |   |  <|    |    |    |    |    |    |      |     |         |           <|   <|        |     <|       <|        |      |      =|      <|     >|
+|      string|   |   |   |   |   |   |   |    |    |    |    |    |    |      |     |         |            |    |        |      |        |        |      |       |       |     >|
+|        then|   |   |   |   |   |   |  <|    |    |    |    |    |    |     =|    =|         |           <|   <|        |     <|       <|        |      |       |      <|     >|
+|       until|  <|   |  <|  <|  <|  <|  >|   <|   <|    |   <|   <|   <|     >|    >|         |           <|    |       <|      |        |        |      |      >|       |     >|
+|       write|   |   |   |   |   |   |   |    |    |    |    |    |    |      |     |         |           =|    |        |      |        |        |      |       |       |     >|
+|        zero|  <|  <|  <|  <|  <|  <|  <|   <|   <|   <|   <|   <|   <|     <|    <|        <|           <|   <|       <|     <|       <|       <|     <|      <|      <|      |
++-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+
+1	Reduce `;` to `$stmt`
+2	Reduce `$stmt ;` to `$stmt_seq`
+3	Reduce `read identifier` to `$read_stmt`
+4	Reduce `$stmt_seq ; $read_stmt` to `$stmt_seq`
+5	Reduce `number` to `$factor`
+6	Reduce `identifier` to `$factor`
+7	Reduce `$factor <  $factor` to `$exp`
+8	Reduce `number` to `$factor`
+9	Reduce `identifier =  $factor` to `$assign_stmt`
+10	Reduce `identifier` to `$factor`
+11	Reduce `identifier` to `$factor`
+12	Reduce `$factor * $factor` to `$term`
+13	Reduce `identifier =  $term` to `$assign_stmt`
+14	Reduce `identifier` to `$factor`
+15	Reduce `number` to `$factor`
+16	Reduce `$factor + $factor` to `$simple_exp`
+17	Reduce `identifier =  $simple_exp` to `$assign_stmt`
+18	Reduce `$assign_stmt ; $assign_stmt` to `$stmt_seq`
+19	Reduce `$stmt_seq ;` to `$stmt_seq`
+20	Reduce `identifier` to `$factor`
+21	Reduce `number` to `$factor`
+22	Reduce `$factor == $factor` to `$exp`
+23	Reduce `repeat $stmt_seq until $exp` to `$repeat_stmt`
+24	Reduce `$assign_stmt ; $repeat_stmt` to `$stmt_seq`
+25	Reduce `write identifier` to `$write_stmt`
+26	Reduce `$stmt_seq ; $write_stmt` to `$stmt_seq`
+27	Reduce `$stmt_seq ;` to `$stmt_seq`
+28	Reduce `if $exp then $stmt_seq end` to `$if_stmt`
+29	Reduce `$stmt_seq ; $if_stmt` to `$stmt_seq`
+30	Reduce `$stmt_seq ;` to `$stmt_seq`
+31	Reduce `identifier` to `$factor`
+32	Reduce `number` to `$factor`
+33	Reduce `$factor >= $factor` to `$exp`
+[E] failed to reduce at 14:14

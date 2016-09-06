@@ -3,7 +3,7 @@
 
 class SyntaxTree;
 class FileScanner;
-class LineScanner;
+class TextScanner;
 struct ScannerToken;
 
 class Parser {
@@ -35,6 +35,6 @@ protected:
 
 private:
 	void InitializeTerminalSymbolContainer();
-	bool ParseProductions(LineScanner* lineScanner);
+	bool ParseProductions(TextScanner* textScanner);
 	void DestroyGammars();
 };

@@ -5,7 +5,7 @@
 #include "parser.h"
 
 class SyntaxTree;
-class LineScanner;
+class TextScanner;
 class ParsingTable;
 struct ScannerToken;
 

@@ -5,7 +5,7 @@
 #include "operator_precedence_parser.h"
 
 Language::Language(LanguageParameter* parameter) {
-	parser_ = new LLParser();
+	parser_ = new OperatorPrecedenceParser();
 	parser_->SetGrammars(parameter->productions, parameter->nproductions);
 }
 

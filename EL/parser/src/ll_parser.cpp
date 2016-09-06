@@ -9,6 +9,24 @@
 #include "ll_parser.h"
 #include "syntax_tree.h"
 
+template <class Ty>
+void TraceStack(const std::string& token, const Ty& s) {
+	std::ostringstream oss;
+	const char* seperator = "";
+	for (Ty copy = s; !copy.empty();) {
+		oss << seperator << copy.top().first.ToString();
+		copy.pop();
+		seperator = " ";
+	}
+
+	std::string space;
+	for (int i = (int)token.length(); i < 12; ++i) {
+		space += ' ';
+	}
+	
+	Debug::Log(token + space + " => " + oss.str());
+}
+
 class ParsingTable : public matrix<GrammarSymbol, GrammarSymbol, std::pair<GrammarSymbol, Condinate*>> {
 public:
 	std::string ToString() const;
@@ -472,7 +490,7 @@ bool LLParser::ParseFile(SyntaxTree* tree, FileScanner* fileScanner) {
 
 		if (symbol.SymbolType() == GrammarSymbolTerminal && symbol.Match(token.text)) {
 			s.pop();
-
+			TraceStack("Match " + std::string(token.text), s);
 			if (symbol != GrammarSymbol::epsilon && !fileScanner->GetToken(&token, &tokenPosition)) {
 				Debug::LogError("failed to read token");
 				return false;
@@ -496,6 +514,8 @@ bool LLParser::ParseFile(SyntaxTree* tree, FileScanner* fileScanner) {
 				for (Condinate::reverse_iterator rite = cond->rbegin(); rite != cond->rend(); ++rite) {
 					s.push(std::make_pair(*rite, tree->AddNode(root, rite->ToString())));
 				}
+
+				TraceStack("Push " + std::string(token.text), s);
 
 				continue;
 			}
