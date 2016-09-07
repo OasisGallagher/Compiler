@@ -75,55 +75,64 @@ const char* grammar11[] = {	// LL(1) Grammar.
 };
 
 const char* grammar12[] = {	// Operator Precedence Grammar.
-	"$program : "
-		"$stmt_seq",
-	"$stmt_seq : "
-		"$stmt_seq ; "
-		//"| $stmt_seq newline"
-		"| $stmt_seq ; $stmt "
-		"| $stmt_seq newline $stmt "
+	"$program"
+		": $stmt_seq",
+	"$stmt_seq"
+		": $stmt_seq ;"
+		"| newline $stmt_seq"
+		"| $stmt_seq newline"
+		"| $stmt_seq ; $stmt"
+		"| $stmt_seq newline $stmt"
 		"| $stmt",
-	"$stmt : "
-		"$if_stmt "
-		"| $repeat_stmt "
-		"| $assign_stmt "
-		"| $read_stmt "
-		"| $write_stmt "
-		"| ;",
-	"$if_stmt : "
-		"if $exp then end "
-		"| if $exp then $stmt_seq end "
-		"| if $exp then else end "
-		"| if $exp then else $stmt_seq end "
-		"| if $exp then $stmt_seq else end "
+	"$function_def"
+		": function identifier ( $argument_list ) end"
+		"| function identifier ( $argument_list ) $stmt_seq end",
+	"$argument_list"
+		": identifier"
+		"| $argument_list , identifier",
+	"$stmt"
+		": $if_stmt"
+		"| $repeat_stmt"
+		"| $assign_stmt"
+		"| $read_stmt"
+		"| $write_stmt"
+		"| $empty_stmt",
+	"$empty_stmt"
+		": ;",
+	"$if_stmt"
+		": if $exp then end"
+		"| if $exp then $stmt_seq end"
+		"| if $exp then else end"
+		"| if $exp then else $stmt_seq end"
+		"| if $exp then $stmt_seq else end"
 		"| if $exp then $stmt_seq else $stmt_seq end",
-	"$repeat_stmt : "
-		"repeat until $exp "
+	"$repeat_stmt"
+		": repeat until $exp"
 		"| repeat $stmt_seq until $exp",
-	"$assign_stmt : "
-		"identifier = $exp",
-	"$read_stmt : "
-		"read identifier",
-	"$write_stmt : "
-		"write identifier",
-	"$exp :" 
-		"$simple_exp < $simple_exp "
-		"| $simple_exp <= $simple_exp "
-		"| $simple_exp == $simple_exp "
-		"| $simple_exp >= $simple_exp "
-		"| $simple_exp > $simple_exp "
+	"$assign_stmt"
+		": identifier = $exp",
+	"$read_stmt"
+		": read identifier",
+	"$write_stmt"
+		": write identifier",
+	"$exp" 
+		": $simple_exp < $simple_exp"
+		"| $simple_exp <= $simple_exp"
+		"| $simple_exp == $simple_exp"
+		"| $simple_exp >= $simple_exp"
+		"| $simple_exp > $simple_exp"
 		"| $simple_exp",
-	"$simple_exp : "
-		"$simple_exp + $term "
-		"| $simple_exp - $term "
+	"$simple_exp"
+		": $simple_exp + $term"
+		"| $simple_exp - $term"
 		"| $term",
-	"$term : "
-		"$term * $factor "
-		"| $term / $factor "
+	"$term"
+		": $term * $factor"
+		"| $term / $factor"
 		"| $factor",
-	"$factor : "
-		"( $exp ) "
-		"| number "
+	"$factor"
+		": ( $exp )"
+		"| number"
 		"| identifier",
 };
 
@@ -134,7 +143,7 @@ int main() {
 
 	LanguageParameter lp;
 
-	SetLanguage(lp, grammar11);
+	SetLanguage(lp, grammar12);
 	Language* lang = new Language(&lp);
 
 	Debug::Log(lang->ToString());

@@ -1,170 +1,106 @@
+[W] invalid operator precedence grammar, precedence (newline, ;) : (<, >)
+[W] invalid operator precedence grammar, precedence (;, ;) : (>, <)
+[W] invalid operator precedence grammar, precedence (newline, ;) : (<, >)
+[W] invalid operator precedence grammar, precedence (newline, newline) : (>, <)
+[W] invalid operator precedence grammar, precedence (), newline) : (>, <)
+[W] invalid operator precedence grammar, precedence (), ;) : (>, <)
+[W] invalid operator precedence grammar, precedence (), end) : (=, >)
+[W] invalid operator precedence grammar, precedence (), end) : (=, >)
+[W] invalid operator precedence grammar, precedence (), end) : (=, >)
+[W] invalid operator precedence grammar, precedence (), end) : (=, >)
 =================== Grammars ===================
 $program              $stmt_seq
-$stmt_seq             $stmt $stmt_seq_2
-$stmt_seq_2           ; $stmt $stmt_seq_2|epsilon|newline $stmt $stmt_seq_2
-$stmt                 $write_stmt|$read_stmt|$assign_stmt|$repeat_stmt|$if_stmt|epsilon
-$if_stmt              if $exp then $stmt_seq $if_stmt_2
-$if_stmt_2            else $stmt_seq end|end
-$repeat_stmt          repeat $stmt_seq until $exp
+$stmt_seq             $stmt_seq newline $stmt|$stmt_seq ; $stmt|$stmt_seq newline|$stmt_seq ;|newline $stmt_seq|$stmt
+$function_def         function identifier ( $argument_list ) end|function identifier ( $argument_list ) $stmt_seq end
+$argument_list        $argument_list , identifier|identifier
+$stmt                 $if_stmt|$repeat_stmt|$assign_stmt|$read_stmt|$write_stmt|$empty_stmt
+$empty_stmt           ;
+$if_stmt              if $exp then end|if $exp then $stmt_seq end|if $exp then else end|if $exp then else $stmt_seq end|if $exp then $stmt_seq else end|if $exp then $stmt_seq else $stmt_seq end
+$repeat_stmt          repeat until $exp|repeat $stmt_seq until $exp
 $assign_stmt          identifier =  $exp
 $read_stmt            read identifier
 $write_stmt           write identifier
-$exp                  $simple_exp $exp_2
-$exp_2                >  $simple_exp|>= $simple_exp|== $simple_exp|<= $simple_exp|<  $simple_exp|epsilon
-$simple_exp           $term $simple_exp_2
-$simple_exp_2         - $term $simple_exp_2|+ $term $simple_exp_2|epsilon
-$term                 $factor $term_2
-$term_2               / $factor $term_2|* $factor $term_2|epsilon
-$factor               ( $exp )|identifier|number
+$exp                  $simple_exp <  $simple_exp|$simple_exp <= $simple_exp|$simple_exp == $simple_exp|$simple_exp >= $simple_exp|$simple_exp >  $simple_exp|$simple_exp
+$simple_exp           $simple_exp - $term|$simple_exp + $term|$term
+$term                 $term / $factor|$term * $factor|$factor
+$factor               ( $exp )|number|identifier
 
 =============== TerminalSymbols ================
-( ) * + - / ; <  <= =  == >  >= else end epsilon identifier if newline number read repeat string then until write zero
+( ) * + , - / ; <  <= =  == >  >= else end epsilon function identifier if newline number read repeat string then until write zero
 
 ============== NonterminalSymbols ==============
-$assign_stmt $exp $exp_2 $factor $if_stmt $if_stmt_2 $program $read_stmt $repeat_stmt $simple_exp $simple_exp_2 $stmt $stmt_seq $stmt_seq_2 $term $term_2 $write_stmt
+$argument_list $assign_stmt $empty_stmt $exp $factor $function_def $if_stmt $program $read_stmt $repeat_stmt $simple_exp $stmt $stmt_seq $term $write_stmt
 
-==================== First =====================
-$program              {epsilon identifier if repeat read write}
-$stmt_seq             {epsilon identifier if repeat read write}
-$stmt                 {epsilon identifier if repeat read write}
-$if_stmt              {if}
-$repeat_stmt          {repeat}
+=================== FirstVt ====================
 $assign_stmt          {identifier}
+$program              {newline identifier ; if read repeat write}
+$stmt_seq             {newline identifier ; if read repeat write}
+$if_stmt              {if}
+$argument_list        {identifier ,}
 $read_stmt            {read}
+$exp                  {number identifier ( <= + >= - == * >  / < }
+$function_def         {function}
 $write_stmt           {write}
-$exp                  {number identifier (}
-$simple_exp           {number identifier (}
-$term                 {number identifier (}
+$empty_stmt           {;}
+$stmt                 {identifier ; if read repeat write}
+$repeat_stmt          {repeat}
+$term                 {number identifier ( * /}
 $factor               {number identifier (}
-$stmt_seq_2           {newline epsilon ;}
-$simple_exp_2         {epsilon + -}
-$term_2               {epsilon * /}
-$if_stmt_2            {end else}
-$exp_2                {epsilon <  <= == >= > }
+$simple_exp           {number identifier ( + - * /}
 
-==================== Follow ====================
-$program              {zero}
-$stmt_seq             {zero end else until}
-$stmt                 {zero newline ; end else until}
-$if_stmt              {zero newline ; end else until}
-$repeat_stmt          {zero newline ; end else until}
-$assign_stmt          {zero newline ; end else until}
-$read_stmt            {zero newline ; end else until}
-$write_stmt           {zero newline ; end else until}
-$exp                  {zero newline ; then end else until )}
-$simple_exp           {zero newline ; then end else until <  <= == >= >  )}
-$term                 {zero newline ; then end else until <  <= == >= >  + - )}
-$factor               {zero newline ; then end else until <  <= == >= >  + - * / )}
-$stmt_seq_2           {zero end else until}
-$simple_exp_2         {zero newline ; then end else until <  <= == >= >  )}
-$term_2               {zero newline ; then end else until <  <= == >= >  + - )}
-$if_stmt_2            {zero newline ; end else until}
-$exp_2                {zero newline ; then end else until )}
+==================== LastVt ====================
+$assign_stmt          {number identifier ) =  <= + >= - == * >  / < }
+$program              {number newline identifier ; ) end =  <= + >= - until == * >  / < }
+$stmt_seq             {number newline identifier ; ) end =  <= + >= - until == * >  / < }
+$if_stmt              {end}
+$argument_list        {identifier}
+$read_stmt            {identifier}
+$exp                  {number identifier ) <= + >= - == * >  / < }
+$function_def         {end}
+$write_stmt           {identifier}
+$empty_stmt           {;}
+$stmt                 {number identifier ; ) end =  <= + >= - until == * >  / < }
+$repeat_stmt          {number identifier ) <= + >= - until == * >  / < }
+$term                 {number identifier ) * /}
+$factor               {number identifier )}
+$simple_exp           {number identifier ) + - * /}
 
-================= ParsingTable =================
-[$program, zero]            $program : $stmt_seq
-[$program, epsilon]         $program : $stmt_seq
-[$program, identifier]      $program : $stmt_seq
-[$program, if]              $program : $stmt_seq
-[$program, repeat]          $program : $stmt_seq
-[$program, read]            $program : $stmt_seq
-[$program, write]           $program : $stmt_seq
-[$stmt_seq, zero]           $stmt_seq : $stmt $stmt_seq_2
-[$stmt_seq, newline]        $stmt_seq : $stmt $stmt_seq_2
-[$stmt_seq, epsilon]        $stmt_seq : $stmt $stmt_seq_2
-[$stmt_seq, identifier]     $stmt_seq : $stmt $stmt_seq_2
-[$stmt_seq, ;]              $stmt_seq : $stmt $stmt_seq_2
-[$stmt_seq, if]             $stmt_seq : $stmt $stmt_seq_2
-[$stmt_seq, end]            $stmt_seq : $stmt $stmt_seq_2
-[$stmt_seq, else]           $stmt_seq : $stmt $stmt_seq_2
-[$stmt_seq, repeat]         $stmt_seq : $stmt $stmt_seq_2
-[$stmt_seq, until]          $stmt_seq : $stmt $stmt_seq_2
-[$stmt_seq, read]           $stmt_seq : $stmt $stmt_seq_2
-[$stmt_seq, write]          $stmt_seq : $stmt $stmt_seq_2
-[$stmt, zero]               $stmt : epsilon
-[$stmt, newline]            $stmt : epsilon
-[$stmt, epsilon]            $stmt : epsilon
-[$stmt, identifier]         $stmt : $assign_stmt
-[$stmt, ;]                  $stmt : epsilon
-[$stmt, if]                 $stmt : $if_stmt
-[$stmt, end]                $stmt : epsilon
-[$stmt, else]               $stmt : epsilon
-[$stmt, repeat]             $stmt : $repeat_stmt
-[$stmt, until]              $stmt : epsilon
-[$stmt, read]               $stmt : $read_stmt
-[$stmt, write]              $stmt : $write_stmt
-[$if_stmt, if]              $if_stmt : if $exp then $stmt_seq $if_stmt_2
-[$repeat_stmt, repeat]      $repeat_stmt : repeat $stmt_seq until $exp
-[$assign_stmt, identifier]  $assign_stmt : identifier =  $exp
-[$read_stmt, read]          $read_stmt : read identifier
-[$write_stmt, write]        $write_stmt : write identifier
-[$exp, number]              $exp : $simple_exp $exp_2
-[$exp, identifier]          $exp : $simple_exp $exp_2
-[$exp, (]                   $exp : $simple_exp $exp_2
-[$simple_exp, number]       $simple_exp : $term $simple_exp_2
-[$simple_exp, identifier]   $simple_exp : $term $simple_exp_2
-[$simple_exp, (]            $simple_exp : $term $simple_exp_2
-[$term, number]             $term : $factor $term_2
-[$term, identifier]         $term : $factor $term_2
-[$term, (]                  $term : $factor $term_2
-[$factor, number]           $factor : number
-[$factor, identifier]       $factor : identifier
-[$factor, (]                $factor : ( $exp )
-[$stmt_seq_2, zero]         $stmt_seq_2 : epsilon
-[$stmt_seq_2, newline]      $stmt_seq_2 : newline $stmt $stmt_seq_2
-[$stmt_seq_2, epsilon]      $stmt_seq_2 : epsilon
-[$stmt_seq_2, ;]            $stmt_seq_2 : ; $stmt $stmt_seq_2
-[$stmt_seq_2, end]          $stmt_seq_2 : epsilon
-[$stmt_seq_2, else]         $stmt_seq_2 : epsilon
-[$stmt_seq_2, until]        $stmt_seq_2 : epsilon
-[$simple_exp_2, zero]       $simple_exp_2 : epsilon
-[$simple_exp_2, newline]    $simple_exp_2 : epsilon
-[$simple_exp_2, epsilon]    $simple_exp_2 : epsilon
-[$simple_exp_2, ;]          $simple_exp_2 : epsilon
-[$simple_exp_2, then]       $simple_exp_2 : epsilon
-[$simple_exp_2, end]        $simple_exp_2 : epsilon
-[$simple_exp_2, else]       $simple_exp_2 : epsilon
-[$simple_exp_2, until]      $simple_exp_2 : epsilon
-[$simple_exp_2, < ]         $simple_exp_2 : epsilon
-[$simple_exp_2, <=]         $simple_exp_2 : epsilon
-[$simple_exp_2, ==]         $simple_exp_2 : epsilon
-[$simple_exp_2, >=]         $simple_exp_2 : epsilon
-[$simple_exp_2, > ]         $simple_exp_2 : epsilon
-[$simple_exp_2, +]          $simple_exp_2 : + $term $simple_exp_2
-[$simple_exp_2, -]          $simple_exp_2 : - $term $simple_exp_2
-[$simple_exp_2, )]          $simple_exp_2 : epsilon
-[$term_2, zero]             $term_2 : epsilon
-[$term_2, newline]          $term_2 : epsilon
-[$term_2, epsilon]          $term_2 : epsilon
-[$term_2, ;]                $term_2 : epsilon
-[$term_2, then]             $term_2 : epsilon
-[$term_2, end]              $term_2 : epsilon
-[$term_2, else]             $term_2 : epsilon
-[$term_2, until]            $term_2 : epsilon
-[$term_2, < ]               $term_2 : epsilon
-[$term_2, <=]               $term_2 : epsilon
-[$term_2, ==]               $term_2 : epsilon
-[$term_2, >=]               $term_2 : epsilon
-[$term_2, > ]               $term_2 : epsilon
-[$term_2, +]                $term_2 : epsilon
-[$term_2, -]                $term_2 : epsilon
-[$term_2, *]                $term_2 : * $factor $term_2
-[$term_2, /]                $term_2 : / $factor $term_2
-[$term_2, )]                $term_2 : epsilon
-[$if_stmt_2, end]           $if_stmt_2 : end
-[$if_stmt_2, else]          $if_stmt_2 : else $stmt_seq end
-[$exp_2, zero]              $exp_2 : epsilon
-[$exp_2, newline]           $exp_2 : epsilon
-[$exp_2, epsilon]           $exp_2 : epsilon
-[$exp_2, ;]                 $exp_2 : epsilon
-[$exp_2, then]              $exp_2 : epsilon
-[$exp_2, end]               $exp_2 : epsilon
-[$exp_2, else]              $exp_2 : epsilon
-[$exp_2, until]             $exp_2 : epsilon
-[$exp_2, < ]                $exp_2 : <  $simple_exp
-[$exp_2, <=]                $exp_2 : <= $simple_exp
-[$exp_2, ==]                $exp_2 : == $simple_exp
-[$exp_2, >=]                $exp_2 : >= $simple_exp
-[$exp_2, > ]                $exp_2 : >  $simple_exp
-[$exp_2, )]                 $exp_2 : epsilon
-[E] unexpected token ; at 1:1
+=========== OperatorPrecedenceTable ============
++--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+|            |  (|  )|  *|  +|  ,|  -|  /|  ;|  < |  <=|  = |  ==|  > |  >=|  else|  end|  epsilon|  function|  identifier|  if|  newline|  number|  read|  repeat|  string|  then|  until|  write|  zero|
++--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+|           (|  <|  =|  <|  <|  <|  <|  <|   |   <|   <|    |   <|   <|   <|      |     |         |          |           <|    |         |       <|      |        |        |      |       |       |     >|
+|           )|   |  >|  >|  >|   |  >|  >|  >|   >|   >|    |   >|   >|   >|     >|    =|         |          |           <|   <|        >|        |     <|       <|        |     >|      >|      <|     >|
+|           *|  <|  >|  >|  >|   |  >|  >|  >|   >|   >|    |   >|   >|   >|     >|    >|         |          |           <|    |        >|       <|      |        |        |     >|      >|       |     >|
+|           +|  <|  >|  <|  >|   |  >|  <|  >|   >|   >|    |   >|   >|   >|     >|    >|         |          |           <|    |        >|       <|      |        |        |     >|      >|       |     >|
+|           ,|   |   |   |   |   |   |   |   |    |    |    |    |    |    |      |     |         |          |           =|    |         |        |      |        |        |      |       |       |     >|
+|           -|  <|  >|  <|  >|   |  >|  <|  >|   >|   >|    |   >|   >|   >|     >|    >|         |          |           <|    |        >|       <|      |        |        |     >|      >|       |     >|
+|           /|  <|  >|  >|  >|   |  >|  >|  >|   >|   >|    |   >|   >|   >|     >|    >|         |          |           <|    |        >|       <|      |        |        |     >|      >|       |     >|
+|           ;|   |   |   |   |   |   |   |  >|    |    |    |    |    |    |     >|    >|         |          |           <|   <|        >|        |     <|       <|        |      |      >|      <|     >|
+|          < |  <|  >|  <|  <|   |  <|  <|  >|    |    |    |    |    |    |     >|    >|         |          |           <|    |        >|       <|      |        |        |     >|      >|       |     >|
+|          <=|  <|  >|  <|  <|   |  <|  <|  >|    |    |    |    |    |    |     >|    >|         |          |           <|    |        >|       <|      |        |        |     >|      >|       |     >|
+|          = |  <|   |  <|  <|   |  <|  <|  >|   <|   <|    |   <|   <|   <|     >|    >|         |          |           <|    |        >|       <|      |        |        |      |      >|       |     >|
+|          ==|  <|  >|  <|  <|   |  <|  <|  >|    |    |    |    |    |    |     >|    >|         |          |           <|    |        >|       <|      |        |        |     >|      >|       |     >|
+|          > |  <|  >|  <|  <|   |  <|  <|  >|    |    |    |    |    |    |     >|    >|         |          |           <|    |        >|       <|      |        |        |     >|      >|       |     >|
+|          >=|  <|  >|  <|  <|   |  <|  <|  >|    |    |    |    |    |    |     >|    >|         |          |           <|    |        >|       <|      |        |        |     >|      >|       |     >|
+|        else|   |   |   |   |   |   |   |  <|    |    |    |    |    |    |      |    =|         |          |           <|   <|        <|        |     <|       <|        |      |       |      <|     >|
+|         end|   |   |   |   |   |   |   |  >|    |    |    |    |    |    |     >|    >|         |          |            |    |        >|        |      |        |        |      |      >|       |     >|
+|     epsilon|   |   |   |   |   |   |   |   |    |    |    |    |    |    |      |     |         |          |            |    |         |        |      |        |        |      |       |       |     >|
+|    function|   |   |   |   |   |   |   |   |    |    |    |    |    |    |      |     |         |          |           =|    |         |        |      |        |        |      |       |       |     >|
+|  identifier|  =|  >|  >|  >|  >|  >|  >|  >|   >|   >|   =|   >|   >|   >|     >|    >|         |          |            |    |        >|        |      |        |        |     >|      >|       |     >|
+|          if|  <|   |  <|  <|   |  <|  <|   |   <|   <|    |   <|   <|   <|      |     |         |          |           <|    |         |       <|      |        |        |     =|       |       |     >|
+|     newline|   |   |   |   |   |   |   |  <|    |    |    |    |    |    |     >|    >|         |          |           <|   <|        >|        |     <|       <|        |      |      >|      <|     >|
+|      number|   |  >|  >|  >|   |  >|  >|  >|   >|   >|    |   >|   >|   >|     >|    >|         |          |            |    |        >|        |      |        |        |     >|      >|       |     >|
+|        read|   |   |   |   |   |   |   |   |    |    |    |    |    |    |      |     |         |          |           =|    |         |        |      |        |        |      |       |       |     >|
+|      repeat|   |   |   |   |   |   |   |  <|    |    |    |    |    |    |      |     |         |          |           <|   <|        <|        |     <|       <|        |      |      =|      <|     >|
+|      string|   |   |   |   |   |   |   |   |    |    |    |    |    |    |      |     |         |          |            |    |         |        |      |        |        |      |       |       |     >|
+|        then|   |   |   |   |   |   |   |  <|    |    |    |    |    |    |     =|    =|         |          |           <|   <|        <|        |     <|       <|        |      |       |      <|     >|
+|       until|  <|   |  <|  <|   |  <|  <|  >|   <|   <|    |   <|   <|   <|     >|    >|         |          |           <|    |        >|       <|      |        |        |      |      >|       |     >|
+|       write|   |   |   |   |   |   |   |   |    |    |    |    |    |    |      |     |         |          |           =|    |         |        |      |        |        |      |       |       |     >|
+|        zero|  <|  <|  <|  <|  <|  <|  <|  <|   <|   <|   <|   <|   <|   <|     <|    <|        <|         <|           <|   <|        <|       <|     <|       <|       <|     <|      <|      <|      |
++--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+
+1	Reduce `identifier` to `$argument_list`
+2	Reduce `$argument_list , identifier` to `$argument_list`
+3	Reduce `$argument_list , identifier` to `$argument_list`
+[E] failed to reduce `function identifier ( $argument_list )` at 1:23

@@ -214,14 +214,14 @@ bool OperatorPrecedenceParser::ParseFile(SyntaxTree* tree, FileScanner* fileScan
 			GrammarSymbol n = Reduce(container.begin() + j + 1, container.begin() + k + 1);
 
 			if (!n) {
-				Debug::LogError("failed to reduce at " + position.ToString());
+				Debug::LogError(std::string("failed to reduce `") + Utility::Concat(container.begin() + j + 1, container.begin() + k + 1) + "` at " + position.ToString());
 				return false;
 			}
 
 			Debug::Log(std::to_string(++reduceCount) + "\tReduce `" + Utility::Concat(container.begin() + j + 1, container.begin() + k + 1) + "` to `" + n.ToString() + "`");
 
 			container.erase(container.begin() + j + 1, container.begin() + k + 1);
-			
+
 			k = j + 1;
 			container.push_back(n);
 		}
@@ -438,10 +438,10 @@ bool OperatorPrecedenceParser::CheckOperatorGrammar() const {
 				Debug::LogError("Adjacent non-terminal grammar symbol.");
 				return false;
 			}
-
+			/*
 			if (c->size() == 1 && c->front().SymbolType() == GrammarSymbolNonterminal) {
 				Debug::LogWarning("production " + g->GetLhs().ToString() + " : " + c->ToString() + " will be omitted.");
-			}
+			}*/
 		}
 	}
 
