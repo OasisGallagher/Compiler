@@ -1,14 +1,13 @@
-function call(x, y, z)
-end
-
 read x
+write x
+
 if 0 < x then
-  fact = 1;
+  fact = 1
   repeat
-    fact = fact * x;
-    x = x + 1;
-  until x == 0;
-  write fact;
+    fact = fact * x
+    x = x + 1
+  until x == 0
+  write fact
 end
 
 repeat
@@ -19,7 +18,7 @@ if x >= 10 then
 	write x;
 end
 
-if x < 10 then write x; end
+if x < 10 then write x end
 #
 #for i = 1; i < 10; i = i + 1 do
 #	write x;

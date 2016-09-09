@@ -133,14 +133,14 @@ OperatorPrecedenceParser::~OperatorPrecedenceParser() {
 	delete operatorPrecedenceTable_;
 }
 
-bool OperatorPrecedenceParser::ComparePrecedence(const GrammarSymbol& lhs, const GrammarSymbol& rhs, OperatorPrecedence precedence) const {
+OperatorPrecedence OperatorPrecedenceParser::GetPrecedence(const GrammarSymbol& lhs, const GrammarSymbol& rhs) const {
 	OperatorPrecedenceTable::const_iterator pos = operatorPrecedenceTable_->find(lhs, rhs);
 
 	if (pos == operatorPrecedenceTable_->end()) {
-		return false;
+		return OperatorPrecedenceUndefined;
 	}
 
-	return pos->second == precedence;
+	return pos->second;
 }
 
 template <class Iterator>
@@ -201,15 +201,15 @@ bool OperatorPrecedenceParser::ParseFile(SyntaxTree* tree, FileScanner* fileScan
 		}
 
 		int j = (container[k].SymbolType() == GrammarSymbolTerminal) ? k : k - 1;
-		OperatorPrecedence precedence = OperatorPrecedenceEmpty;
+		OperatorPrecedence precedence = OperatorPrecedenceUndefined;
 
-		for (; ComparePrecedence(container[j], a, OperatorPrecedenceGreater);) {
+		for (; GetPrecedence(container[j], a) == OperatorPrecedenceGreater;) {
 			GrammarSymbol q;
 			do {
 				q = container[j];
 				j -= (container[j - 1].SymbolType() == GrammarSymbolTerminal) ? 1 : 2;
 
-			} while (!ComparePrecedence(container[j], q, OperatorPrecedenceLess));
+			} while (GetPrecedence(container[j], q) != OperatorPrecedenceLess);
 
 			GrammarSymbol n = Reduce(container.begin() + j + 1, container.begin() + k + 1);
 
@@ -226,7 +226,7 @@ bool OperatorPrecedenceParser::ParseFile(SyntaxTree* tree, FileScanner* fileScan
 			container.push_back(n);
 		}
 
-		if (ComparePrecedence(container[j], a, OperatorPrecedenceLess) || ComparePrecedence(container[j], a, OperatorPrecedenceEqual)) {
+		if (GetPrecedence(container[j], a) == OperatorPrecedenceLess || GetPrecedence(container[j], a) == OperatorPrecedenceEqual) {
 			++k;
 			container.push_back(a);
 		}

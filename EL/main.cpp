@@ -84,12 +84,6 @@ const char* grammar12[] = {	// Operator Precedence Grammar.
 		"| $stmt_seq ; $stmt"
 		"| $stmt_seq newline $stmt"
 		"| $stmt",
-	"$function_def"
-		": function identifier ( $argument_list ) end"
-		"| function identifier ( $argument_list ) $stmt_seq end",
-	"$argument_list"
-		": identifier"
-		"| $argument_list , identifier",
 	"$stmt"
 		": $if_stmt"
 		"| $repeat_stmt"
@@ -100,15 +94,15 @@ const char* grammar12[] = {	// Operator Precedence Grammar.
 	"$empty_stmt"
 		": ;",
 	"$if_stmt"
-		": if $exp then end"
-		"| if $exp then $stmt_seq end"
-		"| if $exp then else end"
-		"| if $exp then else $stmt_seq end"
-		"| if $exp then $stmt_seq else end"
-		"| if $exp then $stmt_seq else $stmt_seq end",
+		": if $exp then newline end"
+		"| if $exp then newline $stmt_seq end"
+		"| if $exp then newline else end"
+		"| if $exp then newline else $stmt_seq end"
+		"| if $exp then newline $stmt_seq else end"
+		"| if $exp then newline $stmt_seq else $stmt_seq end",
 	"$repeat_stmt"
-		": repeat until $exp"
-		"| repeat $stmt_seq until $exp",
+		": repeat newline until $exp"
+		"| repeat newline $stmt_seq newline until $exp",
 	"$assign_stmt"
 		": identifier = $exp",
 	"$read_stmt"

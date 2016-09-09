@@ -11,7 +11,7 @@ public:
 
 public:
 	enum OperatorPrecedence {
-		OperatorPrecedenceEmpty,
+		OperatorPrecedenceUndefined,
 		OperatorPrecedenceLess,
 		OperatorPrecedenceEqual,
 		OperatorPrecedenceGreater,
@@ -46,8 +46,10 @@ private:
 
 	bool OnUnexpectedToken(GrammarSymbol &a, const SymbolStack &container, const TokenPosition &position);
 	bool CheckOperatorGrammar() const;
-	bool ComparePrecedence(const GrammarSymbol& lhs, const GrammarSymbol& rhs, OperatorPrecedence precedence) const;
 	void InsertOperatorPrecedence(const GrammarSymbol& k1, const GrammarSymbol& k2, OperatorPrecedence precedence);
+
+	OperatorPrecedence GetPrecedence(const GrammarSymbol& lhs, const GrammarSymbol& rhs) const;
+
 private:
 	GrammarSymbolSetTable firstVtContainer_;
 	GrammarSymbolSetTable lastVtContainer_;
