@@ -1,25 +1,18 @@
-read x
-write x
-
 if 0 < x then
   fact = 1
-  repeat
-    fact = fact * x
-    x = x + 1
-  until x == 0
-  write fact
+  while x < 10 do
+    fact = fact * x;
+    x = x + 1;
+  end
+
+  write fact;
 end
 
-repeat
-	x = x * 2;
-until x >= 10
+read x;
 
-if x >= 10 then
-	write x;
+while y < x do
+	write y
 end
 
-if x < 10 then write x end
-#
-#for i = 1; i < 10; i = i + 1 do
-#	write x;
-#end
+if x then read x; end
+function printf(format, arguments) def write format; write arguments; end

@@ -227,8 +227,11 @@ bool OperatorPrecedenceParser::ParseFile(SyntaxTree* tree, FileScanner* fileScan
 		}
 
 		if (GetPrecedence(container[j], a) == OperatorPrecedenceLess || GetPrecedence(container[j], a) == OperatorPrecedenceEqual) {
-			++k;
-			container.push_back(a);
+			if (a != GrammarSymbol::newline || container.back().SymbolType() == GrammarSymbolNonterminal) {
+				++k;
+				Debug::LogWarning("Push " + a.ToString());
+				container.push_back(a);
+			}
 		}
 		else if (!OnUnexpectedToken(a, container, position)) {
 			return false;
@@ -449,11 +452,6 @@ bool OperatorPrecedenceParser::CheckOperatorGrammar() const {
 }
 
 bool OperatorPrecedenceParser::OnUnexpectedToken(GrammarSymbol &a, const SymbolStack &container, const TokenPosition &position) {
-	if (a == GrammarSymbol::newline) {
-		// 忽略无法匹配的换行符.
-		return true;
-	}
-
 	if (a == GrammarSymbol::zero) {
 		if (container.size() != 2 || container.front() != GrammarSymbol::zero || container.back().SymbolType() != GrammarSymbolNonterminal) {
 			Debug::LogError("unexpected end of file.");

@@ -61,7 +61,7 @@ const char* grammar10[] = {
 
 const char* grammar11[] = {	// LL(1) Grammar.
 	"$program : $stmt_seq",
-	"$stmt_seq : $stmt_seq ; $stmt | $stmt | $stmt_seq newline $stmt",
+	"$stmt_seq : $stmt_seq ; $stmt | $stmt",
 	"$stmt : $if_stmt | $repeat_stmt | $assign_stmt | $read_stmt | $write_stmt | epsilon",
 	"$if_stmt : if $exp then $stmt_seq end | if $exp then $stmt_seq else $stmt_seq end",
 	"$repeat_stmt : repeat $stmt_seq until $exp",
@@ -73,36 +73,32 @@ const char* grammar11[] = {	// LL(1) Grammar.
 	"$term : $term * $factor | $term / $factor | $factor",
 	"$factor : ( $exp ) | number | identifier",
 };
-
 const char* grammar12[] = {	// Operator Precedence Grammar.
 	"$program"
 		": $stmt_seq",
 	"$stmt_seq"
-		": $stmt_seq ;"
-		"| newline $stmt_seq"
-		"| $stmt_seq newline"
+		": $stmt_seq ; "
 		"| $stmt_seq ; $stmt"
+		"| $stmt_seq newline"
 		"| $stmt_seq newline $stmt"
 		"| $stmt",
 	"$stmt"
 		": $if_stmt"
-		"| $repeat_stmt"
+		"| $while_stmt"
 		"| $assign_stmt"
 		"| $read_stmt"
 		"| $write_stmt"
-		"| $empty_stmt",
-	"$empty_stmt"
-		": ;",
+		"| $function_def",
 	"$if_stmt"
-		": if $exp then newline end"
-		"| if $exp then newline $stmt_seq end"
-		"| if $exp then newline else end"
-		"| if $exp then newline else $stmt_seq end"
-		"| if $exp then newline $stmt_seq else end"
-		"| if $exp then newline $stmt_seq else $stmt_seq end",
-	"$repeat_stmt"
-		": repeat newline until $exp"
-		"| repeat newline $stmt_seq newline until $exp",
+		": if $exp then end"
+		"| if $exp then $stmt_seq end"
+		"| if $exp then else end"
+		"| if $exp then else $stmt_seq end"
+		"| if $exp then $stmt_seq else end"
+		"| if $exp then $stmt_seq else $stmt_seq end",
+	"$while_stmt"
+		": while $exp do end"
+		"| while $exp do $stmt_seq end",
 	"$assign_stmt"
 		": identifier = $exp",
 	"$read_stmt"
@@ -128,6 +124,11 @@ const char* grammar12[] = {	// Operator Precedence Grammar.
 		": ( $exp )"
 		"| number"
 		"| identifier",
+	"$function_def"
+		": function identifier ( $argument_list ) $stmt_seq end",
+	"$argument_list"
+		": $factor"
+		"| $argument_list, $factor",
 };
 
 #define SetLanguage(_Ans, _Prod) if (true) { _Ans.productions = _Prod; _Ans.nproductions = sizeof(_Prod) / sizeof(_Prod[0]); } else (void)0
@@ -140,13 +141,13 @@ int main() {
 	SetLanguage(lp, grammar12);
 	Language* lang = new Language(&lp);
 
-	Debug::Log(lang->ToString());
+	//Debug::Log(lang->ToString());
 
 	SyntaxTree tree;
 
 	if (lang->Parse(&tree, "test.el")) {
-		Debug::Log("\n" + Utility::Heading(" SyntaxTree "));
-		Debug::Log(tree.ToString());
+		//Debug::Log("\n" + Utility::Heading(" SyntaxTree "));
+		//Debug::Log(tree.ToString());
 	}
 
  	delete lang;

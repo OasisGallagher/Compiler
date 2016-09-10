@@ -25,6 +25,10 @@ public:
 	typedef typename container_type::const_iterator const_iterator;
 
 public:
+	value_type& at(const first_key_type& k1, const second_key_type& k2) {
+		return cont_[std::make_pair(k1, k2)];
+	}
+
 	void insert(const first_key_type& k1, const second_key_type& k2, const value_type& val) {
 		cont_.insert(std::make_pair(std::make_pair(k1, k2), val));
 	}

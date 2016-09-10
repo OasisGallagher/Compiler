@@ -1,107 +1,115 @@
-[W] invalid operator precedence grammar, precedence (newline, ;) : (<, >)
-[W] invalid operator precedence grammar, precedence (;, ;) : (>, <)
-[W] invalid operator precedence grammar, precedence (newline, ;) : (<, >)
-[W] invalid operator precedence grammar, precedence (newline, newline) : (>, <)
-[W] invalid operator precedence grammar, precedence (newline, newline) : (>, <)
-[W] invalid operator precedence grammar, precedence (newline, end) : (=, >)
-[W] invalid operator precedence grammar, precedence (newline, end) : (=, >)
-[W] invalid operator precedence grammar, precedence (newline, newline) : (>, <)
-[W] invalid operator precedence grammar, precedence (newline, else) : (=, >)
-[W] invalid operator precedence grammar, precedence (newline, newline) : (>, <)
-[W] invalid operator precedence grammar, precedence (newline, else) : (=, >)
-[W] invalid operator precedence grammar, precedence (newline, end) : (=, >)
-[W] invalid operator precedence grammar, precedence (newline, newline) : (>, =)
-[W] invalid operator precedence grammar, precedence (newline, newline) : (>, <)
-=================== Grammars ===================
-$program              $stmt_seq
-$stmt_seq             $stmt_seq newline $stmt|$stmt_seq ; $stmt|$stmt_seq newline|$stmt_seq ;|newline $stmt_seq|$stmt
-$stmt                 $if_stmt|$repeat_stmt|$assign_stmt|$read_stmt|$write_stmt|$empty_stmt
-$empty_stmt           ;
-$if_stmt              if $exp then newline end|if $exp then newline $stmt_seq end|if $exp then newline else end|if $exp then newline else $stmt_seq end|if $exp then newline $stmt_seq else end|if $exp then newline $stmt_seq else $stmt_seq end
-$repeat_stmt          repeat newline until $exp|repeat newline $stmt_seq newline until $exp
-$assign_stmt          identifier =  $exp
-$read_stmt            read identifier
-$write_stmt           write identifier
-$exp                  $simple_exp <  $simple_exp|$simple_exp <= $simple_exp|$simple_exp == $simple_exp|$simple_exp >= $simple_exp|$simple_exp >  $simple_exp|$simple_exp
-$simple_exp           $simple_exp - $term|$simple_exp + $term|$term
-$term                 $term / $factor|$term * $factor|$factor
-$factor               ( $exp )|number|identifier
-
-=============== TerminalSymbols ================
-( ) * + - / ; <  <= =  == >  >= else end epsilon identifier if newline number read repeat string then until write zero
-
-============== NonterminalSymbols ==============
-$assign_stmt $empty_stmt $exp $factor $if_stmt $program $read_stmt $repeat_stmt $simple_exp $stmt $stmt_seq $term $write_stmt
-
-=================== FirstVt ====================
-$program              {newline identifier ; if repeat read write}
-$stmt_seq             {newline identifier ; if repeat read write}
-$stmt                 {identifier ; if repeat read write}
-$if_stmt              {if}
-$repeat_stmt          {repeat}
-$assign_stmt          {identifier}
-$read_stmt            {read}
-$write_stmt           {write}
-$empty_stmt           {;}
-$exp                  {number identifier <  <= == >= >  + - * / (}
-$simple_exp           {number identifier + - * / (}
-$term                 {number identifier * / (}
-$factor               {number identifier (}
-
-==================== LastVt ====================
-$program              {number newline identifier ; end until =  <  <= == >= >  + - * / )}
-$stmt_seq             {number newline identifier ; end until =  <  <= == >= >  + - * / )}
-$stmt                 {number identifier ; end until =  <  <= == >= >  + - * / )}
-$if_stmt              {end}
-$repeat_stmt          {number identifier until <  <= == >= >  + - * / )}
-$assign_stmt          {number identifier =  <  <= == >= >  + - * / )}
-$read_stmt            {identifier}
-$write_stmt           {identifier}
-$empty_stmt           {;}
-$exp                  {number identifier <  <= == >= >  + - * / )}
-$simple_exp           {number identifier + - * / )}
-$term                 {number identifier * / )}
-$factor               {number identifier )}
-
-=========== OperatorPrecedenceTable ============
-+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-|            |  (|  )|  *|  +|  -|  /|  ;|  < |  <=|  = |  ==|  > |  >=|  else|  end|  epsilon|  identifier|  if|  newline|  number|  read|  repeat|  string|  then|  until|  write|  zero|
-+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-|           (|  <|  =|  <|  <|  <|  <|   |   <|   <|    |   <|   <|   <|      |     |         |           <|    |         |       <|      |        |        |      |       |       |     >|
-|           )|   |  >|  >|  >|  >|  >|  >|   >|   >|    |   >|   >|   >|     >|    >|         |            |    |        >|        |      |        |        |     >|       |       |     >|
-|           *|  <|  >|  >|  >|  >|  >|  >|   >|   >|    |   >|   >|   >|     >|    >|         |           <|    |        >|       <|      |        |        |     >|       |       |     >|
-|           +|  <|  >|  <|  >|  >|  <|  >|   >|   >|    |   >|   >|   >|     >|    >|         |           <|    |        >|       <|      |        |        |     >|       |       |     >|
-|           -|  <|  >|  <|  >|  >|  <|  >|   >|   >|    |   >|   >|   >|     >|    >|         |           <|    |        >|       <|      |        |        |     >|       |       |     >|
-|           /|  <|  >|  >|  >|  >|  >|  >|   >|   >|    |   >|   >|   >|     >|    >|         |           <|    |        >|       <|      |        |        |     >|       |       |     >|
-|           ;|   |   |   |   |   |   |  >|    |    |    |    |    |    |     >|    >|         |           <|   <|        >|        |     <|       <|        |      |       |      <|     >|
-|          < |  <|  >|  <|  <|  <|  <|  >|    |    |    |    |    |    |     >|    >|         |           <|    |        >|       <|      |        |        |     >|       |       |     >|
-|          <=|  <|  >|  <|  <|  <|  <|  >|    |    |    |    |    |    |     >|    >|         |           <|    |        >|       <|      |        |        |     >|       |       |     >|
-|          = |  <|   |  <|  <|  <|  <|  >|   <|   <|    |   <|   <|   <|     >|    >|         |           <|    |        >|       <|      |        |        |      |       |       |     >|
-|          ==|  <|  >|  <|  <|  <|  <|  >|    |    |    |    |    |    |     >|    >|         |           <|    |        >|       <|      |        |        |     >|       |       |     >|
-|          > |  <|  >|  <|  <|  <|  <|  >|    |    |    |    |    |    |     >|    >|         |           <|    |        >|       <|      |        |        |     >|       |       |     >|
-|          >=|  <|  >|  <|  <|  <|  <|  >|    |    |    |    |    |    |     >|    >|         |           <|    |        >|       <|      |        |        |     >|       |       |     >|
-|        else|   |   |   |   |   |   |  <|    |    |    |    |    |    |      |    =|         |           <|   <|        <|        |     <|       <|        |      |       |      <|     >|
-|         end|   |   |   |   |   |   |  >|    |    |    |    |    |    |     >|    >|         |            |    |        >|        |      |        |        |      |       |       |     >|
-|     epsilon|   |   |   |   |   |   |   |    |    |    |    |    |    |      |     |         |            |    |         |        |      |        |        |      |       |       |     >|
-|  identifier|   |  >|  >|  >|  >|  >|  >|   >|   >|   =|   >|   >|   >|     >|    >|         |            |    |        >|        |      |        |        |     >|       |       |     >|
-|          if|  <|   |  <|  <|  <|  <|   |   <|   <|    |   <|   <|   <|      |     |         |           <|    |         |       <|      |        |        |     =|       |       |     >|
-|     newline|   |   |   |   |   |   |  <|    |    |    |    |    |    |     =|    =|         |           <|   <|        >|        |     <|       <|        |      |      =|      <|     >|
-|      number|   |  >|  >|  >|  >|  >|  >|   >|   >|    |   >|   >|   >|     >|    >|         |            |    |        >|        |      |        |        |     >|       |       |     >|
-|        read|   |   |   |   |   |   |   |    |    |    |    |    |    |      |     |         |           =|    |         |        |      |        |        |      |       |       |     >|
-|      repeat|   |   |   |   |   |   |   |    |    |    |    |    |    |      |     |         |            |    |        =|        |      |        |        |      |       |       |     >|
-|      string|   |   |   |   |   |   |   |    |    |    |    |    |    |      |     |         |            |    |         |        |      |        |        |      |       |       |     >|
-|        then|   |   |   |   |   |   |   |    |    |    |    |    |    |      |     |         |            |    |        =|        |      |        |        |      |       |       |     >|
-|       until|  <|   |  <|  <|  <|  <|  >|   <|   <|    |   <|   <|   <|     >|    >|         |           <|    |        >|       <|      |        |        |      |       |       |     >|
-|       write|   |   |   |   |   |   |   |    |    |    |    |    |    |      |     |         |           =|    |         |        |      |        |        |      |       |       |     >|
-|        zero|  <|  <|  <|  <|  <|  <|  <|   <|   <|   <|   <|   <|   <|     <|    <|        <|           <|   <|        <|       <|     <|       <|       <|     <|      <|      <|      |
-+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-
-1	Reduce `read identifier` to `$read_stmt`
-2	Reduce `write identifier` to `$write_stmt`
-3	Reduce `$read_stmt newline $write_stmt` to `$stmt_seq`
+[W] invalid operator precedence grammar, precedence (), end) : (>, =)
+[W] invalid operator precedence grammar, precedence (), newline) : (>, <)
+[W] invalid operator precedence grammar, precedence (), ;) : (>, <)
+[W] Push if
+[W] Push number
+1	Reduce `number` to `$factor`
+[W] Push < 
+[W] Push identifier
+2	Reduce `identifier` to `$factor`
+3	Reduce `$factor <  $factor` to `$exp`
+[W] Push then
+[W] Push identifier
+[W] Push = 
+[W] Push number
 4	Reduce `number` to `$factor`
-5	Reduce `identifier` to `$factor`
-6	Reduce `$factor <  $factor` to `$exp`
+5	Reduce `identifier =  $factor` to `$assign_stmt`
+[W] Push newline
+[W] Push while
+[W] Push identifier
+6	Reduce `identifier` to `$factor`
+[W] Push < 
+[W] Push number
 7	Reduce `number` to `$factor`
-8	Reduce `identifier =  $factor` to `$assign_stmt`
-[E] failed to reduce `if $exp then newline $assign_stmt` at 5:11
+8	Reduce `$factor <  $factor` to `$exp`
+[W] Push do
+[W] Push identifier
+[W] Push = 
+[W] Push identifier
+9	Reduce `identifier` to `$factor`
+[W] Push *
+[W] Push identifier
+10	Reduce `identifier` to `$factor`
+11	Reduce `$factor * $factor` to `$term`
+12	Reduce `identifier =  $term` to `$assign_stmt`
+[W] Push ;
+13	Reduce `$assign_stmt ;` to `$stmt_seq`
+[W] Push newline
+[W] Push identifier
+[W] Push = 
+[W] Push identifier
+14	Reduce `identifier` to `$factor`
+[W] Push +
+[W] Push number
+15	Reduce `number` to `$factor`
+16	Reduce `$factor + $factor` to `$simple_exp`
+17	Reduce `identifier =  $simple_exp` to `$assign_stmt`
+18	Reduce `$stmt_seq newline $assign_stmt` to `$stmt_seq`
+[W] Push ;
+19	Reduce `$stmt_seq ;` to `$stmt_seq`
+[W] Push newline
+20	Reduce `$stmt_seq newline` to `$stmt_seq`
+[W] Push end
+21	Reduce `while $exp do $stmt_seq end` to `$while_stmt`
+22	Reduce `$assign_stmt newline $while_stmt` to `$stmt_seq`
+[W] Push newline
+[W] Push write
+[W] Push identifier
+23	Reduce `write identifier` to `$write_stmt`
+24	Reduce `$stmt_seq newline $write_stmt` to `$stmt_seq`
+[W] Push ;
+25	Reduce `$stmt_seq ;` to `$stmt_seq`
+[W] Push newline
+26	Reduce `$stmt_seq newline` to `$stmt_seq`
+[W] Push end
+27	Reduce `if $exp then $stmt_seq end` to `$if_stmt`
+[W] Push newline
+[W] Push read
+[W] Push identifier
+28	Reduce `read identifier` to `$read_stmt`
+29	Reduce `$if_stmt newline $read_stmt` to `$stmt_seq`
+[W] Push ;
+30	Reduce `$stmt_seq ;` to `$stmt_seq`
+[W] Push newline
+[W] Push while
+[W] Push identifier
+31	Reduce `identifier` to `$factor`
+[W] Push < 
+[W] Push identifier
+32	Reduce `identifier` to `$factor`
+33	Reduce `$factor <  $factor` to `$exp`
+[W] Push do
+[W] Push write
+[W] Push identifier
+34	Reduce `write identifier` to `$write_stmt`
+[W] Push newline
+35	Reduce `$write_stmt newline` to `$stmt_seq`
+[W] Push end
+36	Reduce `while $exp do $stmt_seq end` to `$while_stmt`
+37	Reduce `$stmt_seq newline $while_stmt` to `$stmt_seq`
+[W] Push newline
+[W] Push if
+[W] Push identifier
+38	Reduce `identifier` to `$factor`
+[W] Push then
+[W] Push read
+[W] Push identifier
+39	Reduce `read identifier` to `$read_stmt`
+[W] Push ;
+40	Reduce `$read_stmt ;` to `$stmt_seq`
+[W] Push end
+41	Reduce `if $factor then $stmt_seq end` to `$if_stmt`
+42	Reduce `$stmt_seq newline $if_stmt` to `$stmt_seq`
+[W] Push newline
+[W] Push function
+[W] Push identifier
+[W] Push (
+[W] Push identifier
+43	Reduce `identifier` to `$factor`
+[W] Push ,
+[W] Push identifier
+44	Reduce `identifier` to `$factor`
+45	Reduce `$factor , $factor` to `$argument_list`
+[W] Push )
+[W] Push identifier
+[E] unexpected token write at 18:40
