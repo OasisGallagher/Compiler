@@ -9,7 +9,7 @@ const int red = 12;
 const int white = 7;
 const int yellow = 14;
 
-std::ofstream output("debug.txt");
+std::ofstream output("main/debug/debug.txt");
 
 void Debug::Log(const std::string& text) {
 	SetConsoleColor(white);

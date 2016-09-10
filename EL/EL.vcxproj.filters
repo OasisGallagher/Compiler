@@ -28,6 +28,15 @@
     <Filter Include="global\src">
       <UniqueIdentifier>{4955cf20-14b4-4024-bf2d-1b8764e6347f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="main">
+      <UniqueIdentifier>{7c50240a-0567-47ab-8e5a-1cfc5ddb5ce7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="main\include">
+      <UniqueIdentifier>{5e77e0f4-599e-4426-ad9b-b790fafba1e4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="main\src">
+      <UniqueIdentifier>{31fe78ce-b06d-4174-8f87-7988dc78cb20}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="global\include\constants.h">
@@ -57,9 +66,6 @@
     <ClInclude Include="parser\include\syntax_tree.h">
       <Filter>parser\include</Filter>
     </ClInclude>
-    <ClInclude Include="global\include\file_reader.h">
-      <Filter>global\include</Filter>
-    </ClInclude>
     <ClInclude Include="global\include\reference_countable.h">
       <Filter>global\include</Filter>
     </ClInclude>
@@ -84,9 +90,14 @@
     <ClInclude Include="global\include\disjoint_sets.h">
       <Filter>global\include</Filter>
     </ClInclude>
+    <ClInclude Include="global\include\reader.h">
+      <Filter>global\include</Filter>
+    </ClInclude>
+    <ClInclude Include="main\include\main.h">
+      <Filter>main\include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="main.cpp" />
     <ClCompile Include="global\src\debug.cpp">
       <Filter>global\src</Filter>
     </ClCompile>
@@ -120,8 +131,11 @@
     <ClCompile Include="global\src\table_printer.cpp">
       <Filter>global\src</Filter>
     </ClCompile>
-    <ClCompile Include="global\src\file_reader.cpp">
+    <ClCompile Include="global\src\reader.cpp">
       <Filter>global\src</Filter>
+    </ClCompile>
+    <ClCompile Include="main\src\main.cpp">
+      <Filter>main\src</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

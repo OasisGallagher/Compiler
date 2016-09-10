@@ -6,7 +6,7 @@
 
 Language::Language(LanguageParameter* parameter) {
 	parser_ = new OperatorPrecedenceParser();
-	parser_->SetGrammars(parameter->productions, parameter->nproductions);
+	parser_->SetGrammars(parameter->productions);
 }
 
 Language::~Language() {

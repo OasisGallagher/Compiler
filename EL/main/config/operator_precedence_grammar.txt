@@ -1,0 +1,82 @@
+$program
+	: $stmt_seq
+		
+$stmt_seq
+	: $stmt_seq ; 
+	| $stmt_seq ; $stmt
+	| $stmt_seq newline
+	| $stmt_seq newline $stmt
+	| $stmt
+	
+$stmt
+	: $if_stmt
+	| $while_stmt
+	| $assign_stmt
+	| $read_stmt
+	| $write_stmt
+	| $do_while_stmt
+	| $function_def
+	| $function_call
+	
+$if_stmt
+	: if ( $exp ) { }
+	| if ( $exp ) { $stmt_seq }
+	| if ( $exp ) { } else { }
+	| if ( $exp ) { } else { $stmt_seq } end
+	| if ( $exp ) { $stmt_seq } else { } end
+	| if ( $exp ) { $stmt_seq } else { $stmt_seq } end
+	
+$while_stmt
+	: while ( $exp ) { }
+	| while ( $exp ) { $stmt_seq }
+	
+$do_while_stmt
+	: do { } while ( $exp )
+	| do { $stmt_seq } while ( $exp )
+	
+$assign_stmt
+	: identifier = $exp
+	
+$read_stmt
+	: read identifier
+	
+$write_stmt
+	: write identifier
+	
+$exp 
+	: $simple_exp < $simple_exp
+	| $simple_exp <= $simple_exp
+	| $simple_exp == $simple_exp
+	| $simple_exp >= $simple_exp
+	| $simple_exp > $simple_exp
+	| $simple_exp
+	
+$simple_exp
+	: $simple_exp + $term
+	| $simple_exp - $term
+	| $term
+	
+$term
+	: $term * $factor
+	| $term / $factor
+	| $factor
+	
+$factor
+	: ( $exp )
+	| number
+	| identifier
+	
+$function_def
+	: function identifier ( ) { }
+	| function identifier ( ) { $stmt_seq }
+	| function identifier ( $argument_list ) { }
+	| function identifier ( $argument_list ) { $stmt_seq }
+	
+$function_call
+	: identifier ( )
+	| identifier ( $argument_list )
+	
+$argument_list
+	: $factor
+	| $argument_list, $factor
+	

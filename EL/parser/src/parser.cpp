@@ -1,5 +1,6 @@
 #include <sstream>
 
+#include "reader.h"
 #include "parser.h"
 #include "scanner.h"
 
@@ -43,12 +44,15 @@ GrammarSymbol Parser::CreateSymbol(const std::string& text) {
 	return ans;
 }
 
-bool Parser::SetGrammars(const char** productions, int count) {
+bool Parser::SetGrammars(const char* productions) {
 	Clear();
 
 	TextScanner textScanner;
-	for (int i = 0; i < count; ++i) {
-		textScanner.SetText(productions[i]);
+	ProductionReader pr(productions);
+	const ProductionReader::ProducitonContainer& cont = pr.GetProductions();
+	for (ProductionReader::ProducitonContainer::const_iterator ite = cont.begin();
+		ite != cont.end(); ++ite) {
+		textScanner.SetText(ite->c_str());
 		if (!ParseProductions(&textScanner)) {
 			return false;
 		}

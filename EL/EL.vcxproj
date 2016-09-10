@@ -14,12 +14,13 @@
     <ClInclude Include="global\include\constants.h" />
     <ClInclude Include="global\include\debug.h" />
     <ClInclude Include="global\include\disjoint_sets.h" />
-    <ClInclude Include="global\include\file_reader.h" />
+    <ClInclude Include="global\include\reader.h" />
     <ClInclude Include="global\include\matrix.h" />
     <ClInclude Include="global\include\reference_countable.h" />
     <ClInclude Include="global\include\static_vector.h" />
     <ClInclude Include="global\include\table_printer.h" />
     <ClInclude Include="global\include\utilities.h" />
+    <ClInclude Include="main\include\main.h" />
     <ClInclude Include="parser\include\grammar.h" />
     <ClInclude Include="parser\include\grammar_symbol.h" />
     <ClInclude Include="parser\include\language.h" />
@@ -32,10 +33,10 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="global\src\debug.cpp" />
-    <ClCompile Include="global\src\file_reader.cpp" />
+    <ClCompile Include="global\src\reader.cpp" />
     <ClCompile Include="global\src\table_printer.cpp" />
     <ClCompile Include="global\src\utilities.cpp" />
-    <ClCompile Include="main.cpp" />
+    <ClCompile Include="main\src\main.cpp" />
     <ClCompile Include="parser\src\grammar.cpp" />
     <ClCompile Include="parser\src\grammar_symbol.cpp" />
     <ClCompile Include="parser\src\language.cpp" />
@@ -88,7 +89,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions);_SCL_SECURE_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>global/include;scanner/include;parser/include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>global/include;scanner/include;parser/include;main/include</AdditionalIncludeDirectories>
       <TreatWarningAsError>true</TreatWarningAsError>
     </ClCompile>
     <Link>

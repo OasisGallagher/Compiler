@@ -16,7 +16,7 @@ public:
 	virtual std::string ToString() const;
 
 public:
-	bool SetGrammars(const char** productions, int nproductions);
+	bool SetGrammars(const char* productions);
 
 protected:
 	virtual bool ParseGrammars() = 0;

@@ -5,8 +5,7 @@ class Parser;
 class SyntaxTree;
 
 struct LanguageParameter {
-	const char** productions;
-	int nproductions;
+	const char* productions;
 };
 
 class Language {

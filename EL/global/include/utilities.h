@@ -11,6 +11,8 @@ public:
 
 	static bool IsTerminal(const std::string& token);
 
+	static bool IsBlankText(const char* text);
+
 	template <class Iterator>
 	static std::string Concat(Iterator first, Iterator last, const char* seperator = " ");
 

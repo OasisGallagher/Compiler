@@ -20,18 +20,6 @@ static const char* strOperatorPrecedence[] = {
 	">"
 };
 
-#define INSERT_OPERATOR_PRECEDENCE(_Table, _K1, _K2, _Val) \
-	do { \
-		OperatorPrecedenceTable::const_iterator pos = _Table->find(_K1, _K2); \
-		if (pos == _Table->end()) { \
-			_Table->insert(_K1, _K2, _Val); \
-		}\
-		else if(_Val != pos->second) { \
-			Debug::LogWarning(std::string("invalid operator precedence grammar, precedence (") \
-				+ (_K1).ToString() + ", " + (_K2).ToString() + ") : (" + strOperatorPrecedence[pos->second] + ", " + strOperatorPrecedence[_Val] + ")"); \
-		}\
-	} while (0)
-
 struct IsTerminalSymbol : std::unary_function<GrammarSymbol, bool> {
 	bool operator() (const GrammarSymbol& symbol) const {
 		return symbol.SymbolType() == GrammarSymbolTerminal;
@@ -229,7 +217,6 @@ bool OperatorPrecedenceParser::ParseFile(SyntaxTree* tree, FileScanner* fileScan
 		if (GetPrecedence(container[j], a) == OperatorPrecedenceLess || GetPrecedence(container[j], a) == OperatorPrecedenceEqual) {
 			if (a != GrammarSymbol::newline || container.back().SymbolType() == GrammarSymbolNonterminal) {
 				++k;
-				Debug::LogWarning("Push " + a.ToString());
 				container.push_back(a);
 			}
 		}
@@ -239,7 +226,7 @@ bool OperatorPrecedenceParser::ParseFile(SyntaxTree* tree, FileScanner* fileScan
 
 	} while (a != GrammarSymbol::zero);
 
-	Debug::Log("Accept");
+	Debug::Log(Utility::Heading("Accept"));
 	return true;
 }
 
@@ -373,12 +360,11 @@ void OperatorPrecedenceParser::CreateParsingFunction() {
 
 void OperatorPrecedenceParser::InsertOperatorPrecedence(const GrammarSymbol& k1, const GrammarSymbol& k2, OperatorPrecedence precedence) {
 	OperatorPrecedenceTable::const_iterator pos = operatorPrecedenceTable_->find(k1, k2);
+	Assert(pos == operatorPrecedenceTable_->end() || precedence == pos->second,
+		std::string("invalid operator precedence grammar, precedence (") + k1.ToString() + ", " + k2.ToString() + ") : (" + strOperatorPrecedence[pos->second] + ", " + strOperatorPrecedence[precedence] + ")");
+
 	if (pos == operatorPrecedenceTable_->end()) {
 		operatorPrecedenceTable_->insert(k1, k2, precedence);
-	}
-	else if (precedence != pos->second) {
-		Debug::LogWarning(std::string("invalid operator precedence grammar, precedence (")
-			+ k1.ToString() + ", " + k2.ToString() + ") : (" + strOperatorPrecedence[pos->second] + ", " + strOperatorPrecedence[precedence] + ")");
 	}
 }
 

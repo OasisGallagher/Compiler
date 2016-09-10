@@ -5,7 +5,7 @@
 #include "scanner.h"
 #include "constants.h"
 #include "utilities.h"
-#include "file_reader.h"
+#include "reader.h"
 
 enum ScannerStateType {
 	ScannerStateStart,
@@ -266,7 +266,7 @@ ScannerTokenType TextScanner::GetToken(char* token, int* pos) {
 }
 
 FileScanner::FileScanner(const char* path) 
-	: reader_(new FileReader(path)), lineno_(0) {
+	: reader_(new FileReader(path, true, true)), lineno_(0) {
 	/*symbols_ = new Table < Symbol >();
 	numberLiterals_ = new Table < NumberLiteral >();
 	stringLiterals_ = new Table < StringLiteral >();*/
@@ -292,7 +292,7 @@ bool FileScanner::GetToken(ScannerToken* token, TokenPosition* pos) {
 			break;
 		}
 
-		if (strlen(line) == 0) {
+		if (Utility::IsBlankText(line)) {
 			continue;
 		}
 

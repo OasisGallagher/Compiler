@@ -13,3 +13,13 @@ std::string Utility::Heading(const std::string& text) {
 
 	return ans;
 }
+
+bool Utility::IsBlankText(const char* text) {
+	for (; *text != 0; ++text) {
+		if (*text != ' ' && *text != '\t' && *text != '\n') {
+			return false;
+		}
+	}
+
+	return true;
+}
