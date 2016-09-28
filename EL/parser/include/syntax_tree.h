@@ -1,28 +1,44 @@
 #pragma once
 #include <string>
+#include <vector>
 #include <sstream>
 #include "constants.h"
 
-class SyntaxNode {
-private:
-	friend class SyntaxTree;
+enum SyntaxNodeType {
+	SyntaxNodeConstant,
+	SyntaxNodeSymbol,
+	SyntaxNodeOperation,
+};
 
-	SyntaxNode(const std::string& name);
+class SyntaxNode {
+public:
+	SyntaxNode(SyntaxNodeType type, const std::string& text);
 	~SyntaxNode();
 
-	void AddChild(SyntaxNode* child);
+public:
+	void AddChildren(SyntaxNode** buffer, int count);
+
 	SyntaxNode* GetChild(int index);
-	int ChildCount() const;
+	int GetChildCount() const;
+
+	void SetConstantAddress(void* addr);
+	void SetSymbolAddress(void* addr);
 
 	const std::string& ToString() const;
 
 private:
-	int index_;
-	std::string name_;
-	SyntaxNode* children_[MAX_SYNTAX_NODE_CHILDREN];
-	SyntaxNode* sibling_;
+	std::string text_;
+	SyntaxNodeType type_;
+
+	union {
+		// 子节点, 第一个元素表示子节点个数.
+		SyntaxNode** children;
+		void* constant;
+		void* symbol;
+	} value_;
 };
 
+/*
 class SyntaxTree {
 public:
 	SyntaxTree();
@@ -46,4 +62,4 @@ private:
 
 private:
 	SyntaxNode* root_;
-};
+};*/

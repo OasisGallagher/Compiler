@@ -1,6 +1,7 @@
 #pragma once
 #include <set>
 #include <map>
+#include <vector>
 #include "utilities.h"
 #include "reference_countable.h"
 
@@ -27,7 +28,6 @@ protected:
 	~GrammarSymbolBase();
 
 protected:
-	static int ninstance;
 	std::string text_;
 };
 
@@ -112,6 +112,8 @@ public:
 	static GrammarSymbol Create(const std::string& text);
 };
 
+typedef std::vector<GrammarSymbol> SymbolVector;
+
 class GrammarSymbolContainer : public std::map<std::string, GrammarSymbol> {
 public:
 	std::string ToString() const;
@@ -135,6 +137,7 @@ public:
 	bool operator > (const GrammarSymbol& other) const;
 
 public:
+	void* __tmpPtr() { return symbol_; }
 	GrammarSymbolType SymbolType() const;
 	bool Match(const ScannerToken& token) const;
 	std::string ToString() const;

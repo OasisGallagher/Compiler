@@ -125,7 +125,7 @@ bool LLParser::RemoveImmidiateLeftRecursion(Grammar* g, GrammarContainer* newGra
 
 	CondinateContainer::const_iterator pos = condinates.begin();
 	for (; pos != condinates.end(); ++pos) {
-		if ((*pos)->front() != lhs) {
+		if ((*pos)->symbols.front() != lhs) {
 			break;
 		}
 	}
@@ -143,22 +143,22 @@ bool LLParser::RemoveImmidiateLeftRecursion(Grammar* g, GrammarContainer* newGra
 	Condinate cond;
 
 	for (CondinateContainer::const_iterator ite = pos; ite != condinates.end(); ++ite) {
-		cond.insert(cond.end(), (*ite)->begin(), (*ite)->end());
-		cond.push_back(lhs2);
+		cond.symbols.insert(cond.symbols.end(), (*ite)->symbols.begin(), (*ite)->symbols.end());
+		cond.symbols.push_back(lhs2);
 
 		grammar->AddCondinate(cond);
-		cond.clear();
+		cond.symbols.clear();
 	}
 
 	for (CondinateContainer::const_iterator ite = condinates.begin(); ite != pos; ++ite) {
-		cond.insert(cond.end(), (*ite)->begin() + 1, (*ite)->end());
-		cond.push_back(lhs2);
+		cond.symbols.insert(cond.symbols.end(), (*ite)->symbols.begin() + 1, (*ite)->symbols.end());
+		cond.symbols.push_back(lhs2);
 
 		grammar2->AddCondinate(cond);
-		cond.clear();
+		cond.symbols.clear();
 	}
 
-	cond.push_back(GrammarSymbol::epsilon);
+	cond.symbols.push_back(GrammarSymbol::epsilon);
 
 	grammar2->AddCondinate(cond);
 
@@ -169,10 +169,10 @@ bool LLParser::RemoveImmidiateLeftRecursion(Grammar* g, GrammarContainer* newGra
 }
 
 int LLParser::LongestCommonPrefix(const Condinate* first, const Condinate* second) {
-	int size = std::min(first->size(), second->size());
+	int size = std::min(first->symbols.size(), second->symbols.size());
 	int ans = 0;
 	for (int i = 0; i < size; ++i) {
-		if (first->at(i) != second->at(i)) {
+		if (first->symbols[i] != second->symbols[i]) {
 			break;
 		}
 
@@ -237,12 +237,12 @@ bool LLParser::LeftFactoringOnGrammar(Grammar* g, GrammarContainer* newGrammars)
 
 		Condinate cond;
 		const CondinateContainer& oldCondinates = g->GetCondinates();
-		Condinate::iterator first = oldCondinates[from]->begin();
-		Condinate::iterator last = first;
+		SymbolVector::iterator first = oldCondinates[from]->symbols.begin();
+		SymbolVector::iterator last = first;
 		std::advance(last, length);
-		cond.insert(cond.end(), first, last);
+		cond.symbols.insert(cond.symbols.end(), first, last);
 
-		cond.push_back(lhs2);
+		cond.symbols.push_back(lhs2);
 		grammar->AddCondinate(cond);
 
 		for (int i = 0; i < from; ++i) {
@@ -255,16 +255,16 @@ bool LLParser::LeftFactoringOnGrammar(Grammar* g, GrammarContainer* newGrammars)
 
 		Grammar* grammar2 = new Grammar(lhs2);
 		for (int i = from; i < to; ++i) {
-			Assert(length <= (int)oldCondinates[i]->size(), "logic error");
-			first = oldCondinates[i]->begin();
+			Assert(length <= (int)oldCondinates[i]->symbols.size(), "logic error");
+			first = oldCondinates[i]->symbols.begin();
 			std::advance(first, length);
-			cond.clear();
-			if (first != oldCondinates[i]->end()) {
-				cond.insert(cond.end(), first, oldCondinates[i]->end());
+			cond.symbols.clear();
+			if (first != oldCondinates[i]->symbols.end()) {
+				cond.symbols.insert(cond.symbols.end(), first, oldCondinates[i]->symbols.end());
 				grammar2->AddCondinate(cond);
 			}
 			else {
-				cond.push_back(GrammarSymbol::epsilon);
+				cond.symbols.push_back(GrammarSymbol::epsilon);
 				grammar2->AddCondinate(cond);
 			}
 		}
@@ -302,15 +302,15 @@ bool LLParser::CreateFirstSetsOnePass() {
 
 		for (CondinateContainer::const_iterator ite2 = conds.begin(); ite2 != conds.end(); ++ite2) {
 			Condinate* c = *ite2;
-			GrammarSymbol& front = c->front();
+			GrammarSymbol& front = c->symbols.front();
 
 			if (front.SymbolType() == GrammarSymbolTerminal) {
-				anySetModified = firstSet.insert(c->front()).second || anySetModified;
+				anySetModified = firstSet.insert(c->symbols.front()).second || anySetModified;
 				continue;
 			}
 
-			Condinate::iterator ite3 = c->begin();
-			for (; ite3 != c->end(); ++ite3) {
+			SymbolVector::iterator ite3 = c->symbols.begin();
+			for (; ite3 != c->symbols.end(); ++ite3) {
 				GrammarSymbol& current = *ite3;
 				if (current.SymbolType() != GrammarSymbolNonterminal) {
 					break;
@@ -324,7 +324,7 @@ bool LLParser::CreateFirstSetsOnePass() {
 				}
 			}
 
-			if (ite3 == c->end()) {
+			if (ite3 == c->symbols.end()) {
 				anySetModified = firstSet.insert(GrammarSymbol::epsilon).second || anySetModified;
 			}
 		}
@@ -350,14 +350,14 @@ bool LLParser::CreateFollowSetsOnePass() {
 
 		for (CondinateContainer::const_iterator ite2 = conds.begin(); ite2 != conds.end(); ++ite2) {
 			Condinate* current = *ite2;
-			for (Condinate::iterator ite3 = current->begin(); ite3 != current->end(); ++ite3) {
+			for (SymbolVector::iterator ite3 = current->symbols.begin(); ite3 != current->symbols.end(); ++ite3) {
 				GrammarSymbol& symbol = *ite3;
 				if (symbol.SymbolType() == GrammarSymbolTerminal) {
 					continue;
 				}
 
-				Condinate::iterator ite4 = ite3;
-				GetFirstSet(&gss, ++ite4, current->end());
+				SymbolVector::iterator ite4 = ite3;
+				GetFirstSet(&gss, ++ite4, current->symbols.end());
 				anySetModified = MergeNonEpsilonElements(followSetContainer_[symbol], gss) || anySetModified;
 
 				if (gss.find(GrammarSymbol::epsilon) != gss.end()) {
@@ -402,7 +402,7 @@ bool LLParser::BuildParingTable(Grammar* g) {
 
 	for (CondinateContainer::const_iterator ite = conds.begin(); ite != conds.end(); ++ite) {
 		Condinate* c = *ite;
-		GetFirstSet(&firstSet, c->begin(), c->end());
+		GetFirstSet(&firstSet, c->symbols.begin(), c->symbols.end());
 		for (GrammarSymbolSet::iterator ite2 = firstSet.begin(); ite2 != firstSet.end(); ++ite2) {
 			InsertParsingTable(lhs, *ite2, c);
 		}
@@ -439,7 +439,7 @@ void LLParser::AddAsyncSymbol() {
 	}*/
 }
 
-void LLParser::GetFirstSet(GrammarSymbolSet* answer, Condinate::iterator first, Condinate::iterator last) {
+void LLParser::GetFirstSet(GrammarSymbolSet* answer, SymbolVector::iterator first, SymbolVector::iterator last) {
 	if (first == last) {
 		answer->insert(GrammarSymbol::epsilon);
 		return;
@@ -465,8 +465,8 @@ void LLParser::GetFirstSet(GrammarSymbolSet* answer, Condinate::iterator first, 
 	}
 }
 
-bool LLParser::ParseFile(SyntaxTree* tree, FileScanner* fileScanner) {
-	ScannerToken token;
+bool LLParser::ParseFile(/*SyntaxTree* tree, */FileScanner* fileScanner) {
+	/*ScannerToken token;
 	TokenPosition tokenPosition = { 0 };
 	if (!fileScanner->GetToken(&token, &tokenPosition)) {
 		Debug::LogError("failed to read token");
@@ -539,6 +539,6 @@ bool LLParser::ParseFile(SyntaxTree* tree, FileScanner* fileScanner) {
 		return true;
 	}
 
-	Debug::LogError(error);
+	Debug::LogError(error);*/
 	return false;
 }

@@ -16,7 +16,7 @@ public:
 	~LLParser();
 
 public:
-	virtual bool ParseFile(SyntaxTree* tree, FileScanner* fileScanner);
+	virtual bool ParseFile(/*SyntaxTree* tree, */FileScanner* fileScanner);
 	virtual std::string ToString() const;
 
 protected:
@@ -35,7 +35,7 @@ private:
 
 	void CreateFirstSets();
 	bool CreateFirstSetsOnePass();
-	void GetFirstSet(GrammarSymbolSet* answer, Condinate::iterator first, Condinate::iterator last);
+	void GetFirstSet(GrammarSymbolSet* answer, SymbolVector::iterator first, SymbolVector::iterator last);
 
 	void CreateFollowSets();
 	bool CreateFollowSetsOnePass();

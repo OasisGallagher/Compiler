@@ -28,8 +28,6 @@ std::string TokenPosition::ToString() const {
 	return oss.str();
 }
 
-//static DummyToken dummyToken;
-
 TextScanner::TextScanner() 
 	: current_(nullptr), dest_(nullptr) {
 	lineBuffer_ = new char[MAX_LINE_CHARACTERS]();
@@ -176,6 +174,7 @@ ScannerTokenType TextScanner::GetToken(char* token, int* pos) {
 			else {
 				//tokenType = ScannerTokenAssign;
 				unget = true;
+				savech = false;
 			}
 			break;
 			/*
@@ -203,6 +202,7 @@ ScannerTokenType TextScanner::GetToken(char* token, int* pos) {
 			else {
 				//tokenType = ScannerTokenLess;
 				unget = true;
+				savech = false;
 			}
 			break;
 
@@ -215,6 +215,7 @@ ScannerTokenType TextScanner::GetToken(char* token, int* pos) {
 			else {
 				//tokenType = ScannerTokenGreater;
 				unget = true;
+				savech = false;
 			}
 			break;
 

@@ -17,10 +17,12 @@
     <ClInclude Include="global\include\reader.h" />
     <ClInclude Include="global\include\matrix.h" />
     <ClInclude Include="global\include\reference_countable.h" />
+    <ClInclude Include="global\include\stack2.h" />
     <ClInclude Include="global\include\static_vector.h" />
     <ClInclude Include="global\include\table_printer.h" />
     <ClInclude Include="global\include\utilities.h" />
     <ClInclude Include="main\include\main.h" />
+    <ClInclude Include="parser\include\action.h" />
     <ClInclude Include="parser\include\grammar.h" />
     <ClInclude Include="parser\include\grammar_symbol.h" />
     <ClInclude Include="parser\include\language.h" />
@@ -37,6 +39,7 @@
     <ClCompile Include="global\src\table_printer.cpp" />
     <ClCompile Include="global\src\utilities.cpp" />
     <ClCompile Include="main\src\main.cpp" />
+    <ClCompile Include="parser\src\action.cpp" />
     <ClCompile Include="parser\src\grammar.cpp" />
     <ClCompile Include="parser\src\grammar_symbol.cpp" />
     <ClCompile Include="parser\src\language.cpp" />

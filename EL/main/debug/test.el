@@ -1,4 +1,3 @@
-
 if (0 < x) {
   fact = 1
   while (x < 10) {

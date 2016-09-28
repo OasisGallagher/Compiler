@@ -2,41 +2,57 @@
 #include "debug.h"
 #include "syntax_tree.h"
 
-SyntaxNode::SyntaxNode(const std::string& name)
-	: sibling_(nullptr), index_(0) {
-	for (int i = 0; i < MAX_SYNTAX_NODE_CHILDREN; ++i) {
-		children_[i] = nullptr;
-	}
+#define DEBUG_NODE_TYPE(current, expected)	\
+	Assert(current == expected, std::string("invalid syntax node type: ") + std::to_string(current) + " != " + std::to_string(expected));
 
-	name_ = name;
+SyntaxNode::SyntaxNode(SyntaxNodeType type, const std::string& text)
+	: text_(text), type_(type) {
+	memset(&value_, 0, sizeof(value_));
 }
 
 SyntaxNode::~SyntaxNode() {
-
+	if (type_ == SyntaxNodeOperation) {
+		delete[] value_.children;
+	}
 }
 
-void SyntaxNode::AddChild(SyntaxNode* child) {
-	Assert(index_ < MAX_SYNTAX_NODE_CHILDREN, "out of memory");
-	if (index_ > 0) {
-		children_[index_ - 1]->sibling_ = child;
-	}
+void SyntaxNode::AddChildren(SyntaxNode** buffer, int count) {
+	DEBUG_NODE_TYPE(type_, SyntaxNodeOperation);
 
-	children_[index_++] = child;
+	value_.children = new SyntaxNode*[count + 1];
+	*value_.children = (SyntaxNode*)count;
+
+	for (int i = 1; i <= count; ++i) {
+		value_.children[i] = buffer[i - 1];
+	}
 }
 
 SyntaxNode* SyntaxNode::GetChild(int index) {
-	Assert(index >= 0 && index < MAX_SYNTAX_NODE_CHILDREN, "index out of range");
-	return children_[index];
+	DEBUG_NODE_TYPE(type_, SyntaxNodeOperation);
+	Assert(index >= 0 && index < GetChildCount(), "index out of range");
+	return value_.children[index + 1];
 }
 
-int SyntaxNode::ChildCount() const {
-	return index_;
+int SyntaxNode::GetChildCount() const {
+	DEBUG_NODE_TYPE(type_, SyntaxNodeOperation);
+	return (int)*value_.children;
+}
+
+void SyntaxNode::SetConstantAddress(void* addr) {
+	DEBUG_NODE_TYPE(type_, SyntaxNodeConstant);
+	value_.constant = addr;
+}
+
+void SyntaxNode::SetSymbolAddress(void* addr) {
+	DEBUG_NODE_TYPE(type_, SyntaxNodeSymbol);
+	value_.symbol = addr;
 }
 
 const std::string& SyntaxNode::ToString() const {
-	return name_;
+	return text_;
 }
 
+/*
 SyntaxTree::SyntaxTree() 
 	: root_(nullptr) {
 
@@ -60,7 +76,7 @@ SyntaxNode* SyntaxTree::AddNode(SyntaxNode* parent, const std::string& name) {
 std::string SyntaxTree::ToString() const {
 	std::ostringstream oss;
 	if (root_ != nullptr) {
-		SyntaxNodeToString(oss, "", root_);
+		SyntaxNodeToString(oss, "", nullptr, root_);
 	}
 
 	return oss.str();
@@ -90,10 +106,11 @@ void SyntaxTree::PreorderTreeWalk(TreeWalkCallback callback) {
 	}
 }
 
-void SyntaxTree::SyntaxNodeToString(std::ostringstream& oss, const std::string& prefix, SyntaxNode* current) const {
-	bool tail = (current->sibling_ == nullptr);
+void SyntaxTree::SyntaxNodeToString(std::ostringstream& oss, const std::string& prefix, SyntaxNode* parent, SyntaxNode* current) const {
+	bool tail = (current + 1 == parent->children_ + parent->GetChildCount());
 	oss << prefix << (tail ? "└─── " : "├─── ") << current->ToString() << "\n";
 	for (int i = 0; i < current->ChildCount(); ++i) {
 		SyntaxNodeToString(oss, prefix + (tail ? "     " : "│    "), current->GetChild(i));
 	}
 }
+*/

@@ -2,14 +2,17 @@
 
 #include "reader.h"
 #include "parser.h"
+#include "action.h"
 #include "scanner.h"
 
 Parser::Parser() {
+	actionParser_ = new ActionParser();
 	InitializeTerminalSymbolContainer();
 }
 
 Parser::~Parser() {
 	DestroyGammars();
+	delete actionParser_;
 }
 
 void Parser::InitializeTerminalSymbolContainer() {
@@ -48,13 +51,31 @@ bool Parser::SetGrammars(const char* productions) {
 	Clear();
 
 	TextScanner textScanner;
-	ProductionReader pr(productions);
-	const ProductionReader::ProducitonContainer& cont = pr.GetProductions();
-	for (ProductionReader::ProducitonContainer::const_iterator ite = cont.begin();
+	GrammarReader reader(productions);
+	const GrammarDefContainer& cont = reader.GetGrammars();
+	for (GrammarDefContainer::const_iterator ite = cont.begin();
 		ite != cont.end(); ++ite) {
-		textScanner.SetText(ite->c_str());
-		if (!ParseProductions(&textScanner)) {
-			return false;
+		const GrammarDef& g = *ite;
+		
+		Grammar* grammar = new Grammar(CreateSymbol(g.lhs));
+		grammars_.push_back(grammar);
+
+		Condinate cond;
+
+		for (GrammarDef::ProductionDefContainer::const_iterator ite2 = g.productions.begin(); ite2 != g.productions.end(); ++ite2) {
+			const ProductionDef& pr = *ite2;
+			
+			textScanner.SetText(pr.first.c_str());
+			
+			if (!ParseProductions(&textScanner, cond.symbols)) {
+				return false;
+			}
+
+			cond.action = actionParser_->Parse(pr.second);
+			grammar->AddCondinate(cond);
+
+			cond.action = nullptr;
+			cond.symbols.clear();
 		}
 	}
 
@@ -119,33 +140,12 @@ bool Parser::MergeNonEpsilonElements(GrammarSymbolSet& dest, const GrammarSymbol
 	return modified;
 }
 
-bool Parser::ParseProductions(TextScanner* textScanner) {
+bool Parser::ParseProductions(TextScanner* textScanner, SymbolVector& symbols) {
 	char token[MAX_TOKEN_CHARACTERS];
 
-	ScannerTokenType tokenType = textScanner->GetToken(token);
-	Assert(tokenType != ScannerTokenEndOfFile, "invalid production. missing left hand side.");
-
-	Grammar* grammar = new Grammar(CreateSymbol(token));
-
-	Condinate cond;
-
-	textScanner->GetToken(token);
-	Assert(strcmp(token, ":") == 0, "invalid production. missing \":\".");
-
-	for (; (tokenType = textScanner->GetToken(token)) != ScannerTokenEndOfFile;) {
-		if (tokenType == ScannerTokenSign && strcmp(token, "|") == 0) {
-			Assert(!cond.empty(), "empty production");
-			grammar->AddCondinate(cond);
-			cond.clear();
-			continue;
-		}
-
-		cond.push_back(CreateSymbol(token));
+	for (ScannerTokenType tokenType; (tokenType = textScanner->GetToken(token)) != ScannerTokenEndOfFile;) {
+		symbols.push_back(CreateSymbol(token));
 	}
-
-	grammar->AddCondinate(cond);
-
-	grammars_.push_back(grammar);
 
 	return true;
 }

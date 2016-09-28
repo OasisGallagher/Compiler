@@ -3,9 +3,13 @@
 #include <vector>
 #include "grammar_symbol.h"
 
-class Condinate : public std::vector<GrammarSymbol> {
-public:
+class Action;
+
+struct Condinate {
 	std::string ToString() const;
+
+	SymbolVector symbols;
+	Action* action;
 };
 
 class CondinateContainer :public std::vector<Condinate*> {

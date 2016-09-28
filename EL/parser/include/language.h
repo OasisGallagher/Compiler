@@ -14,7 +14,7 @@ public:
 	~Language();
 
 public:
-	bool Parse(SyntaxTree* tree, const std::string& file);
+	bool Parse(/*SyntaxTree* tree, */const std::string& file);
 	std::string ToString() const;
 
 private:

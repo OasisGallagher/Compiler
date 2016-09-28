@@ -2,8 +2,11 @@
 #include <sstream>
 #include <algorithm>
 
+#include "action.h"
+#include "stack2.h"
 #include "matrix.h"
 #include "scanner.h"
+#include "syntax_tree.h"
 #include "table_printer.h"
 #include "disjoint_sets.h"
 #include "operator_precedence_parser.h"
@@ -24,9 +27,6 @@ struct IsTerminalSymbol : std::unary_function<GrammarSymbol, bool> {
 	bool operator() (const GrammarSymbol& symbol) const {
 		return symbol.SymbolType() == GrammarSymbolTerminal;
 	}
-};
-
-class SymbolStack : public std::vector<GrammarSymbol> {
 };
 
 class OperatorPrecedenceTable : public matrix <GrammarSymbol, GrammarSymbol, OperatorPrecedence> {
@@ -85,8 +85,8 @@ std::string OperatorPrecedenceTable::ToString(const GrammarSymbolContainer& term
 
 struct CreateVtHelper {
 	static bool FindFirstTerminalSymbol(GrammarSymbol& symbol, const Condinate* c) {
-		Condinate::const_iterator ntpos = std::find_if(c->begin(), c->end(), IsTerminalSymbol());
-		if (ntpos == c->end()) {
+		SymbolVector::const_iterator ntpos = std::find_if(c->symbols.begin(), c->symbols.end(), IsTerminalSymbol());
+		if (ntpos == c->symbols.end()) {
 			return false;
 		}
 
@@ -95,12 +95,12 @@ struct CreateVtHelper {
 	}
 
 	static GrammarSymbol Front(const Condinate* c) {
-		return c->front();
+		return c->symbols.front();
 	}
 
 	static bool FindLastTerminalSymbol(GrammarSymbol& symbol, const Condinate* c) {
-		Condinate::const_reverse_iterator ntpos = std::find_if(c->rbegin(), c->rend(), IsTerminalSymbol());
-		if (ntpos == c->rend()) {
+		SymbolVector::const_reverse_iterator ntpos = std::find_if(c->symbols.rbegin(), c->symbols.rend(), IsTerminalSymbol());
+		if (ntpos == c->symbols.rend()) {
 			return false;
 		}
 
@@ -109,7 +109,7 @@ struct CreateVtHelper {
 	}
 
 	static GrammarSymbol Back(const Condinate* c) {
-		return c->back();
+		return c->symbols.back();
 	}
 };
 
@@ -133,8 +133,8 @@ OperatorPrecedence OperatorPrecedenceParser::GetPrecedence(const GrammarSymbol& 
 
 template <class Iterator>
 bool OperatorPrecedenceParser::MatchProduction(const Condinate* c, Iterator first, Iterator last) const {
-	Condinate::const_iterator pos = c->begin();
-	for (; first != last && pos != c->end(); ++first, ++pos) {
+	SymbolVector::const_iterator pos = c->symbols.begin();
+	for (; first != last && pos != c->symbols.end(); ++first, ++pos) {
 		if (first->SymbolType() != pos->SymbolType()) {
 			return false;
 		}
@@ -144,11 +144,11 @@ bool OperatorPrecedenceParser::MatchProduction(const Condinate* c, Iterator firs
 		}
 	}
 
-	return (first == last) && (pos == c->end());
+	return (first == last) && (pos == c->symbols.end());
 }
 
 template <class Iterator>
-GrammarSymbol OperatorPrecedenceParser::Reduce(Iterator first, Iterator last) {
+GrammarSymbol OperatorPrecedenceParser::Reduce(Iterator first, Iterator last, Condinate** condinate) {
 	for (GrammarContainer::const_iterator ite = grammars_.begin();
 		ite != grammars_.end(); ++ite) {
 		Grammar* g = *ite;
@@ -157,6 +157,10 @@ GrammarSymbol OperatorPrecedenceParser::Reduce(Iterator first, Iterator last) {
 			ite != conds.end(); ++ite) {
 			Condinate* c = *ite;
 			if (MatchProduction(c, first, last)) {
+				if (condinate != nullptr) {
+					*condinate = c;
+				}
+
 				return g->GetLhs();
 			}
 		}
@@ -165,9 +169,25 @@ GrammarSymbol OperatorPrecedenceParser::Reduce(Iterator first, Iterator last) {
 	return GrammarSymbol::null;
 }
 
-bool OperatorPrecedenceParser::ParseFile(SyntaxTree* tree, FileScanner* fileScanner) {
-	SymbolStack container;
-	container.push_back(GrammarSymbol::zero);
+static void SyntaxNodeToString(std::ostringstream& oss, const std::string& prefix, SyntaxNode* parent, SyntaxNode* current) {
+	bool tail = false;
+
+	oss << prefix << (tail ? "©¸©¤©¤©¤ " : "©À©¤©¤©¤ ") << (current != nullptr ? current->ToString() : "null") << "\n";
+	if (current == nullptr) {
+		return;
+	}
+
+	for (int i = 0; i < current->GetChildCount(); ++i) {
+		SyntaxNodeToString(oss, prefix + (tail ? "     " : "©¦    "), current, current->GetChild(i));
+	}
+}
+
+bool OperatorPrecedenceParser::ParseFile(/*SyntaxTree* tree, */FileScanner* fileScanner) {
+	std::vector<GrammarSymbol> symbolStack;
+	std::vector<void*> valueStack;
+
+	symbolStack.push_back(GrammarSymbol::zero);
+	valueStack.push_back(nullptr);
 
 	int k = 0;
 
@@ -188,45 +208,58 @@ bool OperatorPrecedenceParser::ParseFile(SyntaxTree* tree, FileScanner* fileScan
 			return false;
 		}
 
-		int j = (container[k].SymbolType() == GrammarSymbolTerminal) ? k : k - 1;
+		int j = (symbolStack[k].SymbolType() == GrammarSymbolTerminal) ? k : k - 1;
 		OperatorPrecedence precedence = OperatorPrecedenceUndefined;
 
-		for (; GetPrecedence(container[j], a) == OperatorPrecedenceGreater;) {
+		for (; GetPrecedence(symbolStack[j], a) == OperatorPrecedenceGreater;) {
 			GrammarSymbol q;
 			do {
-				q = container[j];
-				j -= (container[j - 1].SymbolType() == GrammarSymbolTerminal) ? 1 : 2;
+				q = symbolStack[j];
+				j -= (symbolStack[j - 1].SymbolType() == GrammarSymbolTerminal) ? 1 : 2;
 
-			} while (GetPrecedence(container[j], q) != OperatorPrecedenceLess);
+			} while (GetPrecedence(symbolStack[j], q) != OperatorPrecedenceLess);
 
-			GrammarSymbol n = Reduce(container.begin() + j + 1, container.begin() + k + 1);
+			Condinate* condinate = nullptr;
+			GrammarSymbol n = Reduce(symbolStack.begin() + j + 1, symbolStack.begin() + k + 1, &condinate);
 
 			if (!n) {
-				Debug::LogError(std::string("failed to reduce `") + Utility::Concat(container.begin() + j + 1, container.begin() + k + 1) + "` at " + position.ToString());
+				Debug::LogError(std::string("failed to reduce `") + Utility::Concat(symbolStack.begin() + j + 1, symbolStack.begin() + k + 1) + "` at " + position.ToString());
 				return false;
 			}
 
-			Debug::Log(std::to_string(++reduceCount) + "\tReduce `" + Utility::Concat(container.begin() + j + 1, container.begin() + k + 1) + "` to `" + n.ToString() + "`");
+			Assert(condinate->action != nullptr, "invalid action. condinate: " + condinate->ToString());
+			void* newValue = condinate->action->Invoke(valueStack);
 
-			container.erase(container.begin() + j + 1, container.begin() + k + 1);
+			Debug::Log(std::to_string(++reduceCount) + "\tReduce `" + Utility::Concat(symbolStack.begin() + j + 1, symbolStack.begin() + k + 1) + "` to `" + n.ToString() + "`");
+
+			Assert(symbolStack.begin() + k + 1 == symbolStack.end(), "");
+			symbolStack.erase(symbolStack.begin() + j + 1, symbolStack.begin() + k + 1);
+			valueStack.erase(valueStack.begin() + j + 1, valueStack.begin() + k + 1);
 
 			k = j + 1;
-			container.push_back(n);
+			symbolStack.push_back(n);
+			valueStack.push_back(newValue);
 		}
 
-		if (GetPrecedence(container[j], a) == OperatorPrecedenceLess || GetPrecedence(container[j], a) == OperatorPrecedenceEqual) {
-			if (a != GrammarSymbol::newline || container.back().SymbolType() == GrammarSymbolNonterminal) {
+		if (GetPrecedence(symbolStack[j], a) == OperatorPrecedenceLess || GetPrecedence(symbolStack[j], a) == OperatorPrecedenceEqual) {
+			if (a != GrammarSymbol::newline || symbolStack.back().SymbolType() == GrammarSymbolNonterminal) {
 				++k;
-				container.push_back(a);
+				symbolStack.push_back(a);
+				valueStack.push_back(a.__tmpPtr());
 			}
 		}
-		else if (!OnUnexpectedToken(a, container, position)) {
+		else if (!OnUnexpectedToken(a, symbolStack, position)) {
 			return false;
 		}
 
 	} while (a != GrammarSymbol::zero);
 
+	SyntaxNode* tree = (SyntaxNode*)valueStack.back();
+	std::ostringstream oss;
+	SyntaxNodeToString(oss, "", nullptr, tree);
+
 	Debug::Log(Utility::Heading("Accept"));
+	Debug::Log(oss.str());
 	return true;
 }
 
@@ -369,34 +402,34 @@ void OperatorPrecedenceParser::InsertOperatorPrecedence(const GrammarSymbol& k1,
 }
 
 void OperatorPrecedenceParser::BuildParsingTable(Condinate* c) {
-	for (int i = 0; i < (int)c->size() - 1; ++i) {
-		GrammarSymbolType tcurrent = c->at(i).SymbolType(), tnext = c->at(i + 1).SymbolType();
+	for (int i = 0; i < (int)c->symbols.size() - 1; ++i) {
+		GrammarSymbolType tcurrent = c->symbols[i].SymbolType(), tnext = c->symbols[i + 1].SymbolType();
 
 		if (tcurrent == GrammarSymbolTerminal && tnext == GrammarSymbolTerminal) {
-			InsertOperatorPrecedence(c->at(i), c->at(i + 1), OperatorPrecedenceEqual);
+			InsertOperatorPrecedence(c->symbols[i], c->symbols[i + 1], OperatorPrecedenceEqual);
 		}
 
-		if (i < (int)c->size() - 2
-			&& tcurrent == GrammarSymbolTerminal && tnext == GrammarSymbolNonterminal && c->at(i + 2).SymbolType() == GrammarSymbolTerminal) {
-			InsertOperatorPrecedence(c->at(i), c->at(i + 2), OperatorPrecedenceEqual);
+		if (i < (int)c->symbols.size() - 2
+			&& tcurrent == GrammarSymbolTerminal && tnext == GrammarSymbolNonterminal && c->symbols[i + 2].SymbolType() == GrammarSymbolTerminal) {
+			InsertOperatorPrecedence(c->symbols[i], c->symbols[i + 2], OperatorPrecedenceEqual);
 		}
 
 		if (tcurrent == GrammarSymbolTerminal && tnext == GrammarSymbolNonterminal) {
-			GrammarSymbolSetTable::const_iterator pos = firstVtContainer_.find(c->at(i + 1));
+			GrammarSymbolSetTable::const_iterator pos = firstVtContainer_.find(c->symbols[i + 1]);
 			if (pos != firstVtContainer_.end()) {
 				const GrammarSymbolSet& cont = pos->second;
 				for (GrammarSymbolSet::const_iterator ite = cont.begin(); ite != cont.end(); ++ite) {
-					InsertOperatorPrecedence(c->at(i), *ite, OperatorPrecedenceLess);
+					InsertOperatorPrecedence(c->symbols[i], *ite, OperatorPrecedenceLess);
 				}
 			}
 		}
 
 		if (tcurrent == GrammarSymbolNonterminal && tnext == GrammarSymbolTerminal) {
-			GrammarSymbolSetTable::const_iterator pos = lastVtContainer_.find(c->at(i));
+			GrammarSymbolSetTable::const_iterator pos = lastVtContainer_.find(c->symbols[i]);
 			if (pos != lastVtContainer_.end()) {
 				const GrammarSymbolSet& cont = pos->second;
 				for (GrammarSymbolSet::const_iterator ite = cont.begin(); ite != cont.end(); ++ite) {
-					InsertOperatorPrecedence(*ite, c->at(i + 1), OperatorPrecedenceGreater);
+					InsertOperatorPrecedence(*ite, c->symbols[i + 1], OperatorPrecedenceGreater);
 				}
 			}
 		}
@@ -418,12 +451,12 @@ bool OperatorPrecedenceParser::CheckOperatorGrammar() const {
 			ite != conds.end(); ++ite) {
 			Condinate* c = *ite;
 
-			if (c->size() == 1 && c->front() == GrammarSymbol::epsilon) {
+			if (c->symbols.size() == 1 && c->symbols.front() == GrammarSymbol::epsilon) {
 				Debug::LogError("Production is epsilon.");
 				return false;
 			}
 
-			if (std::adjacent_find(c->begin(), c->end(), GrammarSymbolTypeComparer()) != c->end()) {
+			if (std::adjacent_find(c->symbols.begin(), c->symbols.end(), GrammarSymbolTypeComparer()) != c->symbols.end()) {
 				Debug::LogError("Adjacent non-terminal grammar symbol.");
 				return false;
 			}
@@ -437,7 +470,7 @@ bool OperatorPrecedenceParser::CheckOperatorGrammar() const {
 	return true;
 }
 
-bool OperatorPrecedenceParser::OnUnexpectedToken(GrammarSymbol &a, const SymbolStack &container, const TokenPosition &position) {
+bool OperatorPrecedenceParser::OnUnexpectedToken(GrammarSymbol &a, const SymbolVector& container, const TokenPosition &position) {
 	if (a == GrammarSymbol::zero) {
 		if (container.size() != 2 || container.front() != GrammarSymbol::zero || container.back().SymbolType() != GrammarSymbolNonterminal) {
 			Debug::LogError("unexpected end of file.");

@@ -11,7 +11,9 @@ public:
 
 	static bool IsTerminal(const std::string& token);
 
-	static bool IsBlankText(const char* text);
+	static bool IsBlankText(const char* text, const char** pos = nullptr);
+
+	static std::string Trim(const std::string& text);
 
 	template <class Iterator>
 	static std::string Concat(Iterator first, Iterator last, const char* seperator = " ");

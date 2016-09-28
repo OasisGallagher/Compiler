@@ -1,15 +1,22 @@
 #include <sstream>
 #include <algorithm>
-#include "grammar.h"
+
 #include "debug.h"
+#include "action.h"
+#include "grammar.h"
+#include "scanner.h"
 
 std::string Condinate::ToString() const {
 	std::ostringstream oss;
 
 	const char* space = "";
-	for (Condinate::const_iterator ite = begin(); ite != end(); ++ite) {
+	for (SymbolVector::const_iterator ite = symbols.begin(); ite != symbols.end(); ++ite) {
 		oss << space << ite->ToString();
 		space = " ";
+	}
+
+	if (action != nullptr) {
+		oss << " => " << action->ToString();
 	}
 
 	return oss.str();
@@ -55,9 +62,9 @@ const GrammarSymbol& Grammar::GetLhs() const {
 }
 
 void Grammar::AddCondinate(const Condinate& cond) {
-	Assert(!cond.empty(), "empty condinate");
+	Assert(!cond.symbols.empty(), "empty condinate");
 	Condinate* ptr = new Condinate(cond);
-	if (ptr->front() == lhs_) {
+	if (ptr->symbols.front() == lhs_) {
 		// Add left recursion condinate to front.
 		// TODO: O(n).
 		condinates_.insert(condinates_.begin(), ptr);
@@ -74,16 +81,16 @@ const CondinateContainer& Grammar::GetCondinates() const {
 void Grammar::SortCondinates() {
 	struct CondinateComparer : public std::binary_function < Condinate*, Condinate*, bool > {
 		bool operator () (const Condinate* lhs, const Condinate* rhs) const {
-			Condinate::const_iterator lite = lhs->begin(), rite = rhs->begin();
-			for (; lite != lhs->end() && rite != rhs->end() && *lite == *rite;) {
+			SymbolVector::const_iterator lite = lhs->symbols.begin(), rite = rhs->symbols.begin();
+			for (; lite != lhs->symbols.end() && rite != rhs->symbols.end() && *lite == *rite;) {
 				++lite, ++rite;
 			}
 
-			if (lite == lhs->end()) {
+			if (lite == lhs->symbols.end()) {
 				return false;
 			}
 
-			if (rite == rhs->end()) {
+			if (rite == rhs->symbols.end()) {
 				return true;
 			}
 

@@ -37,31 +37,56 @@ bool FileReader::ReadLine(char* buffer, size_t length, int* lineNumber) {
 	return !!ifs_;
 }
 
-ProductionReader::ProductionReader(const char* file) : fileReader_(file, false, false) {
-	ReadProductions();
+GrammarReader::GrammarReader(const char* file) : fileReader_(file, false, false) {
+	ReadGrammars();
 }
 
-const ProductionReader::ProducitonContainer& ProductionReader::GetProductions() const {
+const GrammarDefContainer& GrammarReader::GetGrammars() const {
 	return grammars_;
 }
 
-void ProductionReader::ReadProductions() {
+const char* GrammarReader::SplitGrammar(char*& text) {
+	text += strspn(text, ":|\t\n ");
+	return std::find(text, text + strlen(text), '\t');
+}
+
+void GrammarReader::ReadGrammars() {
 	char buffer[MAX_LINE_CHARACTERS];
-	std::string g;
-	for (; fileReader_.ReadLine(buffer, MAX_LINE_CHARACTERS, nullptr);) {
-		if (Utility::IsBlankText(buffer)) {
-			if (!g.empty()) {
+	char* ptr = buffer;
+
+	GrammarDef g;
+	std::string text;
+
+	for (; fileReader_.ReadLine(ptr, MAX_LINE_CHARACTERS, nullptr);) {
+		const char* pos = nullptr;
+		if (Utility::IsBlankText(ptr, &pos)) {
+			if (!g.Empty()) {
 				grammars_.push_back(g);
-				g.clear();
+				g.Clear();
 			}
 
 			continue;
 		}
 
-		g += buffer;
+		if (g.Empty()) {
+			g.lhs = Utility::Trim(ptr);
+			continue;
+		}
+
+		const char* tabpos = SplitGrammar(ptr);
+
+		g.productions.push_back(std::make_pair(Utility::Trim(std::string(ptr, tabpos)), Utility::Trim(std::string(tabpos))));
 	}
 
-	if (!g.empty()) {
+	if (!g.Empty()) {
 		grammars_.push_back(g);
 	}
+}
+
+bool GrammarDef::Empty() const {
+	return lhs.empty();
+}
+
+void GrammarDef::Clear() {
+	lhs.clear(); productions.clear();
 }

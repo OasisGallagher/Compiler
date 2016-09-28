@@ -5,6 +5,7 @@ class SyntaxTree;
 class FileScanner;
 class TextScanner;
 struct ScannerToken;
+class ActionParser;
 
 class Parser {
 public:
@@ -12,7 +13,7 @@ public:
 	virtual ~Parser();
 
 public:
-	virtual bool ParseFile(SyntaxTree* tree, FileScanner* fileScanner) = 0;
+	virtual bool ParseFile(/*SyntaxTree* tree, */FileScanner* fileScanner) = 0;
 	virtual std::string ToString() const;
 
 public:
@@ -35,6 +36,9 @@ protected:
 
 private:
 	void InitializeTerminalSymbolContainer();
-	bool ParseProductions(TextScanner* textScanner);
+	bool ParseProductions(TextScanner* textScanner, SymbolVector& symbols);
 	void DestroyGammars();
+
+private:
+	ActionParser* actionParser_;
 };

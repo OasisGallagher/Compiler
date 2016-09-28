@@ -96,6 +96,12 @@
     <ClInclude Include="main\include\main.h">
       <Filter>main\include</Filter>
     </ClInclude>
+    <ClInclude Include="global\include\stack2.h">
+      <Filter>global\include</Filter>
+    </ClInclude>
+    <ClInclude Include="parser\include\action.h">
+      <Filter>parser\include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="global\src\debug.cpp">
@@ -136,6 +142,9 @@
     </ClCompile>
     <ClCompile Include="main\src\main.cpp">
       <Filter>main\src</Filter>
+    </ClCompile>
+    <ClCompile Include="parser\src\action.cpp">
+      <Filter>parser\src</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

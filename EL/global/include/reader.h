@@ -17,20 +17,31 @@ private:
 	std::ifstream ifs_;
 };
 
-class ProductionReader {
+typedef std::pair<std::string, std::string> ProductionDef;
+
+struct GrammarDef {
+	std::string lhs;
+	typedef std::vector<ProductionDef> ProductionDefContainer;
+	ProductionDefContainer productions;
+
+	void Clear();
+	bool Empty() const;
+};
+
+typedef std::vector<GrammarDef> GrammarDefContainer;
+
+class GrammarReader {
 public:
-	ProductionReader(const char* file);
+	GrammarReader(const char* file);
 
 public:
-	typedef std::vector<std::string> ProducitonContainer;
-
-public:
-	const ProducitonContainer& GetProductions() const;
+	const GrammarDefContainer& GetGrammars() const;
 
 private:
-	void ReadProductions();
+	void ReadGrammars();
+	const char* SplitGrammar(char*& text);
 
 private:
 	FileReader fileReader_;
-	ProducitonContainer grammars_;
+	GrammarDefContainer grammars_;
 };

@@ -18,7 +18,7 @@ public:
 	};
 
 public:
-	virtual bool ParseFile(SyntaxTree* tree, FileScanner* fileScanner);
+	virtual bool ParseFile(/*SyntaxTree* tree, */FileScanner* fileScanner);
 
 	virtual std::string ToString() const;
 
@@ -36,7 +36,7 @@ private:
 	void BuildParsingTable(Condinate* c);
 
 	template <class Iterator>
-	GrammarSymbol Reduce(Iterator first, Iterator last);
+	GrammarSymbol Reduce(Iterator first, Iterator last, Condinate** condinate);
 
 	template <class Iterator>
 	bool MatchProduction(const Condinate* c, Iterator first, Iterator last) const;
@@ -44,7 +44,7 @@ private:
 	template <class FindTerminalSymbol, class GetEnds>
 	void CreateVt(GrammarSymbolSetTable& target, FindTerminalSymbol findTerminalSymbol, GetEnds getEnds);
 
-	bool OnUnexpectedToken(GrammarSymbol &a, const SymbolStack &container, const TokenPosition &position);
+	bool OnUnexpectedToken(GrammarSymbol &a, const SymbolVector& container, const TokenPosition &position);
 	bool CheckOperatorGrammar() const;
 	void InsertOperatorPrecedence(const GrammarSymbol& k1, const GrammarSymbol& k2, OperatorPrecedence precedence);
 
