@@ -13,9 +13,9 @@ Language::~Language() {
 	delete parser_;
 }
 
-bool Language::Parse(/*SyntaxTree* tree, */const std::string& file) {
+bool Language::Parse(SyntaxTree* tree, const std::string& file) {
 	FileScanner scanner(file.c_str());
-	return parser_->ParseFile(/*tree, */&scanner);
+	return parser_->ParseFile(tree, &scanner);
 }
 
 std::string Language::ToString() const {

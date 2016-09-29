@@ -2,8 +2,8 @@
 #include <sstream>
 #include <algorithm>
 #include "debug.h"
+#include "define.h"
 #include "scanner.h"
-#include "constants.h"
 #include "utilities.h"
 #include "reader.h"
 

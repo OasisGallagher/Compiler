@@ -16,7 +16,7 @@ std::string Condinate::ToString() const {
 	}
 
 	if (action != nullptr) {
-		oss << " => " << action->ToString();
+		oss << "\t=>\t$$ = " << action->ToString();
 	}
 
 	return oss.str();
@@ -25,15 +25,14 @@ std::string Condinate::ToString() const {
 std::string CondinateContainer::ToString() const {
 	std::ostringstream oss;
 
-	char* space = "", *seperator = "";
+	char* seperator = "";
 	for (CondinateContainer::const_iterator ite = begin();
 		ite != end(); ++ite) {
-		space = "";
-
 		oss << seperator;
-		seperator = "|";
+		seperator = "\t| ";
 
 		oss << (*ite)->ToString();
+		oss << "\n";
 	}
 
 	return oss.str();
@@ -107,6 +106,8 @@ std::string Grammar::ToString() const {
 	oss.setf(std::ios::left);
 	oss << lhs_.ToString();
 
+	oss << "\n";
+	oss << "\t: ";
 	oss << condinates_.ToString();
 
 	return oss.str();

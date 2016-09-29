@@ -3,12 +3,10 @@
 #include <algorithm>
 
 #include "action.h"
-#include "stack2.h"
 #include "matrix.h"
 #include "scanner.h"
 #include "syntax_tree.h"
 #include "table_printer.h"
-#include "disjoint_sets.h"
 #include "operator_precedence_parser.h"
 
 using OperatorPrecedence = OperatorPrecedenceParser::OperatorPrecedence;
@@ -169,20 +167,7 @@ GrammarSymbol OperatorPrecedenceParser::Reduce(Iterator first, Iterator last, Co
 	return GrammarSymbol::null;
 }
 
-static void SyntaxNodeToString(std::ostringstream& oss, const std::string& prefix, SyntaxNode* parent, SyntaxNode* current) {
-	bool tail = false;
-
-	oss << prefix << (tail ? "©¸©¤©¤©¤ " : "©À©¤©¤©¤ ") << (current != nullptr ? current->ToString() : "null") << "\n";
-	if (current == nullptr) {
-		return;
-	}
-
-	for (int i = 0; i < current->GetChildCount(); ++i) {
-		SyntaxNodeToString(oss, prefix + (tail ? "     " : "©¦    "), current, current->GetChild(i));
-	}
-}
-
-bool OperatorPrecedenceParser::ParseFile(/*SyntaxTree* tree, */FileScanner* fileScanner) {
+bool OperatorPrecedenceParser::ParseFile(SyntaxTree* tree, FileScanner* fileScanner) {
 	std::vector<GrammarSymbol> symbolStack;
 	std::vector<void*> valueStack;
 
@@ -197,10 +182,13 @@ bool OperatorPrecedenceParser::ParseFile(/*SyntaxTree* tree, */FileScanner* file
 	int reduceCount = 0;
 
 	GrammarSymbol a;
+	void* addr = nullptr;
+
 	do {
 		a = GrammarSymbol::zero;
+
 		if (fileScanner->GetToken(&token, &position)) {
-			a = FindSymbol(token);
+			a = FindSymbol(token, addr);
 		}
 
 		if (!a) {
@@ -245,7 +233,7 @@ bool OperatorPrecedenceParser::ParseFile(/*SyntaxTree* tree, */FileScanner* file
 			if (a != GrammarSymbol::newline || symbolStack.back().SymbolType() == GrammarSymbolNonterminal) {
 				++k;
 				symbolStack.push_back(a);
-				valueStack.push_back(a.__tmpPtr());
+				valueStack.push_back(addr);
 			}
 		}
 		else if (!OnUnexpectedToken(a, symbolStack, position)) {
@@ -254,12 +242,10 @@ bool OperatorPrecedenceParser::ParseFile(/*SyntaxTree* tree, */FileScanner* file
 
 	} while (a != GrammarSymbol::zero);
 
-	SyntaxNode* tree = (SyntaxNode*)valueStack.back();
-	std::ostringstream oss;
-	SyntaxNodeToString(oss, "", nullptr, tree);
+	tree->SetRoot((SyntaxNode*)valueStack.back());
 
 	Debug::Log(Utility::Heading("Accept"));
-	Debug::Log(oss.str());
+
 	return true;
 }
 

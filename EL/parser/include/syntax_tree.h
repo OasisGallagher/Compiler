@@ -2,13 +2,18 @@
 #include <string>
 #include <vector>
 #include <sstream>
-#include "constants.h"
+#include "define.h"
 
 enum SyntaxNodeType {
-	SyntaxNodeConstant,
 	SyntaxNodeSymbol,
+	SyntaxNodeLiteral,
+	SyntaxNodeConstant,
 	SyntaxNodeOperation,
 };
+
+class Sym;
+class Literal;
+class Constant;
 
 class SyntaxNode {
 public:
@@ -16,13 +21,17 @@ public:
 	~SyntaxNode();
 
 public:
+	SyntaxNodeType GetNodeType() const;
+
 	void AddChildren(SyntaxNode** buffer, int count);
-
 	SyntaxNode* GetChild(int index);
-	int GetChildCount() const;
 
-	void SetConstantAddress(void* addr);
-	void SetSymbolAddress(void* addr);
+	int GetChildCount() const;
+	const SyntaxNode* GetChild(int index) const;
+
+	void SetSymbolAddress(Sym* addr);
+	void SetLiteralAddress(Literal* addr);
+	void SetConstantAddress(Constant* addr);
 
 	const std::string& ToString() const;
 
@@ -31,21 +40,22 @@ private:
 	SyntaxNodeType type_;
 
 	union {
+		Sym* symbol;
+		Literal* literal;
+		Constant* constant;
+
 		// 子节点, 第一个元素表示子节点个数.
 		SyntaxNode** children;
-		void* constant;
-		void* symbol;
 	} value_;
 };
 
-/*
 class SyntaxTree {
 public:
 	SyntaxTree();
 	~SyntaxTree();
 
 public:
-	SyntaxNode* AddNode(SyntaxNode* parent, const std::string& name);
+	void SetRoot(SyntaxNode* root);
 
 public:
 	std::string ToString() const;
@@ -54,7 +64,7 @@ private:
 	SyntaxTree(const SyntaxTree&);
 	SyntaxTree& operator = (const SyntaxTree&);
 
-	void SyntaxNodeToString(std::ostringstream& oss, const std::string& prefix, SyntaxNode* current) const;
+	void ToStringRecursively(std::ostringstream& oss, const std::string& prefix, const SyntaxNode* current, bool tail) const;
 	void DeleteTreeNode(SyntaxNode* node);
 
 	typedef void (SyntaxTree::*TreeWalkCallback)(SyntaxNode* node);
@@ -62,4 +72,4 @@ private:
 
 private:
 	SyntaxNode* root_;
-};*/
+};

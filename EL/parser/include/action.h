@@ -37,17 +37,22 @@ public:
 	virtual SyntaxNode* Invoke(const std::vector<void*>& container);
 };
 
+class ActionLiteral : public Action {
+public:
+	virtual std::string ToString() const;
+	virtual SyntaxNode* Invoke(const std::vector<void*>& container);
+};
+
 class ActionSymbol : public Action {
 public:
 	virtual std::string ToString() const;
 	virtual SyntaxNode* Invoke(const std::vector<void*>& container);
 };
 
-class ActionIdentity : public Action {
+class ActionIndex : public Action {
 public:
 	virtual std::string ToString() const;
 	virtual SyntaxNode* Invoke(const std::vector<void*>& container);
-	virtual bool ParseParameters(TextScanner& scanner, Argument& argument);
 };
 
 class ActionMake : public Action {

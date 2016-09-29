@@ -1,6 +1,6 @@
 #pragma once
 #include <string>
-#include "constants.h"
+#include "define.h"
 
 // Scanner扫描到的标记.
 enum ScannerTokenType {

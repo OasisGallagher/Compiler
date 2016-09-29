@@ -1,9 +1,9 @@
 #include "debug.h"
 #include "token.h"
+#include "table.h"
 #include "action.h"
-#include "stack2.h"
+#include "define.h"
 #include "scanner.h"
-#include "constants.h"
 #include "utilities.h"
 #include "syntax_tree.h"
 
@@ -61,35 +61,62 @@ bool Action::SplitParameters(int* parameters, int& count, TextScanner& scanner) 
 }
 
 std::string ActionConstant::ToString() const {
-	return "";
+	return std::string("constant(") + std::to_string(argument_.parameters.front()) + ")";
 }
 
 SyntaxNode* ActionConstant::Invoke(const std::vector<void*>& container) {
-	return new SyntaxNode(SyntaxNodeConstant, "constant");
+	Constant* constant = (Constant*)container[container.size() - argument_.parameters.front()];
+	SyntaxNode* ans = new SyntaxNode(SyntaxNodeConstant, constant->ToString());
+	ans->SetConstantAddress(constant);
+	return ans;
+}
+
+std::string ActionLiteral::ToString() const {
+	return std::string("literal(") + std::to_string(argument_.parameters.front()) + ")";
+}
+
+SyntaxNode* ActionLiteral::Invoke(const std::vector<void*>& container) {
+	Literal* literal = (Literal*)container[container.size() - argument_.parameters.front()];
+	SyntaxNode* ans = new SyntaxNode(SyntaxNodeLiteral, literal->ToString());
+	ans->SetLiteralAddress(literal);
+	return ans;
 }
 
 std::string ActionSymbol::ToString() const {
-	return "";
+	return std::string("symbol(") + std::to_string(argument_.parameters.front()) + ")";
 }
 
 SyntaxNode* ActionSymbol::Invoke(const std::vector<void*>& container) {
-	return new SyntaxNode(SyntaxNodeSymbol, "identifier");
+	Sym* sym = (Sym*)container[container.size() - argument_.parameters.front()];
+	SyntaxNode* ans = new SyntaxNode(SyntaxNodeSymbol, sym->ToString());
+	ans->SetSymbolAddress(sym);
+	return ans;
 }
 
-std::string ActionIdentity::ToString() const {
-	return "";
+std::string ActionIndex::ToString() const {
+	return std::string("$") + std::to_string(argument_.parameters.front());
 }
 
-SyntaxNode* ActionIdentity::Invoke(const std::vector<void*>& container) {
+SyntaxNode* ActionIndex::Invoke(const std::vector<void*>& container) {
 	return (SyntaxNode*)container[container.size() - argument_.parameters.front()];
 }
 
-bool ActionIdentity::ParseParameters(TextScanner& scanner, Argument& argument) {
-	return true;
-}
-
 std::string ActionMake::ToString() const {
-	return "";
+	const char* sep = "";
+	std::ostringstream oss;
+	
+	oss << "make(";
+
+	for (std::vector<int>::const_iterator ite = argument_.parameters.begin();
+		ite != argument_.parameters.end(); ++ite) {
+		oss << sep;
+		oss << '$' << std::to_string(*ite);
+		sep = ", ";
+	}
+
+	oss << ")";
+
+	return oss.str();
 }
 
 SyntaxNode* ActionMake::Invoke(const std::vector<void*>& container) {
@@ -159,8 +186,15 @@ Action* ActionParser::CreateAction(const std::string& cmd) {
 	Argument argument;
 
 	if (IsOperand(token)) {
-		action = new ActionIdentity();
-		argument.text = "identity";
+		int integer = 0;
+		if (!Utility::ParseInteger(token + 1, &integer)) {
+			Assert(false, std::string("invalid right operand ") + token);
+		}
+		else {
+			action = new ActionIndex();
+			argument.text = "identity";
+			argument.parameters.push_back(integer);
+		}
 	}
 	else {
 		if (strcmp(token, "make") == 0) {
@@ -175,9 +209,14 @@ Action* ActionParser::CreateAction(const std::string& cmd) {
 			action = new ActionSymbol();
 			argument.text = "symbol";
 		}
+		else if (strcmp(token, "literal") == 0) {
+			action = new ActionLiteral();
+			argument.text = "literal";
+		}
 
 		if (action != nullptr && !action->ParseParameters(scanner, argument)) {
 			delete action;
+			action = nullptr;
 		}
 	}
 
@@ -201,6 +240,5 @@ bool ActionParser::IsOperand(const char* text) {
 		return false;
 	}
 
-	++text;
-	return *text == 0;
+	return true;
 }

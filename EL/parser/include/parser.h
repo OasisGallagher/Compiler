@@ -4,8 +4,13 @@
 class SyntaxTree;
 class FileScanner;
 class TextScanner;
-struct ScannerToken;
 class ActionParser;
+
+class SymTable;
+class LiteralTable;
+class ConstantTable;
+
+struct ScannerToken;
 
 class Parser {
 public:
@@ -13,7 +18,7 @@ public:
 	virtual ~Parser();
 
 public:
-	virtual bool ParseFile(/*SyntaxTree* tree, */FileScanner* fileScanner) = 0;
+	virtual bool ParseFile(SyntaxTree* tree, FileScanner* fileScanner) = 0;
 	virtual std::string ToString() const;
 
 public:
@@ -24,7 +29,7 @@ protected:
 	virtual void Clear();
 
 protected:
-	GrammarSymbol FindSymbol(const ScannerToken& token);
+	GrammarSymbol FindSymbol(const ScannerToken& token, void*& addr);
 	Grammar* FindGrammar(const GrammarSymbol& lhs);
 	GrammarSymbol CreateSymbol(const std::string& text);
 	bool MergeNonEpsilonElements(GrammarSymbolSet& dest, const GrammarSymbolSet& src);
@@ -40,5 +45,9 @@ private:
 	void DestroyGammars();
 
 private:
+	SymTable* symTable_;
+	LiteralTable* literalTable_;
+	ConstantTable* constantTable_;
+	
 	ActionParser* actionParser_;
 };

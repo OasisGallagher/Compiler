@@ -137,7 +137,6 @@ public:
 	bool operator > (const GrammarSymbol& other) const;
 
 public:
-	void* __tmpPtr() { return symbol_; }
 	GrammarSymbolType SymbolType() const;
 	bool Match(const ScannerToken& token) const;
 	std::string ToString() const;

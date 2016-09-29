@@ -16,6 +16,10 @@ SyntaxNode::~SyntaxNode() {
 	}
 }
 
+SyntaxNodeType SyntaxNode::GetNodeType() const {
+	return type_;
+}
+
 void SyntaxNode::AddChildren(SyntaxNode** buffer, int count) {
 	DEBUG_NODE_TYPE(type_, SyntaxNodeOperation);
 
@@ -24,11 +28,16 @@ void SyntaxNode::AddChildren(SyntaxNode** buffer, int count) {
 
 	for (int i = 1; i <= count; ++i) {
 		value_.children[i] = buffer[i - 1];
-		printf(buffer[i - 1]->ToString().c_str());
 	}
 }
 
 SyntaxNode* SyntaxNode::GetChild(int index) {
+	DEBUG_NODE_TYPE(type_, SyntaxNodeOperation);
+	Assert(index >= 0 && index < GetChildCount(), "index out of range");
+	return value_.children[index + 1];
+}
+
+const SyntaxNode* SyntaxNode::GetChild(int index) const {
 	DEBUG_NODE_TYPE(type_, SyntaxNodeOperation);
 	Assert(index >= 0 && index < GetChildCount(), "index out of range");
 	return value_.children[index + 1];
@@ -39,21 +48,25 @@ int SyntaxNode::GetChildCount() const {
 	return (int)*value_.children;
 }
 
-void SyntaxNode::SetConstantAddress(void* addr) {
+void SyntaxNode::SetConstantAddress(Constant* addr) {
 	DEBUG_NODE_TYPE(type_, SyntaxNodeConstant);
 	value_.constant = addr;
 }
 
-void SyntaxNode::SetSymbolAddress(void* addr) {
+void SyntaxNode::SetSymbolAddress(Sym* addr) {
 	DEBUG_NODE_TYPE(type_, SyntaxNodeSymbol);
 	value_.symbol = addr;
+}
+
+void SyntaxNode::SetLiteralAddress(Literal* addr) {
+	DEBUG_NODE_TYPE(type_, SyntaxNodeLiteral);
+	value_.literal = addr;
 }
 
 const std::string& SyntaxNode::ToString() const {
 	return text_;
 }
 
-/*
 SyntaxTree::SyntaxTree() 
 	: root_(nullptr) {
 
@@ -63,24 +76,41 @@ SyntaxTree::~SyntaxTree() {
 	PreorderTreeWalk(&SyntaxTree::DeleteTreeNode);
 }
 
-SyntaxNode* SyntaxTree::AddNode(SyntaxNode* parent, const std::string& name) {
-	if (parent == nullptr) {
-		Assert(root_ == nullptr, "root already exists");
-		return root_ = new SyntaxNode(name);
-	}
-
-	SyntaxNode* node = new SyntaxNode(name);
-	parent->AddChild(node);
-	return node;
+void SyntaxTree::SetRoot(SyntaxNode* root) {
+	root_ = root;
 }
 
 std::string SyntaxTree::ToString() const {
 	std::ostringstream oss;
 	if (root_ != nullptr) {
-		SyntaxNodeToString(oss, "", nullptr, root_);
+		ToStringRecursively(oss, "", root_, true);
+	}
+	return oss.str();
+}
+
+void SyntaxTree::ToStringRecursively(std::ostringstream& oss, const std::string& prefix, const SyntaxNode* current, bool tail) const {
+	oss << prefix << (tail ? "└─── " : "├─── ") << (current != nullptr ? current->ToString() : "null") << "\n";
+	if (current == nullptr || current->GetNodeType() != SyntaxNodeOperation) {
+		return;
 	}
 
-	return oss.str();
+	for (int i = 0; i < current->GetChildCount(); ++i) {
+		bool lastChild = current != nullptr && current->GetChildCount() == (i + 1);
+		ToStringRecursively(oss, prefix + (tail ? "     " : "│    "), current->GetChild(i), lastChild);
+	}
+
+	/*
+	bool tail = false;
+
+	oss << prefix << (tail ? "└─── " : "├─── ") << (current != nullptr ? current->ToString() : "null") << "\n";
+	if (current == nullptr || current->GetNodeType() != SyntaxNodeOperation) {
+		return;
+	}
+
+	for (int i = 0; i < current->GetChildCount(); ++i) {
+		SyntaxNodeToString(oss, prefix + (tail ? "     " : "│    "), current, current->GetChild(i));
+	}
+	*/
 }
 
 void SyntaxTree::DeleteTreeNode(SyntaxNode* node) {
@@ -99,19 +129,14 @@ void SyntaxTree::PreorderTreeWalk(TreeWalkCallback callback) {
 		SyntaxNode* cur = s.top();
 		s.pop();
 
-		for (int i = cur->ChildCount() - 1; i >= 0; --i) {
-			s.push(cur->GetChild(i));
+		if (cur != nullptr && cur->GetNodeType() == SyntaxNodeOperation) {
+			for (int i = cur->GetChildCount() - 1; i >= 0; --i) {
+				s.push(cur->GetChild(i));
+			}
 		}
 
-		(this->*callback)(cur);
+		if (cur != nullptr) {
+			(this->*callback)(cur);
+		}
 	}
 }
-
-void SyntaxTree::SyntaxNodeToString(std::ostringstream& oss, const std::string& prefix, SyntaxNode* parent, SyntaxNode* current) const {
-	bool tail = (current + 1 == parent->children_ + parent->GetChildCount());
-	oss << prefix << (tail ? "└─── " : "├─── ") << current->ToString() << "\n";
-	for (int i = 0; i < current->ChildCount(); ++i) {
-		SyntaxNodeToString(oss, prefix + (tail ? "     " : "│    "), current->GetChild(i));
-	}
-}
-*/

@@ -1,17 +1,28 @@
 #include <sstream>
 
+#include "table.h"
 #include "reader.h"
 #include "parser.h"
 #include "action.h"
 #include "scanner.h"
 
 Parser::Parser() {
+	symTable_ = new SymTable();
+	literalTable_ = new LiteralTable();
+	constantTable_ = new ConstantTable();
+
 	actionParser_ = new ActionParser();
+
 	InitializeTerminalSymbolContainer();
 }
 
 Parser::~Parser() {
 	DestroyGammars();
+
+	delete symTable_;
+	delete literalTable_;
+	delete constantTable_;
+
 	delete actionParser_;
 }
 
@@ -94,16 +105,20 @@ Grammar* Parser::FindGrammar(const GrammarSymbol& lhs) {
 	return g;
 }
 
-GrammarSymbol Parser::FindSymbol(const ScannerToken& token) {
+GrammarSymbol Parser::FindSymbol(const ScannerToken& token, void*& addr) {
+	addr = nullptr;
+
 	GrammarSymbol answer = GrammarSymbol::null;
 	if (token.tokenType == ScannerTokenEndOfFile) {
 		answer = GrammarSymbol::zero;
 	}
 	else if (token.tokenType == ScannerTokenNumber) {
 		answer = GrammarSymbol::number;
+		addr = constantTable_->Add(token.text);
 	}
 	else if (token.tokenType == ScannerTokenString) {
 		answer = GrammarSymbol::string;
+		addr = literalTable_->Add(token.text);
 	}
 	else if (token.tokenType == ScannerTokenNewline) {
 		answer = GrammarSymbol::newline;
@@ -116,6 +131,7 @@ GrammarSymbol Parser::FindSymbol(const ScannerToken& token) {
 			}
 			else {
 				answer = GrammarSymbol::identifier;
+				addr = symTable_->Add(token.text);
 			}
 		}
 		else {

@@ -9,24 +9,6 @@
 #include "ll_parser.h"
 #include "syntax_tree.h"
 
-template <class Ty>
-void TraceStack(const std::string& token, const Ty& s) {
-	std::ostringstream oss;
-	const char* seperator = "";
-	for (Ty copy = s; !copy.empty();) {
-		oss << seperator << copy.top().first.ToString();
-		copy.pop();
-		seperator = " ";
-	}
-
-	std::string space;
-	for (int i = (int)token.length(); i < 12; ++i) {
-		space += ' ';
-	}
-	
-	Debug::Log(token + space + " => " + oss.str());
-}
-
 class ParsingTable : public matrix<GrammarSymbol, GrammarSymbol, std::pair<GrammarSymbol, Condinate*>> {
 public:
 	std::string ToString() const;
@@ -465,8 +447,8 @@ void LLParser::GetFirstSet(GrammarSymbolSet* answer, SymbolVector::iterator firs
 	}
 }
 
-bool LLParser::ParseFile(/*SyntaxTree* tree, */FileScanner* fileScanner) {
-	/*ScannerToken token;
+bool LLParser::ParseFile(SyntaxTree* tree, FileScanner* fileScanner) {
+	ScannerToken token;
 	TokenPosition tokenPosition = { 0 };
 	if (!fileScanner->GetToken(&token, &tokenPosition)) {
 		Debug::LogError("failed to read token");
@@ -475,22 +457,17 @@ bool LLParser::ParseFile(/*SyntaxTree* tree, */FileScanner* fileScanner) {
 
 	std::string error = "invalid syntax";
 
-	typedef std::pair<GrammarSymbol, SyntaxNode*> StackItem;
-	std::stack<StackItem> s;
+	std::stack<GrammarSymbol> s;
 	GrammarSymbol symbol = grammars_.front()->GetLhs();
-	SyntaxNode* root = nullptr;
-	root = tree->AddNode(root, symbol.ToString());
 
-	s.push(std::make_pair(symbol, root));
+	s.push(symbol);
 
 	for (; !s.empty();) {
-		StackItem& item = s.top();
-		symbol = item.first;
-		root = item.second;
+		symbol = s.top();
 
 		if (symbol.SymbolType() == GrammarSymbolTerminal && symbol.Match(token)) {
 			s.pop();
-			TraceStack("Match " + std::string(token.text), s);
+
 			if (symbol != GrammarSymbol::epsilon && !fileScanner->GetToken(&token, &tokenPosition)) {
 				Debug::LogError("failed to read token");
 				return false;
@@ -500,7 +477,8 @@ bool LLParser::ParseFile(/*SyntaxTree* tree, */FileScanner* fileScanner) {
 		}
 
 		if (symbol.SymbolType() == GrammarSymbolNonterminal) {
-			GrammarSymbol tokenSymbol = FindSymbol(token);
+			void* addr = nullptr;
+			GrammarSymbol tokenSymbol = FindSymbol(token, addr);
 			if (!tokenSymbol) {
 				error = std::string("invalid token ") + token.text + " at " + tokenPosition.ToString();
 				break;
@@ -511,11 +489,9 @@ bool LLParser::ParseFile(/*SyntaxTree* tree, */FileScanner* fileScanner) {
 				s.pop();
 
 				Condinate* cond = pos->second.second;
-				for (Condinate::reverse_iterator rite = cond->rbegin(); rite != cond->rend(); ++rite) {
-					s.push(std::make_pair(*rite, tree->AddNode(root, rite->ToString())));
+				for (SymbolVector::reverse_iterator rite = cond->symbols.rbegin(); rite != cond->symbols.rend(); ++rite) {
+					s.push(*rite);
 				}
-
-				TraceStack("Push " + std::string(token.text), s);
 
 				continue;
 			}
@@ -539,6 +515,6 @@ bool LLParser::ParseFile(/*SyntaxTree* tree, */FileScanner* fileScanner) {
 		return true;
 	}
 
-	Debug::LogError(error);*/
+	Debug::LogError(error);
 	return false;
 }

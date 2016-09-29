@@ -39,9 +39,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="global\include\constants.h">
-      <Filter>global\include</Filter>
-    </ClInclude>
     <ClInclude Include="global\include\debug.h">
       <Filter>global\include</Filter>
     </ClInclude>
@@ -69,9 +66,6 @@
     <ClInclude Include="global\include\reference_countable.h">
       <Filter>global\include</Filter>
     </ClInclude>
-    <ClInclude Include="global\include\static_vector.h">
-      <Filter>global\include</Filter>
-    </ClInclude>
     <ClInclude Include="parser\include\ll_parser.h">
       <Filter>parser\include</Filter>
     </ClInclude>
@@ -87,19 +81,19 @@
     <ClInclude Include="global\include\table_printer.h">
       <Filter>global\include</Filter>
     </ClInclude>
-    <ClInclude Include="global\include\disjoint_sets.h">
-      <Filter>global\include</Filter>
-    </ClInclude>
     <ClInclude Include="global\include\reader.h">
       <Filter>global\include</Filter>
     </ClInclude>
     <ClInclude Include="main\include\main.h">
       <Filter>main\include</Filter>
     </ClInclude>
-    <ClInclude Include="global\include\stack2.h">
+    <ClInclude Include="parser\include\action.h">
+      <Filter>parser\include</Filter>
+    </ClInclude>
+    <ClInclude Include="global\include\define.h">
       <Filter>global\include</Filter>
     </ClInclude>
-    <ClInclude Include="parser\include\action.h">
+    <ClInclude Include="parser\include\table.h">
       <Filter>parser\include</Filter>
     </ClInclude>
   </ItemGroup>
@@ -144,6 +138,9 @@
       <Filter>main\src</Filter>
     </ClCompile>
     <ClCompile Include="parser\src\action.cpp">
+      <Filter>parser\src</Filter>
+    </ClCompile>
+    <ClCompile Include="parser\src\table.cpp">
       <Filter>parser\src</Filter>
     </ClCompile>
   </ItemGroup>
