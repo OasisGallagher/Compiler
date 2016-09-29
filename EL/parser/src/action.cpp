@@ -4,6 +4,7 @@
 #include "stack2.h"
 #include "scanner.h"
 #include "constants.h"
+#include "utilities.h"
 #include "syntax_tree.h"
 
 void Action::SetArgument(const Argument& argument) {
@@ -41,10 +42,12 @@ bool Action::SplitParameters(int* parameters, int& count, TextScanner& scanner) 
 			expectedTokenType = ScannerTokenIdentifier;
 		}
 		else {
-			Assert(strlen(token) == 2 && token[0] == '$' && isdigit(token[1]), std::string("invalid parameter format ") + token);
+			int integer = 0;
+			bool valid = (*token == '$') && Utility::ParseInteger(token + 1, &integer);
+			Assert(valid, std::string("invalid parameter format ") + token);
 			Assert(index < count, "buffer too small");
 
-			parameters[index++] = token[1] - '0';
+			parameters[index++] = integer;
 			expectedTokenType = ScannerTokenSign;
 		}
 	}
@@ -194,7 +197,7 @@ bool ActionParser::IsOperand(const char* text) {
 	}
 
 	++text;
-	if (*text != '$' && !isdigit(*text)) {
+	if (*text != '$' && !Utility::ParseInteger(text)) {
 		return false;
 	}
 

@@ -23,36 +23,36 @@ $argument_list        $argument_list , $factor => |$factor =>
 $argument_list $assign_stmt $do_while_stmt $exp $factor $function_call $function_def $if_stmt $program $read_stmt $simple_exp $stmt $stmt_seq $term $while_stmt $write_stmt
 
 =================== FirstVt ====================
-$while_stmt           {while}
-$assign_stmt          {identifier}
-$read_stmt            {read}
-$write_stmt           {write}
-$do_while_stmt        {do}
 $stmt                 {identifier if while do read write function}
 $if_stmt              {if}
 $function_def         {function}
 $function_call        {identifier}
 $exp                  {number identifier ( == < <= >= > + - * /}
-$stmt_seq             {newline identifier ; if while do read write function}
 $program              {newline identifier ; if while do read write function}
+$while_stmt           {while}
+$assign_stmt          {identifier}
+$read_stmt            {read}
+$write_stmt           {write}
+$do_while_stmt        {do}
+$stmt_seq             {newline identifier ; if while do read write function}
 $simple_exp           {number identifier ( + - * /}
 $term                 {number identifier ( * /}
 $factor               {number identifier (}
 $argument_list        {number identifier ( ,}
 
 ==================== LastVt ====================
-$while_stmt           {}}
-$assign_stmt          {number identifier ) == = < <= >= > + - * /}
-$read_stmt            {identifier}
-$write_stmt           {identifier}
-$do_while_stmt        {)}
 $stmt                 {number identifier ) } == = < <= >= > + - * /}
 $if_stmt              {}}
 $function_def         {}}
 $function_call        {)}
 $exp                  {number identifier ) == < <= >= > + - * /}
-$stmt_seq             {number newline identifier ; ) } == = < <= >= > + - * /}
 $program              {number newline identifier ; ) } == = < <= >= > + - * /}
+$while_stmt           {}}
+$assign_stmt          {number identifier ) == = < <= >= > + - * /}
+$read_stmt            {identifier}
+$write_stmt           {identifier}
+$do_while_stmt        {)}
+$stmt_seq             {number newline identifier ; ) } == = < <= >= > + - * /}
 $simple_exp           {number identifier ) + - * /}
 $term                 {number identifier ) * /}
 $factor               {number identifier )}
@@ -82,68 +82,4 @@ $argument_list        {number identifier ) ,}
 |    function|   |   |   |   |   |   |   |   |   |    |   |    |   |    |    |      |         |          |           =|    |         |        |      |        |       |       |     >|   |   |
 |  identifier|  =|  >|  >|  >|  >|  >|  >|  >|  >|   >|  =|   >|  >|   >|    |      |         |          |            |    |        >|        |      |        |       |       |     >|   |  >|
 |          if|  =|   |   |   |   |   |   |   |   |    |   |    |   |    |    |      |         |          |            |    |         |        |      |        |       |       |     >|   |   |
-|     newline|   |   |   |   |   |   |   |  >|   |    |   |    |   |    |   <|      |         |         <|           <|   <|        >|        |     <|        |      <|      <|     >|   |  >|
-|      number|   |  >|  >|  >|  >|  >|  >|  >|  >|   >|   |   >|  >|   >|    |      |         |          |            |    |        >|        |      |        |       |       |     >|   |  >|
-|        read|   |   |   |   |   |   |   |   |   |    |   |    |   |    |    |      |         |          |           =|    |         |        |      |        |       |       |     >|   |   |
-|      string|   |   |   |   |   |   |   |   |   |    |   |    |   |    |    |      |         |          |            |    |         |        |      |        |       |       |     >|   |   |
-|       while|  =|   |   |   |   |   |   |   |   |    |   |    |   |    |    |      |         |          |            |    |         |        |      |        |       |       |     >|   |   |
-|       write|   |   |   |   |   |   |   |   |   |    |   |    |   |    |    |      |         |          |           =|    |         |        |      |        |       |       |     >|   |   |
-|        zero|  <|  <|  <|  <|  <|  <|  <|  <|  <|   <|  <|   <|  <|   <|   <|     <|        <|         <|           <|   <|        <|       <|     <|       <|      <|      <|      |  <|  <|
-|           {|   |   |   |   |   |   |   |  <|   |    |   |    |   |    |   <|      |         |         <|           <|   <|        <|        |     <|        |      <|      <|     >|   |  =|
-|           }|   |   |   |   |   |   |   |  >|   |    |   |    |   |    |    |     =|         |          |            |    |        >|        |      |        |      =|       |     >|   |  >|
-+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-
-1	Reduce `number` to `$factor`
-2	Reduce `identifier` to `$factor`
-3	Reduce `$factor < $factor` to `$exp`
-4	Reduce `number` to `$factor`
-5	Reduce `identifier = $factor` to `$assign_stmt`
-6	Reduce `identifier` to `$factor`
-7	Reduce `number` to `$factor`
-8	Reduce `$factor < $factor` to `$exp`
-9	Reduce `identifier` to `$factor`
-10	Reduce `identifier` to `$factor`
-11	Reduce `$factor * $factor` to `$term`
-12	Reduce `identifier = $term` to `$assign_stmt`
-13	Reduce `$assign_stmt ;` to `$stmt_seq`
-14	Reduce `identifier` to `$factor`
-15	Reduce `number` to `$factor`
-16	Reduce `$factor + $factor` to `$simple_exp`
-17	Reduce `identifier = $simple_exp` to `$assign_stmt`
-18	Reduce `$stmt_seq newline $assign_stmt` to `$stmt_seq`
-19	Reduce `$stmt_seq ;` to `$stmt_seq`
-20	Reduce `$stmt_seq newline` to `$stmt_seq`
-21	Reduce `while ( $exp ) { $stmt_seq }` to `$while_stmt`
-22	Reduce `$assign_stmt newline $while_stmt` to `$stmt_seq`
-23	Reduce `write identifier` to `$write_stmt`
-24	Reduce `$stmt_seq newline $write_stmt` to `$stmt_seq`
-25	Reduce `$stmt_seq newline` to `$stmt_seq`
-26	Reduce `if ( $exp ) { $stmt_seq }` to `$if_stmt`
-27	Reduce `read identifier` to `$read_stmt`
-28	Reduce `$if_stmt newline $read_stmt` to `$stmt_seq`
-29	Reduce `$stmt_seq ;` to `$stmt_seq`
-30	Reduce `identifier` to `$factor`
-31	Reduce `identifier` to `$factor`
-32	Reduce `$factor < $factor` to `$exp`
-33	Reduce `write identifier` to `$write_stmt`
-34	Reduce `$write_stmt newline` to `$stmt_seq`
-35	Reduce `while ( $exp ) { $stmt_seq }` to `$while_stmt`
-36	Reduce `$stmt_seq newline $while_stmt` to `$stmt_seq`
-37	Reduce `identifier` to `$factor`
-38	Reduce `number` to `$factor`
-39	Reduce `$factor + $factor` to `$simple_exp`
-40	Reduce `identifier = $simple_exp` to `$assign_stmt`
-41	Reduce `$assign_stmt ;` to `$stmt_seq`
-42	Reduce `$stmt_seq newline` to `$stmt_seq`
-43	Reduce `identifier` to `$factor`
-44	Reduce `number` to `$factor`
-45	Reduce `$factor < $factor` to `$exp`
-46	Reduce `do { $stmt_seq } while ( $exp )` to `$do_while_stmt`
-47	Reduce `$stmt_seq newline $do_while_stmt` to `$stmt_seq`
-48	Reduce `$stmt_seq ;` to `$stmt_seq`
-49	Reduce `identifier` to `$factor`
-50	Reduce `read identifier` to `$read_stmt`
-51	Reduce `$read_stmt ;` to `$stmt_seq`
-52	Reduce `if ( $factor ) { $stmt_seq }` to `$if_stmt`
-53	Reduce `$stmt_seq newline $if_stmt` to `$stmt_seq`
-54	Reduce `
+|     newline|   |   |   |   |   |   |   |  >|   |    |   |    |   |    |   <|      |         |         <|           <|   <|        >|        |     <|        |      

@@ -24,6 +24,7 @@ void SyntaxNode::AddChildren(SyntaxNode** buffer, int count) {
 
 	for (int i = 1; i <= count; ++i) {
 		value_.children[i] = buffer[i - 1];
+		printf(buffer[i - 1]->ToString().c_str());
 	}
 }
 

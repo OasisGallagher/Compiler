@@ -2,9 +2,9 @@ $program
 	: $stmt_seq		$$ = $1
 		
 $stmt_seq
-	: $stmt_seq ; 				$$ = make(";", $0, $2)
+	: $stmt_seq ; 				$$ = make(";", $1, $0)
 	| $stmt_seq ; $stmt			$$ = make(";", $1, $3)
-	| $stmt_seq newline			$$ = make("newline", $0, $2)
+	| $stmt_seq newline			$$ = make("newline", $1, $0)
 	| $stmt_seq newline $stmt	$$ = make("newline", $1, $3)
 	| $stmt						$$ = $1
 	
@@ -19,63 +19,63 @@ $stmt
 	| $function_call	$$ = $1
 	
 $if_stmt
-	: if ( $exp ) { }									$$ = make("if_stmt", $4, $0, $0)
-	| if ( $exp ) { $stmt_seq }							$$ = make("if_stmt", $5, $2, $0)
-	| if ( $exp ) { } else { }							$$ = make("if_stmt", $7, $0, $0)
-	| if ( $exp ) { } else { $stmt_seq }				$$ = make("if_stmt", $8, $0, $2)
-	| if ( $exp ) { $stmt_seq } else { }				$$ = make("if_stmt", $8, $5, $0)	
-	| if ( $exp ) { $stmt_seq } else { $stmt_seq }		$$ = make("if_stmt", $9, $6, $2)
+	: if ( $exp ) { }									$$ = make("if_stmt", $3, $0, $0)
+	| if ( $exp ) { $stmt_seq }							$$ = make("if_stmt", $3, $6, $0)
+	| if ( $exp ) { } else { }							$$ = make("if_stmt", $3, $0, $0)
+	| if ( $exp ) { } else { $stmt_seq }				$$ = make("if_stmt", $3, $0, $9)
+	| if ( $exp ) { $stmt_seq } else { }				$$ = make("if_stmt", $3, $6, $0)	
+	| if ( $exp ) { $stmt_seq } else { $stmt_seq }		$$ = make("if_stmt", $3, $6, $10)
 	
 $while_stmt
-	: while ( $exp ) { }				$$ = make("while_stmt", $4, $0)
-	| while ( $exp ) { $stmt_seq }		$$ = make("while_stmt", $5, $2)
+	: while ( $exp ) { }				$$ = make("while_stmt", $3, $0)
+	| while ( $exp ) { $stmt_seq }		$$ = make("while_stmt", $3, $6)
 	
 $do_while_stmt
-	: do { } while ( $exp )				$$ = make("do_while_stmt", $2, $0)
-	| do { $stmt_seq } while ( $exp )	$$ = make("do_while_stmt", $2, $6)
+	: do { } while ( $exp )				$$ = make("do_while_stmt", $6, $0)
+	| do { $stmt_seq } while ( $exp )	$$ = make("do_while_stmt", $7, $3)
 	
 $assign_stmt
-	: identifier = $exp					$$ = make("assign_stmt", $3, $1)
+	: identifier = $exp					$$ = make("assign_stmt", $1, $3)
 	
 $read_stmt
-	: read identifier					$$ = make("read_stmt", $2, $1)
+	: read identifier					$$ = make("read_stmt", $1, $2)
 	
 $write_stmt
-	: write identifier					$$ = make("write_stmt", $2, $1)
+	: write identifier					$$ = make("write_stmt", $1, $2)
 	
 $exp 
-	: $simple_exp < $simple_exp			$$ = make("<", $3, $1)
-	| $simple_exp <= $simple_exp		$$ = make("<=", $3, $1)
-	| $simple_exp == $simple_exp		$$ = make("==", $3, $1)
-	| $simple_exp >= $simple_exp		$$ = make(">=", $3, $1)
-	| $simple_exp > $simple_exp			$$ = make(">", $3, $1)
+	: $simple_exp < $simple_exp			$$ = make("<", $1, $3)
+	| $simple_exp <= $simple_exp		$$ = make("<=", $1, $3)
+	| $simple_exp == $simple_exp		$$ = make("==", $1, $3)
+	| $simple_exp >= $simple_exp		$$ = make(">=", $1, $3)
+	| $simple_exp > $simple_exp			$$ = make(">", $1, $3)
 	| $simple_exp						$$ = $1
 	
 $simple_exp
-	: $simple_exp + $term				$$ = make("+", $3, $1)
-	| $simple_exp - $term				$$ = make("-", $3, $1)
+	: $simple_exp + $term				$$ = make("+", $1, $3)
+	| $simple_exp - $term				$$ = make("-", $1, $3)
 	| $term								$$ = $1
 	
 $term
-	: $term * $factor					$$ = make("*", $3, $1)
-	| $term / $factor					$$ = make("/", $3, $1)
+	: $term * $factor					$$ = make("*", $1, $3)
+	| $term / $factor					$$ = make("/", $1, $3)
 	| $factor							$$ = $1
 	
 $factor
 	: ( $exp )							$$ = $2
-	| number							$$ = constant($1)
-	| identifier						$$ = symbol($1)
+	| number							$$ = $1
+	| identifier						$$ = $1
 	
 $function_def
-	: function identifier ( ) { }							$$ = make("function_def", $5, $0, $0)
-	| function identifier ( ) { $stmt_seq }					$$ = make("function_def", $6, $0, $2)
-	| function identifier ( $argument_list ) { }			$$ = make("function_def", $6, $4, $0)
-	| function identifier ( $argument_list ) { $stmt_seq }	$$ = make("function_def", $7, $5, $2)
+	: function identifier ( ) { }							$$ = make("function_def", $2, $0, $0)
+	| function identifier ( ) { $stmt_seq }					$$ = make("function_def", $2, $0, $6)
+	| function identifier ( $argument_list ) { }			$$ = make("function_def", $2, $4, $0)
+	| function identifier ( $argument_list ) { $stmt_seq }	$$ = make("function_def", $2, $5, $7)
 	
 $function_call
 	: identifier ( )					$$ = make("function_call", $0)
-	| identifier ( $argument_list )		$$ = make("function_call", $2)
+	| identifier ( $argument_list )		$$ = make("function_call", $3)
 	
 $argument_list
-	: $factor							$$ = make("argument_list", $0, $1)
-	| $argument_list, $factor			$$ = make("argument_list", $3, $1)
+	: $factor							$$ = make("argument_list", $1, $0)
+	| $argument_list, $factor			$$ = make("argument_list", $1, $3)

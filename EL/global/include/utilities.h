@@ -13,6 +13,8 @@ public:
 
 	static bool IsBlankText(const char* text, const char** pos = nullptr);
 
+	static bool ParseInteger(const char* text, int* answer = nullptr);
+
 	static std::string Trim(const std::string& text);
 
 	template <class Iterator>

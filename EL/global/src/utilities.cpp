@@ -28,6 +28,23 @@ bool Utility::IsBlankText(const char* text, const char** pos) {
 	return true;
 }
 
+bool Utility::ParseInteger(const char* text, int* answer) {
+	int integer = 0;
+	for (; *text != 0; ++text) {
+		if (!isdigit(*text)) {
+			return false;
+		}
+
+		integer = integer * 10 + *text - '0';
+	}
+
+	if (answer != nullptr) {
+		*answer = integer;
+	}
+
+	return true;
+}
+
 std::string Utility::Trim(const std::string& text) {
 	const char* whitespaces = " \t";
 	size_t left = text.find_first_not_of(whitespaces);
