@@ -32,6 +32,8 @@ void Parser::InitializeTerminalSymbolContainer() {
 	terminalSymbols_.insert(std::make_pair(GrammarSymbol::string.ToString(), GrammarSymbol::string));
 	terminalSymbols_.insert(std::make_pair(GrammarSymbol::epsilon.ToString(), GrammarSymbol::epsilon));
 	terminalSymbols_.insert(std::make_pair(GrammarSymbol::newline.ToString(), GrammarSymbol::newline));
+	terminalSymbols_.insert(std::make_pair(GrammarSymbol::positive.ToString(), GrammarSymbol::positive));
+	terminalSymbols_.insert(std::make_pair(GrammarSymbol::negative.ToString(), GrammarSymbol::negative));
 	terminalSymbols_.insert(std::make_pair(GrammarSymbol::identifier.ToString(), GrammarSymbol::identifier));
 }
 
@@ -123,22 +125,26 @@ GrammarSymbol Parser::FindSymbol(const ScannerToken& token, void*& addr) {
 	else if (token.tokenType == ScannerTokenNewline) {
 		answer = GrammarSymbol::newline;
 	}
-	else {
-		if (Utility::IsTerminal(token.text)) {
-			GrammarSymbolContainer::const_iterator pos = terminalSymbols_.find(token.text);
-			if (pos != terminalSymbols_.end()) {
-				answer = pos->second;
-			}
-			else {
-				answer = GrammarSymbol::identifier;
-				addr = symTable_->Add(token.text);
-			}
+	else if (token.tokenType == ScannerTokenPositive) {
+		answer = GrammarSymbol::positive;
+	}
+	else if (token.tokenType == ScannerTokenNegative) {
+		answer = GrammarSymbol::negative;
+	}
+	else if (Utility::IsTerminal(token.text)) {
+		GrammarSymbolContainer::const_iterator pos = terminalSymbols_.find(token.text);
+		if (pos != terminalSymbols_.end()) {
+			answer = pos->second;
 		}
 		else {
-			GrammarSymbolContainer::const_iterator ite = nonterminalSymbols_.find(token.text);
-			if (ite != nonterminalSymbols_.end()) {
-				answer = ite->second;
-			}
+			answer = GrammarSymbol::identifier;
+			addr = symTable_->Add(token.text);
+		}
+	}
+	else {
+		GrammarSymbolContainer::const_iterator ite = nonterminalSymbols_.find(token.text);
+		if (ite != nonterminalSymbols_.end()) {
+			answer = ite->second;
 		}
 	}
 

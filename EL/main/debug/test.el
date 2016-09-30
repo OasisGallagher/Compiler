@@ -1,4 +1,5 @@
-if (x > 0 - 2) {
+x = -+-(-2);
+if (x > - 2) {
   fact = 1
   while (x < 10) {
     fact = fact * x;
@@ -24,9 +25,11 @@ if (x) { read x; }
 function stop() {
 }
 
-function printf(format, arguments) {
+function printf(format, argument1, argument2, argument3) {
 	write format; 
-	write arguments;
+	write argument1;
+	write argument2;
+	write argument3;
 	
 	stop();
 } 

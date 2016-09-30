@@ -36,6 +36,10 @@ public:
 	const std::string& ToString() const;
 
 private:
+	SyntaxNode(const SyntaxNode& other);
+	SyntaxNode& operator = (const SyntaxNode& other);
+
+private:
 	std::string text_;
 	SyntaxNodeType type_;
 

@@ -14,10 +14,11 @@ enum ScannerStateType {
 	ScannerStateLess,
 	ScannerStateGreater,
 
+	ScannerStatePlus,
 	ScannerStateMinus,
 	ScannerStateDoubleQuotes,
 
-	ScannerStateID,
+	ScannerStateIdentifier,
 	ScannerStateNumber,
 	ScannerStateDone
 };
@@ -30,13 +31,22 @@ std::string TokenPosition::ToString() const {
 
 TextScanner::TextScanner() 
 	: current_(nullptr), dest_(nullptr) {
-	lineBuffer_ = new char[MAX_LINE_CHARACTERS]();
-	tokenBuffer_ = new char[MAX_TOKEN_CHARACTERS]();
+	lineBuffer_ = new char[MAX_LINE_CHARACTERS];
+	std::fill(lineBuffer_, lineBuffer_ + MAX_LINE_CHARACTERS, 0);
+
+	tokenBuffer_ = new char[MAX_TOKEN_CHARACTERS];
+	std::fill(tokenBuffer_, tokenBuffer_ + MAX_TOKEN_CHARACTERS, 0);
+
+	lastToken_ = new char[MAX_TOKEN_CHARACTERS];
+	std::fill(lastToken_, lastToken_ + MAX_TOKEN_CHARACTERS, 0);
+
+	lastTokenType_ = ScannerTokenEndOfFile;
 }
 
 TextScanner::~TextScanner() {
 	delete[] lineBuffer_;
 	delete[] tokenBuffer_;
+	delete[] lastToken_;
 }
 
 void TextScanner::SetText(const char* text) {
@@ -48,6 +58,9 @@ void TextScanner::SetText(const char* text) {
 
 	start_ = current_ = lineBuffer_;
 	dest_ = lineBuffer_ + length + 1;
+
+	lastTokenType_ = ScannerTokenEndOfFile;
+	std::fill(lastToken_, lastToken_ + MAX_TOKEN_CHARACTERS, 0);
 }
 
 bool TextScanner::GetChar(int* ch) {
@@ -65,6 +78,13 @@ void TextScanner::UngetChar() {
 }
 
 ScannerTokenType TextScanner::GetToken(char* token, int* pos) {
+	*token = 0;
+	lastTokenType_ = GetNextToken(token, pos);
+	strcpy(lastToken_, token);
+	return lastTokenType_;
+}
+
+ScannerTokenType TextScanner::GetNextToken(char* token, int* pos) {
 	ScannerStateType state = ScannerStateStart;
 	ScannerTokenType tokenType = ScannerTokenError;
 
@@ -94,11 +114,11 @@ ScannerTokenType TextScanner::GetToken(char* token, int* pos) {
 			if (ch == ' ' || ch == '\t' || ch == 0) {
 				savech = false;
 			}
-			else if (isdigit(ch)) {
+			else if (Utility::IsDigit(ch)) {
 				state = ScannerStateNumber;
 			}
-			else if (isalpha(ch) || ch == '_' || ch == '$') {
-				state = ScannerStateID;
+			else if (Utility::IsLetter(ch)) {
+				state = ScannerStateIdentifier;
 			}
 			else if (ch == '<') {
 				state = ScannerStateLess;
@@ -109,9 +129,12 @@ ScannerTokenType TextScanner::GetToken(char* token, int* pos) {
 			else if (ch == '>') {
 				state = ScannerStateGreater;
 			}
-			/*else if (ch == '-') {
+			else if (ch == '+') {
+				state = ScannerStatePlus;
+			}
+			else if (ch == '-') {
 				state = ScannerStateMinus;
-				}*/
+			}
 			else if (ch == '"') {
 				state = ScannerStateDoubleQuotes;
 				savech = false;
@@ -122,18 +145,8 @@ ScannerTokenType TextScanner::GetToken(char* token, int* pos) {
 			}
 			else {
 				state = ScannerStateDone;
-				tokenType = ScannerTokenSign;
 
-				/*
 				switch (ch) {
-				case '+':
-					tokenType = ScannerTokenPlus;
-					break;
-
-				case '-':
-					tokenType = ScannerTokenMinus;
-					break;
-
 				case '*':
 					tokenType = ScannerTokenMultiply;
 					break;
@@ -154,6 +167,14 @@ ScannerTokenType TextScanner::GetToken(char* token, int* pos) {
 					tokenType = ScannerTokenRightParenthesis;
 					break;
 
+				case '{':
+					tokenType = ScannerTokenLeftBrace;
+					break;;
+
+				case '}':
+					tokenType = ScannerTokenRightBrace;
+					break;
+
 				case ';':
 					tokenType = ScannerTokenSemicolon;
 					break;
@@ -161,46 +182,69 @@ ScannerTokenType TextScanner::GetToken(char* token, int* pos) {
 				case ':':
 					tokenType = ScannerTokenColon;
 					break;
-				}*/
+
+				case ',':
+					tokenType = ScannerTokenComma;
+					break;
+
+				default:
+					Assert(false, std::string("unrecognized sign: ") + (char)ch);
+					tokenType = ScannerTokenError;
+				}
 			}
 			break;
 
 		case ScannerStateAssign:
 			state = ScannerStateDone;
-			tokenType = ScannerTokenSign;
+
 			if (ch == '=') {
-				//tokenType = ScannerTokenEqual;
+				tokenType = ScannerTokenEqual;
 			}
 			else {
-				//tokenType = ScannerTokenAssign;
+				tokenType = ScannerTokenAssign;
 				unget = true;
 				savech = false;
 			}
 			break;
-			/*
+
 		case ScannerStateMinus:
-			if (isdigit(ch)) {
-				state = ScannerStateNumber;
-			}
-			else if (ch == ' ') {
-				savech = false;
+			unget = true;
+			savech = false;
+			state = ScannerStateDone;
+
+			if (IsUnaryOperator()) {
+				strcpy(tokenBuffer_, NEGATIVE_SIGN);
+				index = strlen(NEGATIVE_SIGN);
+				tokenType = ScannerTokenNegative;
 			}
 			else {
-				state = ScannerStateDone;
-				tokenType = ScannerTokenSign;
-				unget = true;
-				savech = false;
+				tokenType = ScannerTokenMinus;
 			}
 			break;
-			*/
+
+
+		case ScannerStatePlus:
+			savech = false;
+			unget = true;
+			state = ScannerStateDone;
+
+			if (IsUnaryOperator()) {
+				strcpy(tokenBuffer_, POSITIVE_SIGN);
+				index = strlen(POSITIVE_SIGN);
+				tokenType = ScannerTokenPositive;
+			}
+			else {
+				tokenType = ScannerTokenPlus;
+			}
+			break;
+
 		case ScannerStateLess:
 			state = ScannerStateDone;
-			tokenType = ScannerTokenSign;
 			if (ch == '=') {
-				//tokenType = ScannerTokenLessEqual;
+				tokenType = ScannerTokenLessEqual;
 			}
 			else {
-				//tokenType = ScannerTokenLess;
+				tokenType = ScannerTokenLess;
 				unget = true;
 				savech = false;
 			}
@@ -208,12 +252,11 @@ ScannerTokenType TextScanner::GetToken(char* token, int* pos) {
 
 		case ScannerStateGreater:
 			state = ScannerStateDone;
-			tokenType = ScannerTokenSign;
 			if (ch == '=') {
-				//tokenType = ScannerTokenGreaterEqual;
+				tokenType = ScannerTokenGreaterEqual;
 			}
 			else {
-				//tokenType = ScannerTokenGreater;
+				tokenType = ScannerTokenGreater;
 				unget = true;
 				savech = false;
 			}
@@ -227,8 +270,8 @@ ScannerTokenType TextScanner::GetToken(char* token, int* pos) {
 			}
 			break;
 
-		case ScannerStateID:
-			if (!isdigit(ch) && !isalpha(ch) && ch != '_' && ch != '$') {
+		case ScannerStateIdentifier:
+			if (!Utility::IsDigit(ch) && !Utility::IsLetter(ch)) {
 				state = ScannerStateDone;
 				tokenType = ScannerTokenIdentifier;
 				unget = true;
@@ -237,7 +280,7 @@ ScannerTokenType TextScanner::GetToken(char* token, int* pos) {
 			break;
 
 		case ScannerStateNumber:
-			if (!isdigit(ch)) {
+			if (!Utility::IsDigit(ch)) {
 				state = ScannerStateDone;
 				tokenType = ScannerTokenNumber;
 				unget = true;
@@ -255,7 +298,7 @@ ScannerTokenType TextScanner::GetToken(char* token, int* pos) {
 			tokenBuffer_[index++] = ch;
 		}
 	}
-	
+
 	strncpy(token, tokenBuffer_, index);
 	token[index] = 0;
 
@@ -264,6 +307,31 @@ ScannerTokenType TextScanner::GetToken(char* token, int* pos) {
 	}
 
 	return tokenType;
+}
+
+bool TextScanner::IsUnaryOperator() {
+	switch (lastTokenType_) {
+	case ScannerTokenLess:
+	case ScannerTokenPlus:
+	case ScannerTokenMinus:
+	case ScannerTokenComma:
+	case ScannerTokenEqual:
+	case ScannerTokenDivide:
+	case ScannerTokenAssign:
+	case ScannerTokenNewline:
+	case ScannerTokenGreater:
+	case ScannerTokenMultiply:
+	case ScannerTokenNegative:
+	case ScannerTokenPositive:
+	case ScannerTokenLessEqual:
+	case ScannerTokenSemicolon:
+	case ScannerTokenEndOfFile:
+	case ScannerTokenGreaterEqual:
+	case ScannerTokenLeftParenthesis:
+		return true;
+	}
+
+	return false;
 }
 
 FileScanner::FileScanner(const char* path) 
@@ -311,25 +379,6 @@ bool FileScanner::GetToken(ScannerToken* token, TokenPosition* pos) {
 	strcpy(token->text, buffer);
 
 	return true;
-	/*
-	token->token = &dummyToken;
-
-	if (tokenType == ScannerTokenNumber) {
-		token->token = numberLiterals_->Add(buffer);
-	}
-	else if (tokenType == ScannerTokenString) {
-		token->token = stringLiterals_->Add(buffer);
-	}
-	*/
-
-	//if (tokenType == ScannerTokenID) {
-		//ScannerTokenType reserveTokenType = GetReserveTokenType(buffer);
-		//if (reserveTokenType != ScannerTokenError) {
-		//	token->tokenType = reserveTokenType;
-		//}
-	//}
-	
-	//return true;
 }
 
 ScannerTokenType FileScanner::GetReserveTokenType(const char* name) {

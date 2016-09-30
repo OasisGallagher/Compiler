@@ -30,8 +30,15 @@ bool Utility::IsBlankText(const char* text, const char** pos) {
 
 bool Utility::ParseInteger(const char* text, int* answer) {
 	int integer = 0;
+
+	int sign = 1;
+	if (*text == '-') {
+		sign = -1;
+		++text;
+	}
+
 	for (; *text != 0; ++text) {
-		if (!isdigit(*text)) {
+		if (!Utility::IsDigit(*text)) {
 			return false;
 		}
 
@@ -39,7 +46,7 @@ bool Utility::ParseInteger(const char* text, int* answer) {
 	}
 
 	if (answer != nullptr) {
-		*answer = integer;
+		*answer = integer * sign;
 	}
 
 	return true;

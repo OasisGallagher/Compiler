@@ -31,6 +31,12 @@ protected:
 	Argument argument_;
 };
 
+class ActionNegate : public Action {
+public:
+	virtual std::string ToString() const;
+	virtual SyntaxNode* Invoke(const std::vector<void*>& container);
+};
+
 class ActionConstant : public Action {
 public:
 	virtual std::string ToString() const;

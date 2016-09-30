@@ -8,6 +8,8 @@ GrammarSymbol GrammarSymbol::number = new Number();
 GrammarSymbol GrammarSymbol::string = new String();
 GrammarSymbol GrammarSymbol::newline = new Newline();
 GrammarSymbol GrammarSymbol::epsilon = new Epsilon();
+GrammarSymbol GrammarSymbol::positive = new Positive();
+GrammarSymbol GrammarSymbol::negative = new Negative();
 GrammarSymbol GrammarSymbol::identifier = new Identifier();
 
 GrammarSymbol::GrammarSymbol()
@@ -135,6 +137,10 @@ GrammarSymbolType TerminalSymbol::SymbolType() const {
 	return GrammarSymbolTerminal;
 }
 
+TerminalSymbol::TerminalSymbol(const std::string& text) : GrammarSymbolBase(text) {
+
+}
+
 bool NonterminalSymbol::Match(const ScannerToken& token) const {
 	Assert(false, "match nonterminal symbol");
 	return false;
@@ -144,29 +150,73 @@ GrammarSymbolType NonterminalSymbol::SymbolType() const {
 	return GrammarSymbolNonterminal;
 }
 
+NonterminalSymbol::NonterminalSymbol(const std::string& text) : GrammarSymbolBase(text) {
+
+}
+
 bool Zero::Match(const ScannerToken& token) const {
 	Assert(false, "unable to compare zero with text");
 	return false;
+}
+
+Zero::Zero() : TerminalSymbol("zero") {
+
 }
 
 bool Epsilon::Match(const ScannerToken& token) const {
 	return true;
 }
 
+Epsilon::Epsilon() : TerminalSymbol("epsilon") {
+
+}
+
 bool Identifier::Match(const ScannerToken& token) const {
 	return token.tokenType == ScannerTokenIdentifier;
+}
+
+Identifier::Identifier() : TerminalSymbol("identifier") {
+
+}
+
+bool Positive::Match(const ScannerToken& token) const {
+	return token.tokenType == ScannerTokenPositive;
+}
+
+Positive::Positive() : TerminalSymbol(POSITIVE_SIGN) {
+
+}
+
+bool Negative::Match(const ScannerToken& token) const {
+	return token.tokenType == ScannerTokenNegative;
+}
+
+Negative::Negative() : TerminalSymbol(NEGATIVE_SIGN) {
+
 }
 
 bool Number::Match(const ScannerToken& token) const {
 	return token.tokenType == ScannerTokenNumber;
 }
 
+Number::Number() : TerminalSymbol("number") {
+
+}
+
 bool String::Match(const ScannerToken& token) const {
 	return token.tokenType == ScannerTokenString;
 }
 
+String::String() : TerminalSymbol("string") {
+
+}
+
 bool Newline::Match(const ScannerToken& token) const {
 	return token.tokenType == ScannerTokenNewline;
+}
+
+Newline::Newline() : TerminalSymbol("newline") {
+
 }
 
 const std::string& GrammarSymbolBase::ToString() {
