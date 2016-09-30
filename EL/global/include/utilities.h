@@ -13,6 +13,7 @@ public:
 
 	static bool IsBlankText(const char* text, const char** pos = nullptr);
 
+	// TODO: 只解析简单的正整数.
 	static bool ParseInteger(const char* text, int* answer = nullptr);
 
 	static std::string Trim(const std::string& text);

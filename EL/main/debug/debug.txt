@@ -108,7 +108,7 @@ $stmt_seq             {newline identifier ( if ; write read do = while function}
 $id                   {identifier}
 $str                  {string}
 $num                  {number 0+ 0-}
-$exp                  {string number 0+ 0- identifier ( < + <= == >= > * - /}
+$exp                  {number string 0+ 0- identifier ( < + <= == >= > * - /}
 $function_def         {function}
 $write_stmt           {write}
 $do_while_stmt        {do}
@@ -118,31 +118,31 @@ $assign_stmt          {identifier =}
 $stmt                 {identifier ( if write read do = while function}
 $while_stmt           {while}
 $function_call        {identifier (}
-$simple_exp           {string number 0+ 0- identifier ( + * - /}
-$term                 {string number 0+ 0- identifier ( * /}
-$factor               {string number 0+ 0- identifier (}
-$argument_list        {string number 0+ 0- identifier ( ,}
+$simple_exp           {number string 0+ 0- identifier ( + * - /}
+$term                 {number string 0+ 0- identifier ( * /}
+$factor               {number string 0+ 0- identifier (}
+$argument_list        {number string 0+ 0- identifier ( ,}
 
 ==================== LastVt ====================
-$program              {string newline number 0+ 0- identifier ) } ; write < read = + <= == >= > * - /}
-$stmt_seq             {string newline number 0+ 0- identifier ) } ; write < read = + <= == >= > * - /}
+$program              {number string newline 0+ 0- identifier ) } ; write < read = + <= == >= > * - /}
+$stmt_seq             {number string newline 0+ 0- identifier ) } ; write < read = + <= == >= > * - /}
 $id                   {identifier}
 $str                  {string}
 $num                  {number 0+ 0- )}
-$exp                  {string number 0+ 0- identifier ) < + <= == >= > * - /}
+$exp                  {number string 0+ 0- identifier ) < + <= == >= > * - /}
 $function_def         {}}
 $write_stmt           {identifier write}
 $do_while_stmt        {)}
 $read_stmt            {identifier read}
 $if_stmt              {}}
-$assign_stmt          {string number 0+ 0- identifier ) < = + <= == >= > * - /}
-$stmt                 {string number 0+ 0- identifier ) } write < read = + <= == >= > * - /}
+$assign_stmt          {number string 0+ 0- identifier ) < = + <= == >= > * - /}
+$stmt                 {number string 0+ 0- identifier ) } write < read = + <= == >= > * - /}
 $while_stmt           {}}
 $function_call        {)}
-$simple_exp           {string number 0+ 0- identifier ) + * - /}
-$term                 {string number 0+ 0- identifier ) * /}
-$factor               {string number 0+ 0- identifier )}
-$argument_list        {string number 0+ 0- identifier ) ,}
+$simple_exp           {number string 0+ 0- identifier ) + * - /}
+$term                 {number string 0+ 0- identifier ) * /}
+$factor               {number string 0+ 0- identifier )}
+$argument_list        {number string 0+ 0- identifier ) ,}
 
 =========== OperatorPrecedenceTable ============
 +------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
