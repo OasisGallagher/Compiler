@@ -350,6 +350,7 @@ void OperatorPrecedenceParser::CreateParsingTable() {
 		}
 	}
 
+	GrammarSymbol& negate = terminalSymbols_[NEGATIVE_SIGN];
 	for (GrammarSymbolContainer::const_iterator ite = terminalSymbols_.begin();
 		ite != terminalSymbols_.end(); ++ite) {
 		if (ite->second == GrammarSymbol::zero) {
@@ -358,7 +359,19 @@ void OperatorPrecedenceParser::CreateParsingTable() {
 
 		operatorPrecedenceTable_->insert(GrammarSymbol::zero, ite->second, OperatorPrecedenceLess);
 		operatorPrecedenceTable_->insert(ite->second, GrammarSymbol::zero, OperatorPrecedenceGreater);
+		/*
+		operatorPrecedenceTable_->at(ite->second, negate) = OperatorPrecedenceLess;
+		operatorPrecedenceTable_->at(negate, ite->second) = OperatorPrecedenceGreater;
+		*/
 	}
+
+// 	operatorPrecedenceTable_->at(negate, GrammarSymbol::number) = OperatorPrecedenceUndefined;
+// 	operatorPrecedenceTable_->at(negate, GrammarSymbol::string) = OperatorPrecedenceUndefined;
+// 	operatorPrecedenceTable_->at(negate, GrammarSymbol::identifier) = OperatorPrecedenceUndefined;
+// 
+// 	operatorPrecedenceTable_->at(GrammarSymbol::number, negate) = OperatorPrecedenceUndefined;
+// 	operatorPrecedenceTable_->at(GrammarSymbol::string, negate) = OperatorPrecedenceUndefined;
+// 	operatorPrecedenceTable_->at(GrammarSymbol::identifier, negate) = OperatorPrecedenceUndefined;
 }
 
 void OperatorPrecedenceParser::CreateParsingFunction() {

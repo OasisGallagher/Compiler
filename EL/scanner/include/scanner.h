@@ -15,6 +15,9 @@ public:
 private:
 	bool GetChar(int* ch);
 	void UngetChar();
+	ScannerTokenType GetNextToken(char* token, int* pos = nullptr);
+
+	bool IsUnaryOperator();
 
 	char* lineBuffer_;
 	char* tokenBuffer_;
@@ -22,6 +25,9 @@ private:
 	char* start_;
 	char* dest_;
 	char* current_;
+
+	char* lastToken_;
+	ScannerTokenType lastTokenType_;
 };
 
 class FileReader;

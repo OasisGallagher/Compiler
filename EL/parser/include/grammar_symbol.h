@@ -33,77 +33,83 @@ protected:
 
 class TerminalSymbol : public GrammarSymbolBase {
 public:
-	TerminalSymbol(const std::string& text)
-		: GrammarSymbolBase(text) {
-	}
+	TerminalSymbol(const std::string& text);
 
+public:
 	virtual GrammarSymbolType SymbolType() const;
-
 	virtual bool Match(const ScannerToken& token) const;
 };
 
 class NonterminalSymbol : public GrammarSymbolBase {
 public:
-	NonterminalSymbol(const std::string& text)
-		: GrammarSymbolBase(text) {
-	}
+	NonterminalSymbol(const std::string& text);
 
+public:
 	virtual GrammarSymbolType SymbolType() const;
-
 	virtual bool Match(const ScannerToken& token) const;
 };
 
 class Zero : public TerminalSymbol {
 public:
-	Zero()
-		: TerminalSymbol("zero") {
-	}
+	Zero();
 
+public:
 	virtual bool Match(const ScannerToken& token) const;
 };
 
 class Epsilon : public TerminalSymbol {
 public:
-	Epsilon()
-		: TerminalSymbol("epsilon") {
-	}
+	Epsilon();
 
+public:
 	virtual bool Match(const ScannerToken& token) const;
 };
 
 class Identifier : public TerminalSymbol {
 public:
-	Identifier()
-		: TerminalSymbol("identifier") {
-	}
+	Identifier();
 
+public:
+	virtual bool Match(const ScannerToken& token) const;
+};
+
+class Negative : public TerminalSymbol {
+public:
+	Negative();
+
+public:
+	virtual bool Match(const ScannerToken& token) const;
+};
+
+class Positive : public TerminalSymbol {
+public:
+	Positive();
+
+public:
 	virtual bool Match(const ScannerToken& token) const;
 };
 
 class Number : public TerminalSymbol {
 public:
-	Number()
-		: TerminalSymbol("number") {
-	}
+	Number();
 
+public:
 	virtual bool Match(const ScannerToken& token) const;
 };
 
 class String : public TerminalSymbol {
 public:
-	String()
-		: TerminalSymbol("string") {
-	}
+	String();
 
+public:
 	virtual bool Match(const ScannerToken& token) const;
 };
 
 class Newline : public TerminalSymbol {
 public:
-	Newline()
-		: TerminalSymbol("newline") {
-	}
+	Newline();
 
+public:
 	virtual bool Match(const ScannerToken& token) const;
 };
 
@@ -148,6 +154,8 @@ public:
 	static GrammarSymbol string;
 	static GrammarSymbol newline;
 	static GrammarSymbol epsilon;
+	static GrammarSymbol negative;
+	static GrammarSymbol positive;
 	static GrammarSymbol identifier;
 
 private:

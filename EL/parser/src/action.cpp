@@ -31,14 +31,13 @@ bool Action::SplitParameters(int* parameters, int& count, TextScanner& scanner) 
 	ScannerTokenType tokenType = ScannerTokenEndOfFile, expectedTokenType = ScannerTokenIdentifier;
 
 	int index = 0;
-	for (; (tokenType = scanner.GetToken(token)) != ScannerTokenSign || strcmp(token, ")") != 0;) {
-		if (tokenType == ScannerTokenSign && strcmp(token, "(") == 0) {
+	for (; (tokenType = scanner.GetToken(token)) != ScannerTokenRightParenthesis;) {
+		if (tokenType == ScannerTokenLeftParenthesis) {
 			continue;
 		}
 
 		Assert(tokenType == expectedTokenType, std::string("invalid token type ") + std::to_string(tokenType));
-		if (tokenType == ScannerTokenSign) {
-			Assert(strcmp(token, ",") == 0, "invalid seperator");
+		if (tokenType == ScannerTokenComma) {
 			expectedTokenType = ScannerTokenIdentifier;
 		}
 		else {
@@ -48,7 +47,7 @@ bool Action::SplitParameters(int* parameters, int& count, TextScanner& scanner) 
 			Assert(index < count, "buffer too small");
 
 			parameters[index++] = integer;
-			expectedTokenType = ScannerTokenSign;
+			expectedTokenType = ScannerTokenComma;
 		}
 	}
 
@@ -61,7 +60,7 @@ bool Action::SplitParameters(int* parameters, int& count, TextScanner& scanner) 
 }
 
 std::string ActionConstant::ToString() const {
-	return std::string("constant(") + std::to_string(argument_.parameters.front()) + ")";
+	return std::string("constant($") + std::to_string(argument_.parameters.front()) + ")";
 }
 
 SyntaxNode* ActionConstant::Invoke(const std::vector<void*>& container) {
@@ -72,7 +71,7 @@ SyntaxNode* ActionConstant::Invoke(const std::vector<void*>& container) {
 }
 
 std::string ActionLiteral::ToString() const {
-	return std::string("literal(") + std::to_string(argument_.parameters.front()) + ")";
+	return std::string("literal($") + std::to_string(argument_.parameters.front()) + ")";
 }
 
 SyntaxNode* ActionLiteral::Invoke(const std::vector<void*>& container) {
@@ -83,7 +82,7 @@ SyntaxNode* ActionLiteral::Invoke(const std::vector<void*>& container) {
 }
 
 std::string ActionSymbol::ToString() const {
-	return std::string("symbol(") + std::to_string(argument_.parameters.front()) + ")";
+	return std::string("symbol($") + std::to_string(argument_.parameters.front()) + ")";
 }
 
 SyntaxNode* ActionSymbol::Invoke(const std::vector<void*>& container) {
@@ -140,14 +139,14 @@ SyntaxNode* ActionMake::Invoke(const std::vector<void*>& container) {
 bool ActionMake::ParseParameters(TextScanner& scanner, Argument& argument) {
 	char token[MAX_TOKEN_CHARACTERS];
 	ScannerTokenType tokenType = scanner.GetToken(token);
-	Assert(tokenType == ScannerTokenSign && strcmp(token, "(") == 0, "invalid parameter");
+	Assert(tokenType == ScannerTokenLeftParenthesis, "invalid parameter");
 
 	tokenType = scanner.GetToken(token);
 	Assert(tokenType == ScannerTokenString && strlen(token) > 0, "invalid action name");
 	argument.text = token;
 
 	tokenType = scanner.GetToken(token);
-	Assert(tokenType == ScannerTokenSign && strcmp(token, ",") == 0, "invalid parameter");
+	Assert(tokenType == ScannerTokenComma, "invalid parameter");
 
 	return Action::ParseParameters(scanner, argument);
 }
@@ -177,7 +176,7 @@ Action* ActionParser::CreateAction(const std::string& cmd) {
 	Assert(tokenType == ScannerTokenIdentifier && strcmp(token, "$$") == 0, std::string("invalid left hand side operand: ") + token);
 
 	tokenType = scanner.GetToken(token);
-	Assert(tokenType == ScannerTokenSign && strcmp(token, "=") == 0, "missing '='");
+	Assert(tokenType == ScannerTokenAssign, "missing '='");
 
 	tokenType = scanner.GetToken(token);
 	Assert(tokenType == ScannerTokenIdentifier, "invalid command");
@@ -220,7 +219,7 @@ Action* ActionParser::CreateAction(const std::string& cmd) {
 		}
 	}
 
-	Assert(action != nullptr, "invalid command " + token);
+	Assert(action != nullptr, "invalid action " + token);
 	action->SetArgument(argument);
 
 	return action;

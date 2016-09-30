@@ -3,13 +3,17 @@ $program
 	: $stmt_seq	=>	$$ = $1
 
 $id                   
-	: identifier	=>	$$ = symbol(1)
+	: identifier	=>	$$ = symbol($1)
 
 $num                  
-	: number	=>	$$ = constant(1)
+	: number	=>	$$ = constant($1)
+	| 0- $num	=>	$$ = make($0, $1)
+	| 0- ( $num )	=>	$$ = make($0, $2)
+	| 0+ $num	=>	$$ = $1
+	| 0+ ( $num )	=>	$$ = $2
 
 $str                  
-	: string	=>	$$ = literal(1)
+	: string	=>	$$ = literal($1)
 
 $stmt_seq             
 	: $stmt_seq newline $stmt	=>	$$ = make($3, $1)
@@ -93,189 +97,211 @@ $argument_list
 
 
 =============== TerminalSymbols ================
-( ) * + , - / ; < <= = == > >= do else epsilon function identifier if newline number read string while write zero { }
+( ) * + , - / 0+ 0- ; < <= = == > >= do else epsilon function identifier if newline number read string while write zero { }
 
 ============== NonterminalSymbols ==============
 $argument_list $assign_stmt $do_while_stmt $exp $factor $function_call $function_def $id $if_stmt $num $program $read_stmt $simple_exp $stmt $stmt_seq $str $term $while_stmt $write_stmt
 
 =================== FirstVt ====================
-$num                  {number}
-$program              {newline identifier ; do read = while ( if write function}
-$stmt_seq             {newline identifier ; do read = while ( if write function}
+$program              {newline identifier ( if ; write read do = while function}
+$stmt_seq             {newline identifier ( if ; write read do = while function}
 $id                   {identifier}
-$stmt                 {identifier do read = while ( if write function}
 $str                  {string}
-$exp                  {number string identifier ( < <= == >= > + - * /}
-$function_call        {identifier (}
-$do_while_stmt        {do}
+$num                  {number 0+ 0-}
+$exp                  {string number 0+ 0- identifier ( < + <= == >= > * - /}
 $function_def         {function}
-$read_stmt            {read}
 $write_stmt           {write}
+$do_while_stmt        {do}
+$read_stmt            {read}
 $if_stmt              {if}
 $assign_stmt          {identifier =}
+$stmt                 {identifier ( if write read do = while function}
 $while_stmt           {while}
-$simple_exp           {number string identifier ( + - * /}
-$term                 {number string identifier ( * /}
-$factor               {number string identifier (}
-$argument_list        {number string identifier ( ,}
+$function_call        {identifier (}
+$simple_exp           {string number 0+ 0- identifier ( + * - /}
+$term                 {string number 0+ 0- identifier ( * /}
+$factor               {string number 0+ 0- identifier (}
+$argument_list        {string number 0+ 0- identifier ( ,}
 
 ==================== LastVt ====================
-$num                  {number}
-$program              {number string newline identifier ; read = } ) write < <= == >= > + - * /}
-$stmt_seq             {number string newline identifier ; read = } ) write < <= == >= > + - * /}
+$program              {string newline number 0+ 0- identifier ) } ; write < read = + <= == >= > * - /}
+$stmt_seq             {string newline number 0+ 0- identifier ) } ; write < read = + <= == >= > * - /}
 $id                   {identifier}
-$stmt                 {number string identifier read = } ) write < <= == >= > + - * /}
 $str                  {string}
-$exp                  {number string identifier ) < <= == >= > + - * /}
-$function_call        {)}
-$do_while_stmt        {)}
+$num                  {number 0+ 0- )}
+$exp                  {string number 0+ 0- identifier ) < + <= == >= > * - /}
 $function_def         {}}
-$read_stmt            {identifier read}
 $write_stmt           {identifier write}
+$do_while_stmt        {)}
+$read_stmt            {identifier read}
 $if_stmt              {}}
-$assign_stmt          {number string identifier = ) < <= == >= > + - * /}
+$assign_stmt          {string number 0+ 0- identifier ) < = + <= == >= > * - /}
+$stmt                 {string number 0+ 0- identifier ) } write < read = + <= == >= > * - /}
 $while_stmt           {}}
-$simple_exp           {number string identifier ) + - * /}
-$term                 {number string identifier ) * /}
-$factor               {number string identifier )}
-$argument_list        {number string identifier ) ,}
+$function_call        {)}
+$simple_exp           {string number 0+ 0- identifier ) + * - /}
+$term                 {string number 0+ 0- identifier ) * /}
+$factor               {string number 0+ 0- identifier )}
+$argument_list        {string number 0+ 0- identifier ) ,}
 
 =========== OperatorPrecedenceTable ============
-+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-|            |  (|  )|  *|  +|  ,|  -|  /|  ;|  <|  <=|  =|  ==|  >|  >=|  do|  else|  epsilon|  function|  identifier|  if|  newline|  number|  read|  string|  while|  write|  zero|  {|  }|
-+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-|           (|  <|  =|  <|  <|  <|  <|  <|   |  <|   <|   |   <|  <|   <|    |      |         |          |           <|    |         |       <|      |       <|       |       |     >|   |   |
-|           )|   |  >|  >|  >|  >|  >|  >|  >|  >|   >|   |   >|  >|   >|    |      |         |          |            |    |        >|        |      |        |       |       |     >|  =|  >|
-|           *|  <|  >|  >|  >|   |  >|  >|  >|  >|   >|   |   >|  >|   >|    |      |         |          |           <|    |        >|       <|      |       <|       |       |     >|   |  >|
-|           +|  <|  >|  <|  >|   |  >|  <|  >|  >|   >|   |   >|  >|   >|    |      |         |          |           <|    |        >|       <|      |       <|       |       |     >|   |  >|
-|           ,|  <|  >|   |   |  >|   |   |   |   |    |   |    |   |    |    |      |         |          |           <|    |         |       <|      |       <|       |       |     >|   |   |
-|           -|  <|  >|  <|  >|   |  >|  <|  >|  >|   >|   |   >|  >|   >|    |      |         |          |           <|    |        >|       <|      |       <|       |       |     >|   |  >|
-|           /|  <|  >|  >|  >|   |  >|  >|  >|  >|   >|   |   >|  >|   >|    |      |         |          |           <|    |        >|       <|      |       <|       |       |     >|   |  >|
-|           ;|  <|   |   |   |   |   |   |  >|   |    |  <|    |   |    |   <|      |         |         <|           <|   <|        >|        |     <|        |      <|      <|     >|   |  >|
-|           <|  <|  >|  <|  <|   |  <|  <|  >|   |    |   |    |   |    |    |      |         |          |           <|    |        >|       <|      |       <|       |       |     >|   |  >|
-|          <=|  <|  >|  <|  <|   |  <|  <|  >|   |    |   |    |   |    |    |      |         |          |           <|    |        >|       <|      |       <|       |       |     >|   |  >|
-|           =|  <|   |  <|  <|   |  <|  <|  >|  <|   <|   |   <|  <|   <|    |      |         |          |           <|    |        >|       <|      |       <|       |       |     >|   |  >|
-|          ==|  <|  >|  <|  <|   |  <|  <|  >|   |    |   |    |   |    |    |      |         |          |           <|    |        >|       <|      |       <|       |       |     >|   |  >|
-|           >|  <|  >|  <|  <|   |  <|  <|  >|   |    |   |    |   |    |    |      |         |          |           <|    |        >|       <|      |       <|       |       |     >|   |  >|
-|          >=|  <|  >|  <|  <|   |  <|  <|  >|   |    |   |    |   |    |    |      |         |          |           <|    |        >|       <|      |       <|       |       |     >|   |  >|
-|          do|   |   |   |   |   |   |   |   |   |    |   |    |   |    |    |      |         |          |            |    |         |        |      |        |       |       |     >|  =|   |
-|        else|   |   |   |   |   |   |   |   |   |    |   |    |   |    |    |      |         |          |            |    |         |        |      |        |       |       |     >|  =|   |
-|     epsilon|   |   |   |   |   |   |   |   |   |    |   |    |   |    |    |      |         |          |            |    |         |        |      |        |       |       |     >|   |   |
-|    function|  =|   |   |   |   |   |   |   |   |    |   |    |   |    |    |      |         |          |           <|    |         |        |      |        |       |       |     >|   |   |
-|  identifier|  >|  >|  >|  >|  >|  >|  >|  >|  >|   >|  >|   >|  >|   >|    |      |         |          |            |    |        >|        |      |        |       |       |     >|   |  >|
-|          if|  =|   |   |   |   |   |   |   |   |    |   |    |   |    |    |      |         |          |            |    |         |        |      |        |       |       |     >|   |   |
-|     newline|  <|   |   |   |   |   |   |  >|   |    |  <|    |   |    |   <|      |         |         <|           <|   <|        >|        |     <|        |      <|      <|     >|   |  >|
-|      number|   |  >|  >|  >|  >|  >|  >|  >|  >|   >|   |   >|  >|   >|    |      |         |          |            |    |        >|        |      |        |       |       |     >|   |  >|
-|        read|   |   |   |   |   |   |   |  >|   |    |   |    |   |    |    |      |         |          |           <|    |        >|        |      |        |       |       |     >|   |  >|
-|      string|   |  >|  >|  >|  >|  >|  >|  >|  >|   >|   |   >|  >|   >|    |      |         |          |            |    |        >|        |      |        |       |       |     >|   |  >|
-|       while|  =|   |   |   |   |   |   |   |   |    |   |    |   |    |    |      |         |          |            |    |         |        |      |        |       |       |     >|   |   |
-|       write|   |   |   |   |   |   |   |  >|   |    |   |    |   |    |    |      |         |          |           <|    |        >|        |      |        |       |       |     >|   |  >|
-|        zero|  <|  <|  <|  <|  <|  <|  <|  <|  <|   <|  <|   <|  <|   <|   <|     <|        <|         <|           <|   <|        <|       <|     <|       <|      <|      <|      |  <|  <|
-|           {|  <|   |   |   |   |   |   |  <|   |    |  <|    |   |    |   <|      |         |         <|           <|   <|        <|        |     <|        |      <|      <|     >|   |  =|
-|           }|   |   |   |   |   |   |   |  >|   |    |   |    |   |    |    |     =|         |          |            |    |        >|        |      |        |      =|       |     >|   |  >|
-+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
++------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+|            |  (|  )|  *|  +|  ,|  -|  /|  0+|  0-|  ;|  <|  <=|  =|  ==|  >|  >=|  do|  else|  epsilon|  function|  identifier|  if|  newline|  number|  read|  string|  while|  write|  zero|  {|  }|
++------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+|           (|  <|  =|  <|  <|  <|  <|  <|   <|   <|   |  <|   <|   |   <|  <|   <|    |      |         |          |           <|    |         |       <|      |       <|       |       |     >|   |   |
+|           )|   |  >|  >|  >|  >|  >|  >|    |    |  >|  >|   >|   |   >|  >|   >|    |      |         |          |            |    |        >|        |      |        |       |       |     >|  =|  >|
+|           *|  <|  >|  >|  >|   |  >|  >|   <|   <|  >|  >|   >|   |   >|  >|   >|    |      |         |          |           <|    |        >|       <|      |       <|       |       |     >|   |  >|
+|           +|  <|  >|  <|  >|   |  >|  <|   <|   <|  >|  >|   >|   |   >|  >|   >|    |      |         |          |           <|    |        >|       <|      |       <|       |       |     >|   |  >|
+|           ,|  <|  >|   |   |  >|   |   |   <|   <|   |   |    |   |    |   |    |    |      |         |          |           <|    |         |       <|      |       <|       |       |     >|   |   |
+|           -|  <|  >|  <|  >|   |  >|  <|   <|   <|  >|  >|   >|   |   >|  >|   >|    |      |         |          |           <|    |        >|       <|      |       <|       |       |     >|   |  >|
+|           /|  <|  >|  >|  >|   |  >|  >|   <|   <|  >|  >|   >|   |   >|  >|   >|    |      |         |          |           <|    |        >|       <|      |       <|       |       |     >|   |  >|
+|          0+|  =|  >|  >|  >|  >|  >|  >|   <|   <|  >|  >|   >|   |   >|  >|   >|    |      |         |          |            |    |        >|       <|      |        |       |       |     >|   |  >|
+|          0-|  =|  >|  >|  >|  >|  >|  >|   <|   <|  >|  >|   >|   |   >|  >|   >|    |      |         |          |            |    |        >|       <|      |        |       |       |     >|   |  >|
+|           ;|  <|   |   |   |   |   |   |    |    |  >|   |    |  <|    |   |    |   <|      |         |         <|           <|   <|        >|        |     <|        |      <|      <|     >|   |  >|
+|           <|  <|  >|  <|  <|   |  <|  <|   <|   <|  >|   |    |   |    |   |    |    |      |         |          |           <|    |        >|       <|      |       <|       |       |     >|   |  >|
+|          <=|  <|  >|  <|  <|   |  <|  <|   <|   <|  >|   |    |   |    |   |    |    |      |         |          |           <|    |        >|       <|      |       <|       |       |     >|   |  >|
+|           =|  <|   |  <|  <|   |  <|  <|   <|   <|  >|  <|   <|   |   <|  <|   <|    |      |         |          |           <|    |        >|       <|      |       <|       |       |     >|   |  >|
+|          ==|  <|  >|  <|  <|   |  <|  <|   <|   <|  >|   |    |   |    |   |    |    |      |         |          |           <|    |        >|       <|      |       <|       |       |     >|   |  >|
+|           >|  <|  >|  <|  <|   |  <|  <|   <|   <|  >|   |    |   |    |   |    |    |      |         |          |           <|    |        >|       <|      |       <|       |       |     >|   |  >|
+|          >=|  <|  >|  <|  <|   |  <|  <|   <|   <|  >|   |    |   |    |   |    |    |      |         |          |           <|    |        >|       <|      |       <|       |       |     >|   |  >|
+|          do|   |   |   |   |   |   |   |    |    |   |   |    |   |    |   |    |    |      |         |          |            |    |         |        |      |        |       |       |     >|  =|   |
+|        else|   |   |   |   |   |   |   |    |    |   |   |    |   |    |   |    |    |      |         |          |            |    |         |        |      |        |       |       |     >|  =|   |
+|     epsilon|   |   |   |   |   |   |   |    |    |   |   |    |   |    |   |    |    |      |         |          |            |    |         |        |      |        |       |       |     >|   |   |
+|    function|  =|   |   |   |   |   |   |    |    |   |   |    |   |    |   |    |    |      |         |          |           <|    |         |        |      |        |       |       |     >|   |   |
+|  identifier|  >|  >|  >|  >|  >|  >|  >|    |    |  >|  >|   >|  >|   >|  >|   >|    |      |         |          |            |    |        >|        |      |        |       |       |     >|   |  >|
+|          if|  =|   |   |   |   |   |   |    |    |   |   |    |   |    |   |    |    |      |         |          |            |    |         |        |      |        |       |       |     >|   |   |
+|     newline|  <|   |   |   |   |   |   |    |    |  >|   |    |  <|    |   |    |   <|      |         |         <|           <|   <|        >|        |     <|        |      <|      <|     >|   |  >|
+|      number|   |  >|  >|  >|  >|  >|  >|    |    |  >|  >|   >|   |   >|  >|   >|    |      |         |          |            |    |        >|        |      |        |       |       |     >|   |  >|
+|        read|   |   |   |   |   |   |   |    |    |  >|   |    |   |    |   |    |    |      |         |          |           <|    |        >|        |      |        |       |       |     >|   |  >|
+|      string|   |  >|  >|  >|  >|  >|  >|    |    |  >|  >|   >|   |   >|  >|   >|    |      |         |          |            |    |        >|        |      |        |       |       |     >|   |  >|
+|       while|  =|   |   |   |   |   |   |    |    |   |   |    |   |    |   |    |    |      |         |          |            |    |         |        |      |        |       |       |     >|   |   |
+|       write|   |   |   |   |   |   |   |    |    |  >|   |    |   |    |   |    |    |      |         |          |           <|    |        >|        |      |        |       |       |     >|   |  >|
+|        zero|  <|  <|  <|  <|  <|  <|  <|   <|   <|  <|  <|   <|  <|   <|  <|   <|   <|     <|        <|         <|           <|   <|        <|       <|     <|       <|      <|      <|      |  <|  <|
+|           {|  <|   |   |   |   |   |   |    |    |  <|   |    |  <|    |   |    |   <|      |         |         <|           <|   <|        <|        |     <|        |      <|      <|     >|   |  =|
+|           }|   |   |   |   |   |   |   |    |    |  >|   |    |   |    |   |    |    |     =|         |          |            |    |        >|        |      |        |      =|       |     >|   |  >|
++------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 
 1	Reduce `identifier` to `$id`
 2	Reduce `number` to `$num`
-3	Reduce `number` to `$num`
-4	Reduce `$num - $num` to `$simple_exp`
-5	Reduce `$id > $simple_exp` to `$exp`
-6	Reduce `identifier` to `$id`
-7	Reduce `number` to `$num`
-8	Reduce `$id = $num` to `$assign_stmt`
+3	Reduce `0- $num` to `$num`
+4	Reduce `0- ( $num )` to `$num`
+5	Reduce `0+ $num` to `$num`
+6	Reduce `0- $num` to `$num`
+7	Reduce `$id = $num` to `$assign_stmt`
+8	Reduce `$assign_stmt ;` to `$stmt_seq`
 9	Reduce `identifier` to `$id`
 10	Reduce `number` to `$num`
-11	Reduce `$id < $num` to `$exp`
-12	Reduce `identifier` to `$id`
+11	Reduce `0- $num` to `$num`
+12	Reduce `$id > $num` to `$exp`
 13	Reduce `identifier` to `$id`
-14	Reduce `identifier` to `$id`
-15	Reduce `$id * $id` to `$term`
-16	Reduce `$id = $term` to `$assign_stmt`
-17	Reduce `$assign_stmt ;` to `$stmt_seq`
-18	Reduce `identifier` to `$id`
+14	Reduce `number` to `$num`
+15	Reduce `$id = $num` to `$assign_stmt`
+16	Reduce `identifier` to `$id`
+17	Reduce `number` to `$num`
+18	Reduce `$id < $num` to `$exp`
 19	Reduce `identifier` to `$id`
-20	Reduce `number` to `$num`
-21	Reduce `$id + $num` to `$simple_exp`
-22	Reduce `$id = $simple_exp` to `$assign_stmt`
-23	Reduce `$stmt_seq newline $assign_stmt` to `$stmt_seq`
-24	Reduce `$stmt_seq ;` to `$stmt_seq`
-25	Reduce `$stmt_seq newline` to `$stmt_seq`
-26	Reduce `while ( $exp ) { $stmt_seq }` to `$while_stmt`
-27	Reduce `$assign_stmt newline $while_stmt` to `$stmt_seq`
-28	Reduce `identifier` to `$id`
-29	Reduce `identifier` to `$id`
-30	Reduce `number` to `$num`
-31	Reduce `$id - $num` to `$simple_exp`
-32	Reduce `$id = $simple_exp` to `$assign_stmt`
-33	Reduce `$stmt_seq newline $assign_stmt` to `$stmt_seq`
-34	Reduce `identifier` to `$id`
-35	Reduce `write $id` to `$write_stmt`
-36	Reduce `$stmt_seq newline $write_stmt` to `$stmt_seq`
-37	Reduce `$stmt_seq newline` to `$stmt_seq`
-38	Reduce `if ( $exp ) { $stmt_seq }` to `$if_stmt`
-39	Reduce `identifier` to `$id`
-40	Reduce `read $id` to `$read_stmt`
-41	Reduce `$if_stmt newline $read_stmt` to `$stmt_seq`
-42	Reduce `identifier` to `$id`
-43	Reduce `write $id` to `$write_stmt`
-44	Reduce `$stmt_seq ; $write_stmt` to `$stmt_seq`
-45	Reduce `$stmt_seq ;` to `$stmt_seq`
-46	Reduce `identifier` to `$id`
+20	Reduce `identifier` to `$id`
+21	Reduce `identifier` to `$id`
+22	Reduce `$id * $id` to `$term`
+23	Reduce `$id = $term` to `$assign_stmt`
+24	Reduce `$assign_stmt ;` to `$stmt_seq`
+25	Reduce `identifier` to `$id`
+26	Reduce `identifier` to `$id`
+27	Reduce `number` to `$num`
+28	Reduce `$id + $num` to `$simple_exp`
+29	Reduce `$id = $simple_exp` to `$assign_stmt`
+30	Reduce `$stmt_seq newline $assign_stmt` to `$stmt_seq`
+31	Reduce `$stmt_seq ;` to `$stmt_seq`
+32	Reduce `$stmt_seq newline` to `$stmt_seq`
+33	Reduce `while ( $exp ) { $stmt_seq }` to `$while_stmt`
+34	Reduce `$assign_stmt newline $while_stmt` to `$stmt_seq`
+35	Reduce `identifier` to `$id`
+36	Reduce `identifier` to `$id`
+37	Reduce `number` to `$num`
+38	Reduce `$id - $num` to `$simple_exp`
+39	Reduce `$id = $simple_exp` to `$assign_stmt`
+40	Reduce `$stmt_seq newline $assign_stmt` to `$stmt_seq`
+41	Reduce `identifier` to `$id`
+42	Reduce `write $id` to `$write_stmt`
+43	Reduce `$stmt_seq newline $write_stmt` to `$stmt_seq`
+44	Reduce `$stmt_seq newline` to `$stmt_seq`
+45	Reduce `if ( $exp ) { $stmt_seq }` to `$if_stmt`
+46	Reduce `$stmt_seq newline $if_stmt` to `$stmt_seq`
 47	Reduce `identifier` to `$id`
-48	Reduce `$id < $id` to `$exp`
-49	Reduce `identifier` to `$id`
-50	Reduce `write $id` to `$write_stmt`
-51	Reduce `$write_stmt newline` to `$stmt_seq`
-52	Reduce `while ( $exp ) { $stmt_seq }` to `$while_stmt`
-53	Reduce `$stmt_seq newline $while_stmt` to `$stmt_seq`
+48	Reduce `read $id` to `$read_stmt`
+49	Reduce `$stmt_seq newline $read_stmt` to `$stmt_seq`
+50	Reduce `identifier` to `$id`
+51	Reduce `write $id` to `$write_stmt`
+52	Reduce `$stmt_seq ; $write_stmt` to `$stmt_seq`
+53	Reduce `$stmt_seq ;` to `$stmt_seq`
 54	Reduce `identifier` to `$id`
 55	Reduce `identifier` to `$id`
-56	Reduce `number` to `$num`
-57	Reduce `$id + $num` to `$simple_exp`
-58	Reduce `$id = $simple_exp` to `$assign_stmt`
-59	Reduce `$assign_stmt ;` to `$stmt_seq`
-60	Reduce `$stmt_seq newline` to `$stmt_seq`
-61	Reduce `identifier` to `$id`
-62	Reduce `number` to `$num`
-63	Reduce `$id < $num` to `$exp`
-64	Reduce `do { $stmt_seq } while ( $exp )` to `$do_while_stmt`
-65	Reduce `$stmt_seq newline $do_while_stmt` to `$stmt_seq`
-66	Reduce `$stmt_seq ;` to `$stmt_seq`
-67	Reduce `identifier` to `$id`
-68	Reduce `identifier` to `$id`
-69	Reduce `read $id` to `$read_stmt`
-70	Reduce `$read_stmt ;` to `$stmt_seq`
-71	Reduce `if ( $id ) { $stmt_seq }` to `$if_stmt`
-72	Reduce `$stmt_seq newline $if_stmt` to `$stmt_seq`
-73	Reduce `identifier` to `$id`
-74	Reduce `function $id ( ) { }` to `$function_def`
-75	Reduce `$stmt_seq newline $function_def` to `$stmt_seq`
+56	Reduce `$id < $id` to `$exp`
+57	Reduce `identifier` to `$id`
+58	Reduce `write $id` to `$write_stmt`
+59	Reduce `$write_stmt newline` to `$stmt_seq`
+60	Reduce `while ( $exp ) { $stmt_seq }` to `$while_stmt`
+61	Reduce `$stmt_seq newline $while_stmt` to `$stmt_seq`
+62	Reduce `identifier` to `$id`
+63	Reduce `identifier` to `$id`
+64	Reduce `number` to `$num`
+65	Reduce `$id + $num` to `$simple_exp`
+66	Reduce `$id = $simple_exp` to `$assign_stmt`
+67	Reduce `$assign_stmt ;` to `$stmt_seq`
+68	Reduce `$stmt_seq newline` to `$stmt_seq`
+69	Reduce `identifier` to `$id`
+70	Reduce `number` to `$num`
+71	Reduce `$id < $num` to `$exp`
+72	Reduce `do { $stmt_seq } while ( $exp )` to `$do_while_stmt`
+73	Reduce `$stmt_seq newline $do_while_stmt` to `$stmt_seq`
+74	Reduce `$stmt_seq ;` to `$stmt_seq`
+75	Reduce `identifier` to `$id`
 76	Reduce `identifier` to `$id`
-77	Reduce `identifier` to `$id`
-78	Reduce `identifier` to `$id`
-79	Reduce `$id , $id` to `$argument_list`
-80	Reduce `identifier` to `$id`
-81	Reduce `write $id` to `$write_stmt`
-82	Reduce `$write_stmt ;` to `$stmt_seq`
-83	Reduce `identifier` to `$id`
-84	Reduce `write $id` to `$write_stmt`
-85	Reduce `$stmt_seq newline $write_stmt` to `$stmt_seq`
-86	Reduce `$stmt_seq ;` to `$stmt_seq`
-87	Reduce `identifier` to `$id`
-88	Reduce `$id ( )` to `$function_call`
-89	Reduce `$stmt_seq newline $function_call` to `$stmt_seq`
-90	Reduce `$stmt_seq ;` to `$stmt_seq`
-91	Reduce `$stmt_seq newline` to `$stmt_seq`
-92	Reduce `function $id ( $argument_list ) { $stmt_seq }` to `$function_def`
-93	Reduce `$stmt_seq newline $function_def` to `$stmt_seq`
-94	Reduce `identifier` to `$id`
-95	Reduce `string` to `$str`
-96	Reduce `number` to `$num`
-97	Reduce `$str , $num` to `$argument_list`
-98	Reduce `$id ( $argument_list )` to `$function_call`
-99	Reduce `$stmt_seq newline $function_call` to `$stmt_seq`
-100	Reduce `$stmt_seq ;` to `$stmt_seq`
-101	Reduce `$stmt_seq newline` to `$stmt_seq`
+77	Reduce `read $id` to `$read_stmt`
+78	Reduce `$read_stmt ;` to `$stmt_seq`
+79	Reduce `if ( $id ) { $stmt_seq }` to `$if_stmt`
+80	Reduce `$stmt_seq newline $if_stmt` to `$stmt_seq`
+81	Reduce `identifier` to `$id`
+82	Reduce `function $id ( ) { }` to `$function_def`
+83	Reduce `$stmt_seq newline $function_def` to `$stmt_seq`
+84	Reduce `identifier` to `$id`
+85	Reduce `identifier` to `$id`
+86	Reduce `identifier` to `$id`
+87	Reduce `$id , $id` to `$argument_list`
+88	Reduce `identifier` to `$id`
+89	Reduce `$argument_list , $id` to `$argument_list`
+90	Reduce `identifier` to `$id`
+91	Reduce `$argument_list , $id` to `$argument_list`
+92	Reduce `identifier` to `$id`
+93	Reduce `write $id` to `$write_stmt`
+94	Reduce `$write_stmt ;` to `$stmt_seq`
+95	Reduce `identifier` to `$id`
+96	Reduce `write $id` to `$write_stmt`
+97	Reduce `$stmt_seq newline $write_stmt` to `$stmt_seq`
+98	Reduce `$stmt_seq ;` to `$stmt_seq`
+99	Reduce `identifier` to `$id`
+100	Reduce `write $id` to `$write_stmt`
+101	Reduce `$stmt_seq newline $write_stmt` to `$stmt_seq`
+102	Reduce `$stmt_seq ;` to `$stmt_seq`
+103	Reduce `identifier` to `$id`
+104	Reduce `write $id` to `$write_stmt`
+105	Reduce `$stmt_seq newline $write_stmt` to `$stmt_seq`
+106	Reduce `$stmt_seq ;` to `$stmt_seq`
+107	Reduce `identifier` to `$id`
+108	Reduce `$id ( )` to `$function_call`
+109	Reduce `$stmt_seq newline $function_call` to `$stmt_seq`
+110	Reduce `$stmt_seq ;` to `$stmt_seq`
+111	Reduce `$stmt_seq newline` to `$stmt_seq`
+112	Reduce `function $id ( $argument_list ) { $stmt_seq }` to `$function_def`
+113	Reduce `$stmt_seq newline $function_def` to `$stmt_seq`
+114	Reduce `identifier` to `$id`
+115	Reduce `string` to `$str`
+116	Reduce `number` to `$num`
+117	Reduce `$str , $num` to `$argument_list`
+118	Reduce `$id ( $argument_list )` to `$function_call`
+119	Reduce `$stmt_seq newline $function_call` to `$stmt_seq`
+120	Reduce `$stmt_seq ;` to `$stmt_seq`
+121	Reduce `$stmt_seq newline` to `$stmt_seq`
 =====================Accept=====================
 
 ================== SyntaxTree ==================
@@ -287,41 +313,51 @@ $argument_list        {number string identifier ) ,}
      ©¦    ©¦    ©¦    ©¦    ©À©¤©¤©¤ ;
      ©¦    ©¦    ©¦    ©¦    ©¦    ©À©¤©¤©¤ ;
      ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©À©¤©¤©¤ ;
-     ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©À©¤©¤©¤ if
-     ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©À©¤©¤©¤ >
+     ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©À©¤©¤©¤ ;
+     ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©À©¤©¤©¤ =
      ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©À©¤©¤©¤ x
      ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¸©¤©¤©¤ -
-     ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦         ©À©¤©¤©¤ 0
-     ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦         ©¸©¤©¤©¤ 2
-     ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©À©¤©¤©¤ ;
-     ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©À©¤©¤©¤ ;
-     ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©À©¤©¤©¤ ;
-     ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©À©¤©¤©¤ =
-     ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©À©¤©¤©¤ fact
-     ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¸©¤©¤©¤ 1
-     ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¸©¤©¤©¤ while
-     ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦         ©À©¤©¤©¤ <
-     ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦         ©¦    ©À©¤©¤©¤ x
-     ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦         ©¦    ©¸©¤©¤©¤ 10
-     ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦         ©¸©¤©¤©¤ ;
-     ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦              ©À©¤©¤©¤ =
-     ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦              ©¦    ©À©¤©¤©¤ fact
-     ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦              ©¦    ©¸©¤©¤©¤ *
-     ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦              ©¦         ©À©¤©¤©¤ fact
-     ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦              ©¦         ©¸©¤©¤©¤ x
-     ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦              ©¸©¤©¤©¤ =
-     ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦                   ©À©¤©¤©¤ x
-     ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦                   ©¸©¤©¤©¤ +
-     ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦                        ©À©¤©¤©¤ x
-     ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦                        ©¸©¤©¤©¤ 1
-     ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¸©¤©¤©¤ =
-     ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦         ©À©¤©¤©¤ x
-     ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦         ©¸©¤©¤©¤ -
-     ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦              ©À©¤©¤©¤ x
-     ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦              ©¸©¤©¤©¤ 5
-     ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¸©¤©¤©¤ write
-     ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦         ©¸©¤©¤©¤ fact
-     ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¸©¤©¤©¤ null
+     ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦         ©À©¤©¤©¤ null
+     ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦         ©¸©¤©¤©¤ -
+     ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦              ©À©¤©¤©¤ null
+     ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦              ©¸©¤©¤©¤ -
+     ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦                   ©À©¤©¤©¤ null
+     ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦                   ©¸©¤©¤©¤ 2
+     ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¸©¤©¤©¤ if
+     ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦         ©À©¤©¤©¤ >
+     ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦         ©¦    ©À©¤©¤©¤ x
+     ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦         ©¦    ©¸©¤©¤©¤ -
+     ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦         ©¦         ©À©¤©¤©¤ null
+     ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦         ©¦         ©¸©¤©¤©¤ 2
+     ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦         ©À©¤©¤©¤ ;
+     ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦         ©¦    ©À©¤©¤©¤ ;
+     ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦         ©¦    ©¦    ©À©¤©¤©¤ ;
+     ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦         ©¦    ©¦    ©¦    ©À©¤©¤©¤ =
+     ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦         ©¦    ©¦    ©¦    ©¦    ©À©¤©¤©¤ fact
+     ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦         ©¦    ©¦    ©¦    ©¦    ©¸©¤©¤©¤ 1
+     ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦         ©¦    ©¦    ©¦    ©¸©¤©¤©¤ while
+     ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦         ©¦    ©¦    ©¦         ©À©¤©¤©¤ <
+     ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦         ©¦    ©¦    ©¦         ©¦    ©À©¤©¤©¤ x
+     ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦         ©¦    ©¦    ©¦         ©¦    ©¸©¤©¤©¤ 10
+     ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦         ©¦    ©¦    ©¦         ©¸©¤©¤©¤ ;
+     ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦         ©¦    ©¦    ©¦              ©À©¤©¤©¤ =
+     ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦         ©¦    ©¦    ©¦              ©¦    ©À©¤©¤©¤ fact
+     ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦         ©¦    ©¦    ©¦              ©¦    ©¸©¤©¤©¤ *
+     ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦         ©¦    ©¦    ©¦              ©¦         ©À©¤©¤©¤ fact
+     ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦         ©¦    ©¦    ©¦              ©¦         ©¸©¤©¤©¤ x
+     ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦         ©¦    ©¦    ©¦              ©¸©¤©¤©¤ =
+     ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦         ©¦    ©¦    ©¦                   ©À©¤©¤©¤ x
+     ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦         ©¦    ©¦    ©¦                   ©¸©¤©¤©¤ +
+     ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦         ©¦    ©¦    ©¦                        ©À©¤©¤©¤ x
+     ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦         ©¦    ©¦    ©¦                        ©¸©¤©¤©¤ 1
+     ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦         ©¦    ©¦    ©¸©¤©¤©¤ =
+     ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦         ©¦    ©¦         ©À©¤©¤©¤ x
+     ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦         ©¦    ©¦         ©¸©¤©¤©¤ -
+     ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦         ©¦    ©¦              ©À©¤©¤©¤ x
+     ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦         ©¦    ©¦              ©¸©¤©¤©¤ 5
+     ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦         ©¦    ©¸©¤©¤©¤ write
+     ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦         ©¦         ©¸©¤©¤©¤ fact
+     ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦         ©¸©¤©¤©¤ null
      ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¸©¤©¤©¤ read
      ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¦         ©¸©¤©¤©¤ x
      ©¦    ©¦    ©¦    ©¦    ©¦    ©¦    ©¸©¤©¤©¤ write
@@ -353,14 +389,24 @@ $argument_list        {number string identifier ) ,}
      ©¦    ©¸©¤©¤©¤ function
      ©¦         ©À©¤©¤©¤ printf
      ©¦         ©À©¤©¤©¤ argument_list
-     ©¦         ©¦    ©À©¤©¤©¤ format
-     ©¦         ©¦    ©¸©¤©¤©¤ arguments
+     ©¦         ©¦    ©À©¤©¤©¤ argument_list
+     ©¦         ©¦    ©¦    ©À©¤©¤©¤ argument_list
+     ©¦         ©¦    ©¦    ©¦    ©À©¤©¤©¤ format
+     ©¦         ©¦    ©¦    ©¦    ©¸©¤©¤©¤ argument1
+     ©¦         ©¦    ©¦    ©¸©¤©¤©¤ argument2
+     ©¦         ©¦    ©¸©¤©¤©¤ argument3
      ©¦         ©¸©¤©¤©¤ ;
      ©¦              ©À©¤©¤©¤ ;
-     ©¦              ©¦    ©À©¤©¤©¤ write
-     ©¦              ©¦    ©¦    ©¸©¤©¤©¤ format
+     ©¦              ©¦    ©À©¤©¤©¤ ;
+     ©¦              ©¦    ©¦    ©À©¤©¤©¤ ;
+     ©¦              ©¦    ©¦    ©¦    ©À©¤©¤©¤ write
+     ©¦              ©¦    ©¦    ©¦    ©¦    ©¸©¤©¤©¤ format
+     ©¦              ©¦    ©¦    ©¦    ©¸©¤©¤©¤ write
+     ©¦              ©¦    ©¦    ©¦         ©¸©¤©¤©¤ argument1
+     ©¦              ©¦    ©¦    ©¸©¤©¤©¤ write
+     ©¦              ©¦    ©¦         ©¸©¤©¤©¤ argument2
      ©¦              ©¦    ©¸©¤©¤©¤ write
-     ©¦              ©¦         ©¸©¤©¤©¤ arguments
+     ©¦              ©¦         ©¸©¤©¤©¤ argument3
      ©¦              ©¸©¤©¤©¤ function_call
      ©¦                   ©À©¤©¤©¤ stop
      ©¦                   ©¸©¤©¤©¤ null

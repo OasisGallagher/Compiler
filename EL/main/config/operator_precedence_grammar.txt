@@ -6,6 +6,10 @@ $id
 	
 $num
 	: number		$$ = constant($1)
+	| - $num		$$ = make("-", $0, $1)
+	| - ( $num )	$$ = make("-", $0, $2)
+	| + $num		$$ = $1
+	| + ( $num )	$$ = $2
 
 $str
 	: string		$$ = literal($1)
@@ -87,5 +91,5 @@ $function_call
 	| $id ( $argument_list )		$$ = make("function_call", $4, $2)
 	
 $argument_list
-	: $factor							$$ = make("argument_list", $1, $0)
-	| $argument_list, $factor			$$ = make("argument_list", $3, $1)
+	: $factor						$$ = make("argument_list", $1, $0)
+	| $argument_list, $factor		$$ = make("argument_list", $3, $1)
