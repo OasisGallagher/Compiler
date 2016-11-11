@@ -2,7 +2,6 @@
 #include "parser.h"
 
 class OperatorPrecedenceTable;
-class SymbolStack;
 
 class OperatorPrecedenceParser : public Parser {
 public:

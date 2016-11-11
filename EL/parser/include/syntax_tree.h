@@ -24,9 +24,10 @@ public:
 	SyntaxNodeType GetNodeType() const;
 
 	void AddChildren(SyntaxNode** buffer, int count);
-	SyntaxNode* GetChild(int index);
-
+	
 	int GetChildCount() const;
+
+	SyntaxNode* GetChild(int index);
 	const SyntaxNode* GetChild(int index) const;
 
 	void SetSymbolAddress(Sym* addr);

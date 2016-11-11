@@ -23,7 +23,8 @@
     <ClInclude Include="parser\include\grammar.h" />
     <ClInclude Include="parser\include\grammar_symbol.h" />
     <ClInclude Include="parser\include\language.h" />
-    <ClInclude Include="parser\include\ll_parser.h" />
+    <ClInclude Include="parser\include\lr0.h" />
+    <ClInclude Include="parser\include\lr_parser.h" />
     <ClInclude Include="parser\include\operator_precedence_parser.h" />
     <ClInclude Include="parser\include\parser.h" />
     <ClInclude Include="parser\include\syntax_tree.h" />
@@ -41,7 +42,8 @@
     <ClCompile Include="parser\src\grammar.cpp" />
     <ClCompile Include="parser\src\grammar_symbol.cpp" />
     <ClCompile Include="parser\src\language.cpp" />
-    <ClCompile Include="parser\src\ll_parser.cpp" />
+    <ClCompile Include="parser\src\lr0.cpp" />
+    <ClCompile Include="parser\src\lr_parser.cpp" />
     <ClCompile Include="parser\src\operator_precedence_parser.cpp" />
     <ClCompile Include="parser\src\parser.cpp" />
     <ClCompile Include="parser\src\table.cpp" />

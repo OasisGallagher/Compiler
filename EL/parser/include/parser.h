@@ -4,7 +4,6 @@
 class SyntaxTree;
 class FileScanner;
 class TextScanner;
-class ActionParser;
 
 class SymTable;
 class LiteralTable;
@@ -30,24 +29,34 @@ protected:
 
 protected:
 	GrammarSymbol FindSymbol(const ScannerToken& token, void*& addr);
-	Grammar* FindGrammar(const GrammarSymbol& lhs);
+	Grammar* FindGrammar(const GrammarSymbol& lhs, int* index = nullptr);
 	GrammarSymbol CreateSymbol(const std::string& text);
 	bool MergeNonEpsilonElements(GrammarSymbolSet& dest, const GrammarSymbolSet& src);
+
+	void CreateFirstSets();
+	void CreateFollowSets();
+
+	void GetFirstSet(GrammarSymbolSet& answer, SymbolVector::iterator first, SymbolVector::iterator last);
 
 protected:
 	GrammarContainer grammars_;
 	GrammarSymbolContainer terminalSymbols_;
 	GrammarSymbolContainer nonterminalSymbols_;
 
+	// VnµÄfirst/follow¼¯ºÏ.
+	GrammarSymbolSetTable firstSetContainer_;
+	GrammarSymbolSetTable followSetContainer_;
+
 private:
 	void InitializeTerminalSymbolContainer();
 	bool ParseProductions(TextScanner* textScanner, SymbolVector& symbols);
 	void DestroyGammars();
 
+	bool CreateFirstSetsOnePass();
+	bool CreateFollowSetsOnePass();
+
 private:
 	SymTable* symTable_;
 	LiteralTable* literalTable_;
 	ConstantTable* constantTable_;
-	
-	ActionParser* actionParser_;
 };

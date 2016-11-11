@@ -11,8 +11,6 @@ Parser::Parser() {
 	literalTable_ = new LiteralTable();
 	constantTable_ = new ConstantTable();
 
-	actionParser_ = new ActionParser();
-
 	InitializeTerminalSymbolContainer();
 }
 
@@ -22,8 +20,6 @@ Parser::~Parser() {
 	delete symTable_;
 	delete literalTable_;
 	delete constantTable_;
-
-	delete actionParser_;
 }
 
 void Parser::InitializeTerminalSymbolContainer() {
@@ -73,38 +69,23 @@ bool Parser::SetGrammars(const char* productions) {
 		Grammar* grammar = new Grammar(CreateSymbol(g.lhs));
 		grammars_.push_back(grammar);
 
-		Condinate cond;
+		SymbolVector symbols;
 
 		for (GrammarDef::ProductionDefContainer::const_iterator ite2 = g.productions.begin(); ite2 != g.productions.end(); ++ite2) {
 			const ProductionDef& pr = *ite2;
 			
 			textScanner.SetText(pr.first.c_str());
 			
-			if (!ParseProductions(&textScanner, cond.symbols)) {
+			if (!ParseProductions(&textScanner, symbols)) {
 				return false;
 			}
 
-			cond.action = actionParser_->Parse(pr.second);
-			grammar->AddCondinate(cond);
-
-			cond.action = nullptr;
-			cond.symbols.clear();
+			grammar->AddCondinate(pr.second, symbols);
+			symbols.clear();
 		}
 	}
 
 	return ParseGrammars();
-}
-
-Grammar* Parser::FindGrammar(const GrammarSymbol& lhs) {
-	Grammar* g = nullptr;
-	for (GrammarContainer::iterator ite = grammars_.begin(); ite != grammars_.end(); ++ite) {
-		if ((*ite)->GetLhs() == lhs) {
-			g = *ite;
-			break;
-		}
-	}
-
-	return g;
 }
 
 GrammarSymbol Parser::FindSymbol(const ScannerToken& token, void*& addr) {
@@ -188,6 +169,117 @@ void Parser::DestroyGammars() {
 	}
 
 	grammars_.clear();
+}
+
+void Parser::CreateFirstSets() {
+	for (; CreateFirstSetsOnePass();) {
+	}
+}
+
+bool Parser::CreateFirstSetsOnePass() {
+	bool anySetModified = false;
+
+	for (GrammarContainer::iterator ite = grammars_.begin(); ite != grammars_.end(); ++ite) {
+		Grammar* g = *ite;
+		const CondinateContainer& conds = g->GetCondinates();
+		GrammarSymbolSet& firstSet = firstSetContainer_[g->GetLhs()];
+
+		for (CondinateContainer::const_iterator ite2 = conds.begin(); ite2 != conds.end(); ++ite2) {
+			Condinate* c = *ite2;
+			GrammarSymbol& front = c->symbols.front();
+
+			if (front.SymbolType() == GrammarSymbolTerminal) {
+				anySetModified = firstSet.insert(c->symbols.front()).second || anySetModified;
+				continue;
+			}
+
+			SymbolVector::iterator ite3 = c->symbols.begin();
+			for (; ite3 != c->symbols.end(); ++ite3) {
+				GrammarSymbol& current = *ite3;
+				if (current.SymbolType() != GrammarSymbolNonterminal) {
+					break;
+				}
+
+				anySetModified = MergeNonEpsilonElements(firstSet, firstSetContainer_[front]) || anySetModified;
+
+				GrammarSymbolSet& currentFirstSet = firstSetContainer_[current];
+				if (currentFirstSet.find(GrammarSymbol::epsilon) == currentFirstSet.end()) {
+					break;
+				}
+			}
+
+			if (ite3 == c->symbols.end()) {
+				anySetModified = firstSet.insert(GrammarSymbol::epsilon).second || anySetModified;
+			}
+		}
+	}
+
+	return anySetModified;
+}
+
+void Parser::CreateFollowSets() {
+	followSetContainer_[grammars_.front()->GetLhs()].insert(GrammarSymbol::zero);
+
+	for (; CreateFollowSetsOnePass();) {
+	}
+}
+
+bool Parser::CreateFollowSetsOnePass() {
+	bool anySetModified = false;
+
+	GrammarSymbolSet gss;
+	for (GrammarContainer::iterator ite = grammars_.begin(); ite != grammars_.end(); ++ite) {
+		Grammar* g = *ite;
+		const CondinateContainer& conds = g->GetCondinates();
+
+		for (CondinateContainer::const_iterator ite2 = conds.begin(); ite2 != conds.end(); ++ite2) {
+			Condinate* current = *ite2;
+			for (SymbolVector::iterator ite3 = current->symbols.begin(); ite3 != current->symbols.end(); ++ite3) {
+				GrammarSymbol& symbol = *ite3;
+				if (symbol.SymbolType() == GrammarSymbolTerminal) {
+					continue;
+				}
+
+				SymbolVector::iterator ite4 = ite3;
+				GetFirstSet(gss, ++ite4, current->symbols.end());
+				anySetModified = MergeNonEpsilonElements(followSetContainer_[symbol], gss) || anySetModified;
+
+				if (gss.find(GrammarSymbol::epsilon) != gss.end()) {
+					anySetModified = MergeNonEpsilonElements(followSetContainer_[symbol], followSetContainer_[g->GetLhs()]) || anySetModified;
+				}
+
+				gss.clear();
+			}
+		}
+	}
+
+	return anySetModified;
+}
+
+void Parser::GetFirstSet(GrammarSymbolSet& answer, SymbolVector::iterator first, SymbolVector::iterator last) {
+	if (first == last) {
+		answer.insert(GrammarSymbol::epsilon);
+		return;
+	}
+
+	for (; first != last; ++first) {
+		if (first->SymbolType() == GrammarSymbolTerminal) {
+			answer.insert(*first);
+
+			if (*first != GrammarSymbol::epsilon) {
+				break;
+			}
+		}
+		else {
+			Assert(firstSetContainer_.find(*first) != firstSetContainer_.end(), "logic error");
+			GrammarSymbolSet& firstSet = firstSetContainer_[*first];
+			answer.insert(firstSet.begin(), firstSet.end());
+
+			if (firstSet.find(GrammarSymbol::epsilon) == firstSet.end()) {
+				break;
+			}
+		}
+	}
 }
 
 std::string Parser::ToString() const {

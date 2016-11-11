@@ -165,8 +165,6 @@ private:
 	void* operator new(size_t);
 #pragma pop_macro("new")
 
-	static GrammarSymbol synch;
-
 private:
 	GrammarSymbolBase* symbol_;
 };

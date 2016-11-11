@@ -151,19 +151,16 @@ bool ActionMake::ParseParameters(TextScanner& scanner, Argument& argument) {
 	return Action::ParseParameters(scanner, argument);
 }
 
-ActionParser::~ActionParser() {
-	for (std::vector<Action*>::iterator ite = actions_.begin(); ite != actions_.end(); ++ite) {
-		delete *ite;
+Action* ActionParser::Parse(const std::string& cmd) {
+	if (cmd.empty()) {
+		return nullptr;
 	}
+
+	return CreateAction(cmd);
 }
 
-Action* ActionParser::Parse(const std::string& cmd) {
-	Action* ans = CreateAction(cmd);
-	if (ans != nullptr) {
-		actions_.push_back(ans);
-	}
-
-	return ans;
+void ActionParser::Destroy(Action* action) {
+	delete action;
 }
 
 Action* ActionParser::CreateAction(const std::string& cmd) {

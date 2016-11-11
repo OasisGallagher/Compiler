@@ -22,6 +22,14 @@ std::string Condinate::ToString() const {
 	return oss.str();
 }
 
+Condinate::Condinate(const SymbolVector& container, const std::string& actionText)
+	: action(ActionParser::Parse(actionText)), symbols(container) {
+}
+
+Condinate::~Condinate() {
+	ActionParser::Destroy(action);
+}
+
 std::string CondinateContainer::ToString() const {
 	std::ostringstream oss;
 
@@ -60,9 +68,11 @@ const GrammarSymbol& Grammar::GetLhs() const {
 	return lhs_;
 }
 
-void Grammar::AddCondinate(const Condinate& cond) {
-	Assert(!cond.symbols.empty(), "empty condinate");
-	Condinate* ptr = new Condinate(cond);
+void Grammar::AddCondinate(const std::string& action, const SymbolVector& symbols) {
+	Assert(!symbols.empty(), "empty condinate");
+	Condinate* ptr = new Condinate(symbols, action);
+	ptr->symbols = symbols;
+
 	if (ptr->symbols.front() == lhs_) {
 		// Add left recursion condinate to front.
 		// TODO: O(n).
@@ -111,4 +121,21 @@ std::string Grammar::ToString() const {
 	oss << condinates_.ToString();
 
 	return oss.str();
+}
+
+Grammar* GrammarContainer::FindGrammar(const GrammarSymbol& lhs, int* index) {
+	Grammar* g = nullptr;
+	int pos = 0;
+	for (GrammarContainer::iterator ite = begin(); ite != end(); ++ite, ++pos) {
+		if ((*ite)->GetLhs() == lhs) {
+			g = *ite;
+			break;
+		}
+	}
+
+	if (g != nullptr && index != nullptr) {
+		*index = pos;
+	}
+
+	return g;
 }

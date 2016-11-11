@@ -2,8 +2,6 @@
 
 #include <vector>
 
-template <class Ty>
-class Stack;
 class SyntaxNode;
 class TextScanner;
 
@@ -64,15 +62,10 @@ public:
 
 class ActionParser {
 public:
-	~ActionParser();
-
-public:
-	Action* Parse(const std::string& cmd);
+	static Action* Parse(const std::string& cmd);
+	static void Destroy(Action* action);
 
 private:
-	Action* CreateAction(const std::string& cmd);
-	bool IsOperand(const char* text);
-
-private:
-	std::vector<Action*> actions_;
+	static Action* CreateAction(const std::string& cmd);
+	static bool IsOperand(const char* text);
 };

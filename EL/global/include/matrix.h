@@ -29,6 +29,26 @@ public:
 		return cont_[std::make_pair(k1, k2)];
 	}
 
+	bool get(const first_key_type& k1, const second_key_type& k2, value_type& answer) {
+		iterator ite = find(k1, k2);
+		if (ite == end()) {
+			return false;
+		}
+
+		answer = ite->second;
+		return true;
+	}
+
+	bool get(const first_key_type& k1, const second_key_type& k2, value_type& answer) const {
+		const_iterator ite = find(k1, k2);
+		if (ite == end()) {
+			return false;
+		}
+
+		answer = ite->second;
+		return true;
+	}
+
 	void insert(const first_key_type& k1, const second_key_type& k2, const value_type& val) {
 		cont_.insert(std::make_pair(std::make_pair(k1, k2), val));
 	}
@@ -52,8 +72,6 @@ public:
 	void clear() {
 		cont_.clear();
 	}
-
-	std::string ToString() const;
 
 protected:
 	container_type cont_;
