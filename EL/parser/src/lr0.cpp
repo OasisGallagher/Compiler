@@ -14,12 +14,22 @@ LR0::~LR0() {
 	}
 }
 
-bool LR0::Parse(GrammarContainer* grammars, GrammarSymbolContainer* terminalSymbols, GrammarSymbolContainer* nonterminalSymbols) {
+void LR0::Setup(GrammarContainer* grammars, GrammarSymbolContainer* terminalSymbols, GrammarSymbolContainer* nonterminalSymbols) {
 	grammars_ = grammars;
 	terminalSymbols_ = terminalSymbols;
 	nonterminalSymbols_ = nonterminalSymbols;
+}
 
-	return CreateLR0Itemsets();
+bool LR0::Parse(LRGotoTable& gotoTable, LRActionTable& actionTable) {
+	if (!CreateLR0Itemsets()) {
+		return false;
+	}
+
+	return CreateLRParsingTable(gotoTable, actionTable);
+}
+
+bool LR0::CreateLRParsingTable(LRGotoTable& gotoTable, LRActionTable& actionTable) {
+	return true;
 }
 
 std::string LR0::ToString() const {
@@ -140,8 +150,8 @@ LR0Closure* LR0::GetLR0EdgeTarget(LR0Closure* src, const GrammarSymbol& symbol) 
 LR0Closure* LR0::CalculateLR0EdgeTarget(LR0Closure* src, const GrammarSymbol& symbol) {
 	LR0Closure* answer = nullptr;
 	for (LR0Closure::const_iterator ite = src->begin(); ite != src->end(); ++ite) {
-		Condinate* cond = LR0::GetTargetCondinate(*grammars_, ite->cpos);
-		SymbolVector::iterator pos = std::find(cond->symbols.begin(), cond->symbols.end(), symbol);
+		const Condinate* cond = grammars_->GetTargetCondinate(ite->cpos, nullptr);
+		SymbolVector::const_iterator pos = std::find(cond->symbols.begin(), cond->symbols.end(), symbol);
 		if (pos == cond->symbols.end() || ite->dpos != (int)std::distance(cond->symbols.begin(), pos)) {
 			continue;
 		}
@@ -159,12 +169,12 @@ bool LR0::CalculateLR0ClosureOnePass(LR0Closure* answer) {
 	bool setChanged = false;
 	for (LR0Closure::iterator ite = answer->begin(); ite != answer->end(); ++ite) {
 		const LR0Item& current = *ite;
-		Condinate* cond = LR0::GetTargetCondinate(*grammars_, current.cpos);
+		const Condinate* cond = grammars_->GetTargetCondinate(current.cpos, nullptr);
 		if (current.dpos >= (int)cond->symbols.size()) {
 			continue;
 		}
 
-		GrammarSymbol& b = cond->symbols[current.dpos];
+		const GrammarSymbol& b = cond->symbols[current.dpos];
 
 		if (b.SymbolType() == GrammarSymbolTerminal) {
 			continue;
@@ -200,20 +210,6 @@ bool LR0::CreateLR0ItemsetsOnePass() {
 	return setChanged;
 }
 
-Condinate* LR0::GetTargetCondinate(const GrammarContainer& grammars, int cpos, Grammar** g) {
-	int gi = Utility::Highword(cpos);
-	int ci = Utility::Loword(cpos);
-	// TODO: index grammar list...
-	GrammarContainer::const_iterator ite = grammars.begin();
-	std::advance(ite, gi);
-
-	if (g != nullptr) {
-		*g = *ite;
-	}
-
-	return (*ite)->GetCondinates()[ci];
-}
-
 bool LR0Item::operator < (const LR0Item& other) const {
 	if (cpos == other.cpos) {
 		return dpos < other.dpos;
@@ -224,7 +220,7 @@ bool LR0Item::operator < (const LR0Item& other) const {
 
 std::string LR0Item::ToString(const GrammarContainer& grammars) const {
 	Grammar* g = nullptr;
-	Condinate* cond = LR0::GetTargetCondinate(grammars, cpos, &g);
+	const Condinate* cond = grammars.GetTargetCondinate(cpos, &g);
 
 	std::ostringstream oss;
 	oss << g->GetLhs().ToString() << " : ";
@@ -234,7 +230,7 @@ std::string LR0Item::ToString(const GrammarContainer& grammars) const {
 		if (i == dpos) {
 			oss << seperator;
 			seperator = " ";
-			oss << ".";
+			oss << "¡¤";
 		}
 
 		oss << seperator;
@@ -243,7 +239,7 @@ std::string LR0Item::ToString(const GrammarContainer& grammars) const {
 	}
 
 	if (dpos == (int)cond->symbols.size()) {
-		oss << seperator << ".";
+		oss << seperator << "¡¤";
 	}
 
 	return oss.str();

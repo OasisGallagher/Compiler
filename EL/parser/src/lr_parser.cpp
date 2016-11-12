@@ -1,16 +1,16 @@
 #include "action.h"
 #include "matrix.h"
 #include "scanner.h"
+#include "lr_table.h"
 #include "lr_parser.h"
 #include "syntax_tree.h"
-#include "table_printer.h"
 
 LRParser::LRParser() {
-	lr0_ = new LR0();
+	lrTable_ = new LRTable();
 }
 
 LRParser::~LRParser() {
-	delete lr0_;
+	delete lrTable_;
 }
 
 GrammarSymbol LRParser::ParseNextSymbol(TokenPosition& position, void*& addr, FileScanner* fileScanner) {
@@ -45,7 +45,7 @@ bool LRParser::ParseFile(SyntaxTree* tree, FileScanner* fileScanner) {
 			return false;
 		}
 
-		action = actionTable_.at(stateStack.back(), a);
+		action = lrTable_->GetAction(stateStack.back(), a);
 		
 		if (action.actionType == LRActionError) {
 			Debug::LogError("unexpected symbol " + a.ToString() + " at " + position.ToString());
@@ -53,7 +53,8 @@ bool LRParser::ParseFile(SyntaxTree* tree, FileScanner* fileScanner) {
 		}
 
 		if (action.actionType == LRActionShift) {
-			if (!gotoTable_.get(stateStack.back(), a, nextState)) {
+			nextState = lrTable_->GetNextState(stateStack.back(), a);
+			if (nextState < 0) {
 				Debug::LogError("empty goto item(" + std::to_string(stateStack.back()) + ", " + a.ToString() + ")");
 				return false;
 			}
@@ -64,7 +65,7 @@ bool LRParser::ParseFile(SyntaxTree* tree, FileScanner* fileScanner) {
 		}
 		else if (action.actionType == LRActionReduce) {
 			Grammar* g = nullptr;
-			Condinate* cond = LR0::GetTargetCondinate(grammars_, action.actionParameter, &g);
+			const Condinate* cond = grammars_.GetTargetCondinate(action.actionParameter, &g);
 
 			int length = cond->symbols.size();
 			Debug::Log(std::to_string(++reduceCount) + "\tReduce `" + Utility::Concat(symbolStack.end() - length, symbolStack.end()) + "` to `" + g->GetLhs().ToString() + "`");
@@ -73,7 +74,8 @@ bool LRParser::ParseFile(SyntaxTree* tree, FileScanner* fileScanner) {
 			symbolStack.erase(symbolStack.end() - length, symbolStack.end());
 			valueStack.erase(valueStack.end() - length, valueStack.end());
 
-			if (!gotoTable_.get(stateStack.back(), g->GetLhs(), nextState)) {
+			nextState = lrTable_->GetNextState(stateStack.back(), g->GetLhs());
+			if (nextState < 0) {
 				Debug::LogError("empty goto item(" + std::to_string(stateStack.back()) + ", " + g->GetLhs().ToString() + ")");
 				return false;
 			}
@@ -92,7 +94,7 @@ bool LRParser::ParseFile(SyntaxTree* tree, FileScanner* fileScanner) {
 }
 
 bool LRParser::ParseGrammars() {
-	lr0_->Parse(&grammars_, &terminalSymbols_, &nonterminalSymbols_);
+	lrTable_->Create(&grammars_, &terminalSymbols_, &nonterminalSymbols_);
 	return true;
 }
 
@@ -106,7 +108,7 @@ std::string LRParser::ToString() const {
 
 	oss << "\n\n";
 
-	oss << lr0_->ToString();
+	oss << lrTable_->ToString();
 
 	return oss.str();
 }

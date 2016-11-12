@@ -41,7 +41,7 @@ GrammarReader::GrammarReader(const char* file) : fileReader_(file, false, false)
 	ReadGrammars();
 }
 
-const GrammarDefContainer& GrammarReader::GetGrammars() const {
+const GrammarTextContainer& GrammarReader::GetGrammars() const {
 	return grammars_;
 }
 
@@ -54,7 +54,7 @@ void GrammarReader::ReadGrammars() {
 	char buffer[MAX_LINE_CHARACTERS];
 	char* ptr = buffer;
 
-	GrammarDef g;
+	GrammarText g;
 	std::string text;
 
 	for (; fileReader_.ReadLine(ptr, MAX_LINE_CHARACTERS, nullptr);) {
@@ -83,10 +83,10 @@ void GrammarReader::ReadGrammars() {
 	}
 }
 
-bool GrammarDef::Empty() const {
+bool GrammarText::Empty() const {
 	return lhs.empty();
 }
 
-void GrammarDef::Clear() {
+void GrammarText::Clear() {
 	lhs.clear(); productions.clear();
 }

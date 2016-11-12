@@ -139,3 +139,17 @@ Grammar* GrammarContainer::FindGrammar(const GrammarSymbol& lhs, int* index) {
 
 	return g;
 }
+
+const Condinate* GrammarContainer::GetTargetCondinate(int cpos, Grammar** g) const {
+	int gi = Utility::Highword(cpos);
+	int ci = Utility::Loword(cpos);
+	// TODO: index grammar list...
+	GrammarContainer::const_iterator ite = begin();
+	std::advance(ite, gi);
+
+	if (g != nullptr) {
+		*g = *ite;
+	}
+
+	return (*ite)->GetCondinates()[ci];
+}

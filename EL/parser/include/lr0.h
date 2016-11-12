@@ -4,6 +4,7 @@
 
 #include "matrix.h"
 #include "grammar.h"
+#include "lr_impl.h"
 
 struct LR0Item {
 	int cpos, dpos;
@@ -32,18 +33,20 @@ public:
 	std::string ToString(const GrammarContainer& grammars) const;
 };
 
-class LR0 {
-public:
-	static Condinate* GetTargetCondinate(const GrammarContainer& grammars, int cpos, Grammar** g = nullptr);
+class LR0 : public LRImpl {
 
 public:
 	LR0();
 	~LR0();
 
 public:
-	bool Parse(GrammarContainer* grammars, GrammarSymbolContainer* terminalSymbols, GrammarSymbolContainer* nonterminalSymbols);
+	virtual std::string ToString() const;
 
-	std::string ToString() const;
+	virtual bool Parse(LRGotoTable& gotoTable, LRActionTable& actionTable);
+	virtual void Setup(GrammarContainer* grammars, GrammarSymbolContainer* terminalSymbols, GrammarSymbolContainer* nonterminalSymbols);
+
+protected:
+	virtual bool CreateLRParsingTable(LRGotoTable& gotoTable, LRActionTable& actionTable);
 
 private:
 	bool CreateLR0Itemsets();

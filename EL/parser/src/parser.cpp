@@ -61,18 +61,18 @@ bool Parser::SetGrammars(const char* productions) {
 
 	TextScanner textScanner;
 	GrammarReader reader(productions);
-	const GrammarDefContainer& cont = reader.GetGrammars();
-	for (GrammarDefContainer::const_iterator ite = cont.begin();
+	const GrammarTextContainer& cont = reader.GetGrammars();
+	for (GrammarTextContainer::const_iterator ite = cont.begin();
 		ite != cont.end(); ++ite) {
-		const GrammarDef& g = *ite;
+		const GrammarText& g = *ite;
 		
 		Grammar* grammar = new Grammar(CreateSymbol(g.lhs));
 		grammars_.push_back(grammar);
 
 		SymbolVector symbols;
 
-		for (GrammarDef::ProductionDefContainer::const_iterator ite2 = g.productions.begin(); ite2 != g.productions.end(); ++ite2) {
-			const ProductionDef& pr = *ite2;
+		for (GrammarText::ProductionTextContainer::const_iterator ite2 = g.productions.begin(); ite2 != g.productions.end(); ++ite2) {
+			const ProductionText& pr = *ite2;
 			
 			textScanner.SetText(pr.first.c_str());
 			

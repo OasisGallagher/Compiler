@@ -90,13 +90,19 @@
     <ClInclude Include="global\include\define.h">
       <Filter>global\include</Filter>
     </ClInclude>
-    <ClInclude Include="parser\include\table.h">
-      <Filter>parser\include</Filter>
-    </ClInclude>
     <ClInclude Include="parser\include\lr_parser.h">
       <Filter>parser\include</Filter>
     </ClInclude>
     <ClInclude Include="parser\include\lr0.h">
+      <Filter>parser\include</Filter>
+    </ClInclude>
+    <ClInclude Include="parser\include\lr_table.h">
+      <Filter>parser\include</Filter>
+    </ClInclude>
+    <ClInclude Include="parser\include\lr_impl.h">
+      <Filter>parser\include</Filter>
+    </ClInclude>
+    <ClInclude Include="parser\include\table.h">
       <Filter>parser\include</Filter>
     </ClInclude>
   </ItemGroup>
@@ -140,13 +146,16 @@
     <ClCompile Include="parser\src\action.cpp">
       <Filter>parser\src</Filter>
     </ClCompile>
-    <ClCompile Include="parser\src\table.cpp">
-      <Filter>parser\src</Filter>
-    </ClCompile>
     <ClCompile Include="parser\src\lr_parser.cpp">
       <Filter>parser\src</Filter>
     </ClCompile>
     <ClCompile Include="parser\src\lr0.cpp">
+      <Filter>parser\src</Filter>
+    </ClCompile>
+    <ClCompile Include="parser\src\lr_table.cpp">
+      <Filter>parser\src</Filter>
+    </ClCompile>
+    <ClCompile Include="parser\src\table.cpp">
       <Filter>parser\src</Filter>
     </ClCompile>
   </ItemGroup>

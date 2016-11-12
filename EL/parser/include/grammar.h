@@ -48,4 +48,5 @@ private:
 class GrammarContainer : public std::list<Grammar*> {
 public:
 	Grammar* FindGrammar(const GrammarSymbol& lhs, int* index);
+	const Condinate* GetTargetCondinate(int cpos, Grammar** g) const;
 };
