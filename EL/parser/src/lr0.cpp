@@ -29,6 +29,19 @@ bool LR0::Parse(LRGotoTable& gotoTable, LRActionTable& actionTable) {
 }
 
 bool LR0::CreateLRParsingTable(LRGotoTable& gotoTable, LRActionTable& actionTable) {
+	for (LR0Itemsets::iterator ite = lr0Itemsets_.begin(); ite != lr0Itemsets_.end(); ++ite) {
+		LR0Closure* closure = *ite;
+		for (LR0Closure::iterator ite2 = closure->begin(); ite2 != closure->end(); ++ite2) {
+			const LR0Item& item = *ite2;
+			const Condinate* cond = grammars_->GetTargetCondinate(item.cpos, nullptr);
+
+			if (item.dpos >= (int)cond->symbols.size()) {
+				continue;
+			}
+
+			const GrammarSymbol& symbol = cond->symbols[item.dpos];
+		}
+	}
 	return true;
 }
 
