@@ -1,14 +1,11 @@
+$SPlus
+	: $S
+
 $S
-  : $E
-  
-$E 
-  : a $A
-  | b $B
-  
-$A 
-  : c $A
-  | d
-  
-$B 
-  : c $B 
-  | d
+	: $B $B
+
+$B
+	: a$B
+
+$B
+	: b	

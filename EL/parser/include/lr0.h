@@ -43,7 +43,7 @@ public:
 	virtual std::string ToString() const;
 
 	virtual bool Parse(LRGotoTable& gotoTable, LRActionTable& actionTable);
-	virtual void Setup(GrammarContainer* grammars, GrammarSymbolContainer* terminalSymbols, GrammarSymbolContainer* nonterminalSymbols);
+	virtual void Setup(const LRSetupParameter& parameter);
 
 protected:
 	virtual bool CreateLRParsingTable(LRGotoTable& gotoTable, LRActionTable& actionTable);
@@ -66,7 +66,10 @@ private:
 	GrammarSymbolContainer* terminalSymbols_;
 	GrammarSymbolContainer* nonterminalSymbols_;
 
-	LR0EdgeTable lr0Edges_;
-	LR0ClosureContainer lr0Closures_;
-	LR0Itemsets lr0Itemsets_;
+	FirstSetTable* firstSetContainer_;
+	GrammarSymbolSetTable* followSetContainer;
+
+	LR0EdgeTable edges_;
+	LR0ClosureContainer closures_;
+	LR0Itemsets itemsets_;
 };

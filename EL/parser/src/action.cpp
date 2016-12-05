@@ -170,6 +170,11 @@ Action* ActionParser::CreateAction(const std::string& cmd) {
 	char token[MAX_TOKEN_CHARACTERS];
 	ScannerTokenType tokenType = scanner.GetToken(token);
 
+	// TODO: 
+	if (tokenType == ScannerTokenEndOfFile) {
+		return nullptr;
+	}
+
 	Assert(tokenType == ScannerTokenIdentifier && strcmp(token, "$$") == 0, std::string("invalid left hand side operand: ") + token);
 
 	tokenType = scanner.GetToken(token);

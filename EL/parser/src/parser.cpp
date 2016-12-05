@@ -241,7 +241,7 @@ bool Parser::CreateFollowSetsOnePass() {
 				}
 
 				SymbolVector::iterator ite4 = ite3;
-				GetFirstSet(gss, ++ite4, current->symbols.end());
+				firstSetContainer_.GetFirstSet(gss, ++ite4, current->symbols.end());
 				anySetModified = MergeNonEpsilonElements(followSetContainer_[symbol], gss) || anySetModified;
 
 				if (gss.find(GrammarSymbol::epsilon) != gss.end()) {
@@ -254,32 +254,6 @@ bool Parser::CreateFollowSetsOnePass() {
 	}
 
 	return anySetModified;
-}
-
-void Parser::GetFirstSet(GrammarSymbolSet& answer, SymbolVector::iterator first, SymbolVector::iterator last) {
-	if (first == last) {
-		answer.insert(GrammarSymbol::epsilon);
-		return;
-	}
-
-	for (; first != last; ++first) {
-		if (first->SymbolType() == GrammarSymbolTerminal) {
-			answer.insert(*first);
-
-			if (*first != GrammarSymbol::epsilon) {
-				break;
-			}
-		}
-		else {
-			Assert(firstSetContainer_.find(*first) != firstSetContainer_.end(), "logic error");
-			GrammarSymbolSet& firstSet = firstSetContainer_[*first];
-			answer.insert(firstSet.begin(), firstSet.end());
-
-			if (firstSet.find(GrammarSymbol::epsilon) == firstSet.end()) {
-				break;
-			}
-		}
-	}
 }
 
 std::string Parser::ToString() const {

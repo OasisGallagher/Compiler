@@ -121,6 +121,33 @@ std::string GrammarSymbolSetTable::ToString() const {
 
 	return oss.str();
 }
+
+void FirstSetTable::GetFirstSet(GrammarSymbolSet& answer, SymbolVector::iterator first, SymbolVector::iterator last) {
+	if (first == last) {
+		answer.insert(GrammarSymbol::epsilon);
+		return;
+	}
+
+	for (; first != last; ++first) {
+		if (first->SymbolType() == GrammarSymbolTerminal) {
+			answer.insert(*first);
+
+			if (*first != GrammarSymbol::epsilon) {
+				break;
+			}
+		}
+		else {
+			Assert(find(*first) != end(), "logic error");
+			GrammarSymbolSet& firstSet = this->at(*first);
+			answer.insert(firstSet.begin(), firstSet.end());
+
+			if (firstSet.find(GrammarSymbol::epsilon) == firstSet.end()) {
+				break;
+			}
+		}
+	}
+}
+
 GrammarSymbol SymbolFactory::Create(const std::string& text) {
 	if (Utility::IsTerminal(text)) {
 		return new TerminalSymbol(text);

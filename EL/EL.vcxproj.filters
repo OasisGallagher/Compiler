@@ -105,6 +105,9 @@
     <ClInclude Include="parser\include\table.h">
       <Filter>parser\include</Filter>
     </ClInclude>
+    <ClInclude Include="parser\include\lr1.h">
+      <Filter>parser\include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="global\src\debug.cpp">
@@ -156,6 +159,9 @@
       <Filter>parser\src</Filter>
     </ClCompile>
     <ClCompile Include="parser\src\table.cpp">
+      <Filter>parser\src</Filter>
+    </ClCompile>
+    <ClCompile Include="parser\src\lr1.cpp">
       <Filter>parser\src</Filter>
     </ClCompile>
   </ItemGroup>

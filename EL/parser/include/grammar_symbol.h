@@ -175,3 +175,8 @@ class GrammarSymbolSetTable : public std::map<GrammarSymbol, GrammarSymbolSet> {
 public:
 	std::string ToString() const;
 };
+
+class FirstSetTable : public GrammarSymbolSetTable {
+public:
+	void GetFirstSet(GrammarSymbolSet& answer, SymbolVector::iterator first, SymbolVector::iterator last);
+};

@@ -94,8 +94,13 @@ bool LRParser::ParseFile(SyntaxTree* tree, FileScanner* fileScanner) {
 }
 
 bool LRParser::ParseGrammars() {
-	lrTable_->Create(&grammars_, &terminalSymbols_, &nonterminalSymbols_);
-	return true;
+	LRSetupParameter parameter = {
+		&grammars_,
+		&terminalSymbols_, &nonterminalSymbols_, 
+		&firstSetContainer_, &followSetContainer_
+	};
+
+	return lrTable_->Create(parameter);
 }
 
 void LRParser::Clear() {

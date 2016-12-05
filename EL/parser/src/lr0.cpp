@@ -8,16 +8,19 @@ LR0::LR0() {
 }
 
 LR0::~LR0() {
-	for (LR0ClosureContainer::iterator ite = lr0Closures_.begin();
-		ite != lr0Closures_.end(); ++ite) {
+	for (LR0ClosureContainer::iterator ite = closures_.begin();
+		ite != closures_.end(); ++ite) {
 		delete ite->second;
 	}
 }
 
-void LR0::Setup(GrammarContainer* grammars, GrammarSymbolContainer* terminalSymbols, GrammarSymbolContainer* nonterminalSymbols) {
-	grammars_ = grammars;
-	terminalSymbols_ = terminalSymbols;
-	nonterminalSymbols_ = nonterminalSymbols;
+void LR0::Setup(const LRSetupParameter& parameter) {
+	grammars_ = parameter.grammars;
+	terminalSymbols_ = parameter.terminalSymbols;
+	nonterminalSymbols_ = parameter.nonterminalSymbols;
+
+	firstSetContainer_ = parameter.firstSetContainer;
+	followSetContainer = parameter.followSetContainer;
 }
 
 bool LR0::Parse(LRGotoTable& gotoTable, LRActionTable& actionTable) {
@@ -29,7 +32,7 @@ bool LR0::Parse(LRGotoTable& gotoTable, LRActionTable& actionTable) {
 }
 
 bool LR0::CreateLRParsingTable(LRGotoTable& gotoTable, LRActionTable& actionTable) {
-	for (LR0Itemsets::iterator ite = lr0Itemsets_.begin(); ite != lr0Itemsets_.end(); ++ite) {
+	for (LR0Itemsets::iterator ite = itemsets_.begin(); ite != itemsets_.end(); ++ite) {
 		LR0Closure* closure = *ite;
 		for (LR0Closure::iterator ite2 = closure->begin(); ite2 != closure->end(); ++ite2) {
 			const LR0Item& item = *ite2;
@@ -49,17 +52,17 @@ std::string LR0::ToString() const {
 	std::ostringstream oss;
 
 	oss << Utility::Heading(" LR0 Closures ") << "\n";
-	oss << lr0Closures_.ToString(*grammars_);
+	oss << closures_.ToString(*grammars_);
 
 	oss << "\n\n";
 
 	oss << Utility::Heading(" LR0 Edges ") << "\n";
-	oss << lr0Edges_.ToString(*grammars_);
+	oss << edges_.ToString(*grammars_);
 
 	oss << "\n\n";
 
 	oss << Utility::Heading(" LR0 Itemsets ") << "\n";
-	oss << lr0Itemsets_.ToString(*grammars_);
+	oss << itemsets_.ToString(*grammars_);
 
 	oss << "\n\n";
 
@@ -85,12 +88,12 @@ std::string LR0::ToString() const {
 	tp.AddHeader();
 
 	int si = 0;
-	for (LR0Itemsets::const_iterator ite = lr0Itemsets_.begin(); ite != lr0Itemsets_.end(); ++ite) {
+	for (LR0Itemsets::const_iterator ite = itemsets_.begin(); ite != itemsets_.end(); ++ite) {
 		tp << si++;
 		LR0Closure* dest = nullptr;
 		for (GrammarSymbolContainer::const_iterator ite2 = terminalSymbols_->begin(); ite2 != terminalSymbols_->end(); ++ite2) {
-			if (lr0Edges_.get(*ite, ite2->second, dest)) {
-				tp << (int)std::distance(lr0Itemsets_.begin(), std::find(lr0Itemsets_.begin(), lr0Itemsets_.end(), dest));
+			if (edges_.get(*ite, ite2->second, dest)) {
+				tp << (int)std::distance(itemsets_.begin(), std::find(itemsets_.begin(), itemsets_.end(), dest));
 			}
 			else {
 				tp << "";
@@ -98,8 +101,8 @@ std::string LR0::ToString() const {
 		}
 
 		for (GrammarSymbolContainer::const_iterator ite2 = nonterminalSymbols_->begin(); ite2 != nonterminalSymbols_->end(); ++ite2) {
-			if (lr0Edges_.get(*ite, ite2->second, dest)) {
-				tp << (int)std::distance(lr0Itemsets_.begin(), std::find(lr0Itemsets_.begin(), lr0Itemsets_.end(), dest));
+			if (edges_.get(*ite, ite2->second, dest)) {
+				tp << (int)std::distance(itemsets_.begin(), std::find(itemsets_.begin(), itemsets_.end(), dest));
 			}
 			else {
 				tp << "";
@@ -116,7 +119,7 @@ std::string LR0::ToString() const {
 
 bool LR0::CreateLR0Itemsets() {
 	LR0Item start = { 0, 0 };
-	lr0Itemsets_.insert(GetLR0Closure(start));
+	itemsets_.insert(GetLR0Closure(start));
 
 	for (; CreateLR0ItemsetsOnePass();) {
 
@@ -126,13 +129,13 @@ bool LR0::CreateLR0Itemsets() {
 }
 
 LR0Closure* LR0::GetLR0Closure(const LR0Item& item) {
-	LR0ClosureContainer::iterator ite = lr0Closures_.find(item);
-	if (ite != lr0Closures_.end()) {
+	LR0ClosureContainer::iterator ite = closures_.find(item);
+	if (ite != closures_.end()) {
 		return ite->second;
 	}
 
 	LR0Closure* answer = CalculateLR0Closure(item);
-	lr0Closures_.insert(std::make_pair(item, answer));
+	closures_.insert(std::make_pair(item, answer));
 	return answer;
 }
 
@@ -147,14 +150,14 @@ LR0Closure* LR0::CalculateLR0Closure(const LR0Item& item) {
 }
 
 LR0Closure* LR0::GetLR0EdgeTarget(LR0Closure* src, const GrammarSymbol& symbol) {
-	LR0EdgeTable::iterator ite = lr0Edges_.find(src, symbol);
-	if (ite != lr0Edges_.end()) {
+	LR0EdgeTable::iterator ite = edges_.find(src, symbol);
+	if (ite != edges_.end()) {
 		return ite->second;
 	}
 
 	LR0Closure* answer = CalculateLR0EdgeTarget(src, symbol);
 	if (answer != nullptr) {
-		lr0Edges_.insert(src, symbol, answer);
+		edges_.insert(src, symbol, answer);
 	}
 
 	return answer;
@@ -208,15 +211,15 @@ bool LR0::CalculateLR0ClosureOnePass(LR0Closure* answer) {
 
 bool LR0::CreateLR0ItemsetsOnePass() {
 	bool setChanged = false;
-	for (LR0Itemsets::iterator ite = lr0Itemsets_.begin(); ite != lr0Itemsets_.end(); ++ite) {
+	for (LR0Itemsets::iterator ite = itemsets_.begin(); ite != itemsets_.end(); ++ite) {
 		for (GrammarSymbolContainer::iterator ite2 = terminalSymbols_->begin(); ite2 != terminalSymbols_->end(); ++ite2) {
 			LR0Closure* target = GetLR0EdgeTarget(*ite, ite2->second);
-			setChanged = (target != nullptr && lr0Itemsets_.insert(target).second) || setChanged;
+			setChanged = (target != nullptr && itemsets_.insert(target).second) || setChanged;
 		}
 
 		for (GrammarSymbolContainer::iterator ite2 = nonterminalSymbols_->begin(); ite2 != nonterminalSymbols_->end(); ++ite2) {
 			LR0Closure* target = GetLR0EdgeTarget(*ite, ite2->second);
-			setChanged = (target != nullptr && lr0Itemsets_.insert(target).second) || setChanged;
+			setChanged = (target != nullptr && itemsets_.insert(target).second) || setChanged;
 		}
 	}
 

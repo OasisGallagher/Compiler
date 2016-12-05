@@ -1,17 +1,19 @@
 #include "lr0.h"
+#include "lr1.h"
+
 #include "lr_table.h"
 #include "grammar_symbol.h"
 
 LRTable::LRTable() {
-	impl_ = new LR0();
+	impl_ = new LR1();
 }
 
 LRTable::~LRTable() {
 	delete impl_;
 }
 
-bool LRTable::Create(GrammarContainer* grammars, GrammarSymbolContainer* terminalSymbols, GrammarSymbolContainer* nonterminalSymbols) {
-	impl_->Setup(grammars, terminalSymbols, nonterminalSymbols);
+bool LRTable::Create(const LRSetupParameter& parameter) {
+	impl_->Setup(parameter);
 	return impl_->Parse(gotoTable_, actionTable_);
 }
 

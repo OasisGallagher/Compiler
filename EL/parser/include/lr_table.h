@@ -8,7 +8,7 @@ public:
 	~LRTable();
 
 public:
-	bool Create(GrammarContainer* grammars, GrammarSymbolContainer* terminalSymbols, GrammarSymbolContainer* nonterminalSymbols);
+	bool Create(const LRSetupParameter& parameter);
 
 	LRAction GetAction(int state, const GrammarSymbol& symbol);
 	int GetNextState(int state, const GrammarSymbol& symbol);

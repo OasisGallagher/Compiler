@@ -36,15 +36,13 @@ protected:
 	void CreateFirstSets();
 	void CreateFollowSets();
 
-	void GetFirstSet(GrammarSymbolSet& answer, SymbolVector::iterator first, SymbolVector::iterator last);
-
 protected:
 	GrammarContainer grammars_;
 	GrammarSymbolContainer terminalSymbols_;
 	GrammarSymbolContainer nonterminalSymbols_;
 
 	// VnµÄfirst/follow¼¯ºÏ.
-	GrammarSymbolSetTable firstSetContainer_;
+	FirstSetTable firstSetContainer_;
 	GrammarSymbolSetTable followSetContainer_;
 
 private:
