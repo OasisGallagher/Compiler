@@ -1,17 +1,13 @@
 #include <sstream>
+#include <algorithm>
 
 #include "lr1.h"
 #include "table_printer.h"
 
 LR1::LR1() {
-
 }
 
 LR1::~LR1() {
-	for (LR1ClosureContainer::iterator ite = closures_.begin();
-		ite != closures_.end(); ++ite) {
-		delete ite->second;
-	}
 }
 
 void LR1::Setup(const LRSetupParameter& parameter) {
@@ -33,8 +29,8 @@ bool LR1::Parse(LRGotoTable& gotoTable, LRActionTable& actionTable) {
 
 bool LR1::CreateLRParsingTable(LRGotoTable& gotoTable, LRActionTable& actionTable) {
 	for (LR1Itemsets::iterator ite = itemsets_.begin(); ite != itemsets_.end(); ++ite) {
-		LR1Closure* closure = *ite;
-		for (LR1Closure::iterator ite2 = closure->begin(); ite2 != closure->end(); ++ite2) {
+		const LR1Closure& closure = *ite;
+		for (LR1Closure::const_iterator ite2 = closure.begin(); ite2 != closure.end(); ++ite2) {
 			const LR1Item& item = *ite2;
 			const Condinate* cond = grammars_->GetTargetCondinate(item.cpos, nullptr);
 
@@ -50,11 +46,6 @@ bool LR1::CreateLRParsingTable(LRGotoTable& gotoTable, LRActionTable& actionTabl
 
 std::string LR1::ToString() const {
 	std::ostringstream oss;
-
-	oss << Utility::Heading(" LR1 Closures ") << "\n";
-	oss << closures_.ToString(*grammars_);
-
-	oss << "\n\n";
 
 	oss << Utility::Heading(" LR1 Edges ") << "\n";
 	oss << edges_.ToString(*grammars_);
@@ -90,7 +81,7 @@ std::string LR1::ToString() const {
 	int si = 0;
 	for (LR1Itemsets::const_iterator ite = itemsets_.begin(); ite != itemsets_.end(); ++ite) {
 		tp << si++;
-		LR1Closure* dest = nullptr;
+		LR1Closure dest;
 		for (GrammarSymbolContainer::const_iterator ite2 = terminalSymbols_->begin(); ite2 != terminalSymbols_->end(); ++ite2) {
 			if (edges_.get(*ite, ite2->second, dest)) {
 				tp << (int)std::distance(itemsets_.begin(), std::find(itemsets_.begin(), itemsets_.end(), dest));
@@ -119,7 +110,12 @@ std::string LR1::ToString() const {
 
 bool LR1::CreateLR1Itemsets() {
 	LR1Item start = { 0, 0, GrammarSymbol::zero };
-	itemsets_.insert(GetLR1Closure(start));
+	
+	LR1Closure closure;
+	closure.insert(start);
+	CalculateLR1Closure(closure);
+
+	itemsets_.insert(closure);
 
 	for (; CreateLR1ItemsetsOnePass();) {
 
@@ -128,62 +124,49 @@ bool LR1::CreateLR1Itemsets() {
 	return true;
 }
 
-LR1Closure* LR1::GetLR1Closure(const LR1Item& item) {
-	LR1ClosureContainer::iterator ite = closures_.find(item);
-	if (ite != closures_.end()) {
-		return ite->second;
-	}
-
-	LR1Closure* answer = CalculateLR1Closure(item);
-	closures_.insert(std::make_pair(item, answer));
-	return answer;
-}
-
-LR1Closure* LR1::CalculateLR1Closure(const LR1Item& item) {
-	LR1Closure* answer = new LR1Closure();
-	answer->insert(item);
-
+void LR1::CalculateLR1Closure(LR1Closure& answer) {
 	for (; CalculateLR1ClosureOnePass(answer);) {
 	}
-
-	return answer;
 }
 
-LR1Closure* LR1::GetLR1EdgeTarget(LR1Closure* src, const GrammarSymbol& symbol) {
-	LR1EdgeTable::iterator ite = edges_.find(src, symbol);
-	if (ite != edges_.end()) {
-		return ite->second;
+bool LR1::GetLR1EdgeTarget(LR1Closure& answer, const LR1Closure& src, const GrammarSymbol& symbol) {
+	LR1EdgeTable::iterator pos = edges_.find(src, symbol);
+	if (pos != edges_.end()) {
+		answer = pos->second;
+		return true;
 	}
 
-	LR1Closure* answer = CalculateLR1EdgeTarget(src, symbol);
-	if (answer != nullptr) {
+	CalculateLR1EdgeTarget(answer, src, symbol);
+	if (!answer.empty()) {
 		edges_.insert(src, symbol, answer);
+		return true;
 	}
 
-	return answer;
+	return false;
 }
 
-LR1Closure* LR1::CalculateLR1EdgeTarget(LR1Closure* src, const GrammarSymbol& symbol) {
-	LR1Closure* answer = nullptr;
-	for (LR1Closure::const_iterator ite = src->begin(); ite != src->end(); ++ite) {
+void LR1::CalculateLR1EdgeTarget(LR1Closure& answer, const LR1Closure& src, const GrammarSymbol& symbol) {
+	for (LR1Closure::const_iterator ite = src.begin(); ite != src.end(); ++ite) {
 		const Condinate* cond = grammars_->GetTargetCondinate(ite->cpos, nullptr);
 		SymbolVector::const_iterator pos = std::find(cond->symbols.begin(), cond->symbols.end(), symbol);
-		if (pos == cond->symbols.end() || ite->dpos != (int)std::distance(cond->symbols.begin(), pos)) {
+		if (pos == cond->symbols.end()) {
 			continue;
 		}
 
-		Assert(answer == nullptr, "closure is not unique");
+		if (ite->dpos != (int)std::distance(cond->symbols.begin(), pos)) {
+			continue;
+		}
 
 		LR1Item item = { ite->cpos, ite->dpos + 1, ite->forward };
-		answer = GetLR1Closure(item);
+		answer.insert(item);
 	}
 
-	return answer;
+	CalculateLR1Closure(answer);
 }
 
-bool LR1::CalculateLR1ClosureOnePass(LR1Closure* answer) {
+bool LR1::CalculateLR1ClosureOnePass(LR1Closure& answer) {
 	bool setChanged = false;
-	for (LR1Closure::iterator ite = answer->begin(); ite != answer->end(); ++ite) {
+	for (LR1Closure::iterator ite = answer.begin(); ite != answer.end(); ++ite) {
 		const LR1Item& current = *ite;
 		const Condinate* cond = grammars_->GetTargetCondinate(current.cpos, nullptr);
 		if (current.dpos >= (int)cond->symbols.size()) {
@@ -213,6 +196,7 @@ bool LR1::CalculateLR1ClosureOnePass(LR1Closure* answer) {
 			int index = 0;
 			for (CondinateContainer::const_iterator ite3 = conds.begin(); ite3 != conds.end(); ++ite3, ++index) {
 				LR1Item newItem = { Utility::MakeDword(index, gi), 0, *ite2 };
+				setChanged = answer.insert(newItem) || setChanged;
 			}
 		}
 	}
@@ -222,15 +206,20 @@ bool LR1::CalculateLR1ClosureOnePass(LR1Closure* answer) {
 
 bool LR1::CreateLR1ItemsetsOnePass() {
 	bool setChanged = false;
+	
 	for (LR1Itemsets::iterator ite = itemsets_.begin(); ite != itemsets_.end(); ++ite) {
 		for (GrammarSymbolContainer::iterator ite2 = terminalSymbols_->begin(); ite2 != terminalSymbols_->end(); ++ite2) {
-			LR1Closure* target = GetLR1EdgeTarget(*ite, ite2->second);
-			setChanged = (target != nullptr && itemsets_.insert(target).second) || setChanged;
+			LR1Closure closure;
+			if (GetLR1EdgeTarget(closure, *ite, ite2->second)) {
+				setChanged = itemsets_.insert(closure).second || setChanged;
+			}
 		}
 
 		for (GrammarSymbolContainer::iterator ite2 = nonterminalSymbols_->begin(); ite2 != nonterminalSymbols_->end(); ++ite2) {
-			LR1Closure* target = GetLR1EdgeTarget(*ite, ite2->second);
-			setChanged = (target != nullptr && itemsets_.insert(target).second) || setChanged;
+			LR1Closure closure;
+			if (GetLR1EdgeTarget(closure, *ite, ite2->second)) {
+				setChanged = itemsets_.insert(closure).second || setChanged;
+			}
 		}
 	}
 
@@ -239,10 +228,18 @@ bool LR1::CreateLR1ItemsetsOnePass() {
 
 bool LR1Item::operator < (const LR1Item& other) const {
 	if (cpos == other.cpos) {
+		if (dpos == other.dpos) {
+			return forward < other.forward;
+		}
+
 		return dpos < other.dpos;
 	}
 
 	return cpos < other.cpos;
+}
+
+bool LR1Item::operator ==(const LR1Item& other) const {
+	return cpos == other.cpos && dpos == other.dpos && forward == other.forward;
 }
 
 std::string LR1Item::ToString(const GrammarContainer& grammars) const {
@@ -269,7 +266,94 @@ std::string LR1Item::ToString(const GrammarContainer& grammars) const {
 		oss << seperator << "¡¤";
 	}
 
+	oss << ", " << forward.ToString();
+
 	return oss.str();
+}
+
+LR1Closure::LR1Closure() {
+	impl_ = new LR1ClosureImpl();
+}
+
+LR1Closure::LR1Closure(const LR1Closure& other) {
+	impl_ = other.impl_;
+	if (impl_ != nullptr) {
+		impl_->IncRefCount();
+	}
+}
+
+LR1Closure::~LR1Closure() {
+	if (impl_ != nullptr && impl_->DecRefCount() == 0) {
+		delete impl_;
+	}
+}
+
+LR1Closure& LR1Closure::operator = (const LR1Closure& other) {
+	if (other.impl_ != nullptr) {
+		other.impl_->IncRefCount();
+	}
+
+	if (impl_ != nullptr && impl_->DecRefCount() == 0) {
+		delete impl_;
+	}
+
+	impl_ = other.impl_;
+
+	return *this;
+}
+
+LR1Closure::iterator LR1Closure::begin() {
+	return impl_->begin();
+}
+
+LR1Closure::const_iterator LR1Closure::begin() const {
+	return impl_->begin();
+}
+
+LR1Closure::iterator LR1Closure::end() {
+	return impl_->end();
+}
+
+LR1Closure::const_iterator LR1Closure::end() const {
+	return impl_->end();
+}
+
+void LR1Closure::clear() {
+	impl_->clear();
+}
+
+bool LR1Closure::empty() const {
+	return impl_->empty();
+}
+
+bool LR1Closure::insert(const LR1Item& item) {
+	return impl_->insert(item).second;
+}
+
+bool LR1Closure::operator < (const LR1Closure& other) const {
+	const_iterator first1 = begin(), first2 = other.begin();
+	for (; first1 != end() && first2 != other.end(); ++first1, ++first2) {
+		if (!(*first1 == *first2)) {
+			return *first1 < *first2;
+		}
+	}
+
+	if (first1 == end() && first2 == other.end()) {
+		return false;
+	}
+
+	return first1 == end();
+}
+
+bool LR1Closure::operator == (const LR1Closure& other) const {
+	const_iterator first1 = begin(), first2 = other.begin();
+	for (; first1 != end() && first2 != other.end(); ++first1, ++first2) {
+		if (!(*first1 == *first2)) {
+			return false;
+		}
+	}
+
+	return first1 == end() && first2 == other.end();
 }
 
 std::string LR1Closure::ToString(const GrammarContainer& grammars) const {
@@ -292,7 +376,7 @@ std::string LR1Itemsets::ToString(const GrammarContainer& grammars) const {
 	for (const_iterator ite = begin(); ite != end(); ++ite) {
 		oss << seperator;
 		seperator = "\n";
-		oss << "(" << index++ << ")\t" << " { " << (*ite)->ToString(grammars) << " }";
+		oss << "(" << index++ << ")\t" << " { " << (*ite).ToString(grammars) << " }";
 	}
 
 	return oss.str();
@@ -307,7 +391,7 @@ std::string LR1ClosureContainer::ToString(const GrammarContainer& grammars) cons
 
 		oss << "{ " << ite->first.ToString(grammars) << " }";
 		oss << " => ";
-		oss << "{ " << (ite->second)->ToString(grammars) << " }";
+		oss << "{ " << ite->second.ToString(grammars) << " }";
 	}
 
 	return oss.str();
@@ -321,18 +405,18 @@ std::string LR1EdgeTable::ToString(const GrammarContainer& grammars) const {
 		oss << seperator;
 		seperator = "\n";
 
-		LR1Closure* src = ite->first.first;
+		const LR1Closure& src = ite->first.first;
 		const GrammarSymbol& symbol = ite->first.second;
-		LR1Closure* dest = ite->second;
+		const LR1Closure& dest = ite->second;
 
 		oss << "( ";
-		oss << src->ToString(grammars);
+		oss << src.ToString(grammars);
 		oss << ", ";
 		oss << symbol.ToString();
 		oss << " )";
 
 		oss << " => ";
-		oss << "{ " << dest->ToString(grammars) << " }";
+		oss << "{ " << dest.ToString(grammars) << " }";
 	}
 
 	return oss.str();

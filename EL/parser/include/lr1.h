@@ -11,25 +11,61 @@ struct LR1Item {
 	GrammarSymbol forward;
 
 	bool operator < (const LR1Item& other) const;
+	bool operator == (const LR1Item& other) const;
+
 	std::string ToString(const GrammarContainer& grammars) const;
 };
 
-class LR1Closure : public std::set<LR1Item> {
+class LR1ClosureImpl : public RefCountable, public std::set<LR1Item> {
+	friend class LR1Closure;
+};
+
+class LR1Closure {
+public:
+	LR1Closure();
+	LR1Closure(const LR1Closure& other);
+
+	~LR1Closure();
+
+public:
+	typedef LR1ClosureImpl::iterator iterator;
+	typedef LR1ClosureImpl::const_iterator const_iterator;
+
+public:
+	iterator begin();
+	iterator end();
+	const_iterator begin() const;
+	const_iterator end() const;
+
+	void clear();
+	bool empty() const;
+	bool insert(const LR1Item& item);
+
+public:
+	LR1Closure& LR1Closure::operator = (const LR1Closure& other);
+
+public:
+	bool operator < (const LR1Closure& other) const;
+	bool operator == (const LR1Closure& other) const;
+
+public:
+	std::string ToString(const GrammarContainer& grammars) const;
+
+private:
+	LR1ClosureImpl* impl_;
+};
+
+class LR1Itemsets : public std::set<LR1Closure> {
 public:
 	std::string ToString(const GrammarContainer& grammars) const;
 };
 
-class LR1Itemsets : public std::set<LR1Closure*> {
+class LR1ClosureContainer : public std::map<LR1Item, LR1Closure> {
 public:
 	std::string ToString(const GrammarContainer& grammars) const;
 };
 
-class LR1ClosureContainer : public std::map<LR1Item, LR1Closure*> {
-public:
-	std::string ToString(const GrammarContainer& grammars) const;
-};
-
-class LR1EdgeTable : public matrix<LR1Closure*, GrammarSymbol, LR1Closure*> {
+class LR1EdgeTable : public matrix<LR1Closure, GrammarSymbol, LR1Closure> {
 public:
 	std::string ToString(const GrammarContainer& grammars) const;
 };
@@ -54,12 +90,11 @@ private:
 
 	bool CreateLR1ItemsetsOnePass();
 
-	LR1Closure* GetLR1Closure(const LR1Item& item);
-	LR1Closure* CalculateLR1Closure(const LR1Item& item);
-	bool CalculateLR1ClosureOnePass(LR1Closure* answer);
+	void CalculateLR1Closure(LR1Closure& answer);
+	bool CalculateLR1ClosureOnePass(LR1Closure& answer);
 
-	LR1Closure* GetLR1EdgeTarget(LR1Closure* src, const GrammarSymbol& symbol);
-	LR1Closure* CalculateLR1EdgeTarget(LR1Closure* src, const GrammarSymbol& symbol);
+	bool GetLR1EdgeTarget(LR1Closure& answer, const LR1Closure& src, const GrammarSymbol& symbol);
+	void CalculateLR1EdgeTarget(LR1Closure& answer, const LR1Closure& src, const GrammarSymbol& symbol);
 
 private:
 	GrammarContainer* grammars_;
@@ -70,6 +105,5 @@ private:
 	GrammarSymbolSetTable* followSetContainer;
 
 	LR1EdgeTable edges_;
-	LR1ClosureContainer closures_;
 	LR1Itemsets itemsets_;
 };

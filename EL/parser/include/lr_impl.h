@@ -1,6 +1,8 @@
 #pragma once
 #include "matrix.h"
 
+class FirstSetTable;
+
 class GrammarSymbol;
 class GrammarContainer;
 class GrammarSymbolSetTable;

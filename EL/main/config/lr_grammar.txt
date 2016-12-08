@@ -2,10 +2,8 @@ $SPlus
 	: $S
 
 $S
-	: $B $B
+	: $C $C
 
-$B
-	: a$B
-
-$B
-	: b	
+$C
+	: c $C
+	| d

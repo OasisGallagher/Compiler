@@ -49,8 +49,8 @@ public:
 		return true;
 	}
 
-	void insert(const first_key_type& k1, const second_key_type& k2, const value_type& val) {
-		cont_.insert(std::make_pair(std::make_pair(k1, k2), val));
+	bool insert(const first_key_type& k1, const second_key_type& k2, const value_type& val) {
+		return cont_.insert(std::make_pair(std::make_pair(k1, k2), val)).second;
 	}
 
 	iterator find(const first_key_type& k1, const second_key_type& k2) {

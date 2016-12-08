@@ -85,6 +85,9 @@ bool Parser::SetGrammars(const char* productions) {
 		}
 	}
 
+	CreateFirstSets();
+	CreateFollowSets();
+
 	return ParseGrammars();
 }
 
