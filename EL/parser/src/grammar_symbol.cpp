@@ -1,8 +1,10 @@
 #include <sstream>
+
+#include "debug.h"
 #include "token.h"
 #include "grammar_symbol.h"
 
-GrammarSymbol GrammarSymbol::null;
+GrammarSymbol GrammarSymbol::null = nullptr;
 GrammarSymbol GrammarSymbol::zero = new Zero();
 GrammarSymbol GrammarSymbol::number = new Number();
 GrammarSymbol GrammarSymbol::string = new String();
@@ -13,70 +15,39 @@ GrammarSymbol GrammarSymbol::negative = new Negative();
 GrammarSymbol GrammarSymbol::identifier = new Identifier();
 
 GrammarSymbol::GrammarSymbol()
-	: symbol_(nullptr) {
-}
-
-GrammarSymbol::GrammarSymbol(GrammarSymbolBase* symbol)
-	: symbol_(symbol) {
-}
-
-GrammarSymbol::GrammarSymbol(const GrammarSymbol& other) {
-	symbol_ = other.symbol_;
-	if (symbol_ != nullptr) {
-		symbol_->IncRefCount();
-	}
-}
-
-GrammarSymbol& GrammarSymbol::operator=(const GrammarSymbol& other) {
-	if (other.symbol_ != nullptr) {
-		other.symbol_->IncRefCount();
-	}
-
-	if (symbol_ != nullptr && symbol_->DecRefCount() == 0) {
-		delete symbol_;
-	}
-
-	symbol_ = other.symbol_;
-
-	return *this;
-}
-
-GrammarSymbol::~GrammarSymbol() {
-	if (symbol_ != nullptr && symbol_->DecRefCount() == 0) {
-		delete symbol_;
-	}
+	: ptr_(nullptr) {
 }
 
 GrammarSymbol::operator bool() const {
-	return symbol_ != nullptr;
+	return ptr_ != nullptr;
 }
 
 bool GrammarSymbol::operator == (const GrammarSymbol& other) const {
-	return symbol_ == other.symbol_;
+	return ptr_ == other.ptr_;
 }
 
 bool GrammarSymbol::operator != (const GrammarSymbol& other) const {
-	return symbol_ != other.symbol_;
+	return ptr_ != other.ptr_;
 }
 
 bool GrammarSymbol::operator < (const GrammarSymbol& other) const {
-	return symbol_ < other.symbol_;
+	return ptr_ < other.ptr_;
 }
 
 bool GrammarSymbol::operator >(const GrammarSymbol& other) const {
-	return symbol_ > other.symbol_;
+	return ptr_ > other.ptr_;
 }
 
 GrammarSymbolType GrammarSymbol::SymbolType() const {
-	return symbol_->SymbolType();
+	return ptr_->SymbolType();
 }
 
 bool GrammarSymbol::Match(const ScannerToken& token) const {
-	return symbol_->Match(token);
+	return ptr_->Match(token);
 }
 
 std::string GrammarSymbol::ToString() const {
-	return symbol_->ToString();
+	return ptr_->ToString();
 }
 
 std::string GrammarSymbolContainer::ToString() const {

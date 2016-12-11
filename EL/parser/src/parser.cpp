@@ -43,7 +43,7 @@ GrammarSymbol Parser::CreateSymbol(const std::string& text) {
 	}
 
 	GrammarSymbolContainer::iterator ite = target->find(text);
-	GrammarSymbol ans;
+	GrammarSymbol ans = nullptr;
 
 	if (ite == target->end()) {
 		ans = SymbolFactory::Create(text);

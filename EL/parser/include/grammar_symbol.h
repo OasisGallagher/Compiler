@@ -12,7 +12,7 @@ enum GrammarSymbolType {
 
 struct ScannerToken;
 
-class GrammarSymbolBase : public RefCountable {
+class GrammarSymbolBase {
 public:
 	friend class GrammarSymbol;
 	friend class SymbolFactory;
@@ -126,15 +126,13 @@ public:
 };
 
 class GrammarSymbol {
+	IMPLEMENT_REFERENCE_COUNTABLE(GrammarSymbol, GrammarSymbolBase);
+
 public:
 	GrammarSymbol();
-	GrammarSymbol(GrammarSymbolBase* symbol);
-	GrammarSymbol(const GrammarSymbol& other);
-	~GrammarSymbol();
 
 public:
 	operator bool() const;
-	GrammarSymbol& operator = (const GrammarSymbol& other);
 
 public:
 	bool operator == (const GrammarSymbol& other) const;
@@ -164,9 +162,6 @@ private:
 	// GrammarSymbol不可以通过new分配.
 	void* operator new(size_t);
 #pragma pop_macro("new")
-
-private:
-	GrammarSymbolBase* symbol_;
 };
 
 typedef std::set<GrammarSymbol> GrammarSymbolSet;

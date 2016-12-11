@@ -1,6 +1,7 @@
 #include <sstream>
 
 #include "lr0.h"
+#include "debug.h"
 #include "table_printer.h"
 
 LR0::LR0() {

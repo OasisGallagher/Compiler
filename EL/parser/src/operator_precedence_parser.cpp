@@ -2,6 +2,7 @@
 #include <sstream>
 #include <algorithm>
 
+#include "debug.h"
 #include "action.h"
 #include "matrix.h"
 #include "scanner.h"
@@ -168,7 +169,7 @@ GrammarSymbol OperatorPrecedenceParser::Reduce(Iterator first, Iterator last, Co
 }
 
 bool OperatorPrecedenceParser::ParseFile(SyntaxTree* tree, FileScanner* fileScanner) {
-	std::vector<GrammarSymbol> symbolStack;
+	SymbolVector symbolStack;
 	std::vector<void*> valueStack;
 
 	symbolStack.push_back(GrammarSymbol::zero);
@@ -181,7 +182,7 @@ bool OperatorPrecedenceParser::ParseFile(SyntaxTree* tree, FileScanner* fileScan
 
 	int reduceCount = 0;
 
-	GrammarSymbol a;
+	GrammarSymbol a = nullptr;
 	void* addr = nullptr;
 
 	do {
@@ -200,7 +201,7 @@ bool OperatorPrecedenceParser::ParseFile(SyntaxTree* tree, FileScanner* fileScan
 		OperatorPrecedence precedence = OperatorPrecedenceUndefined;
 
 		for (; GetPrecedence(symbolStack[j], a) == OperatorPrecedenceGreater;) {
-			GrammarSymbol q;
+			GrammarSymbol q = nullptr;
 			do {
 				q = symbolStack[j];
 				j -= (symbolStack[j - 1].SymbolType() == GrammarSymbolTerminal) ? 1 : 2;

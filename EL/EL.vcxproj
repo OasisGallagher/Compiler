@@ -38,6 +38,7 @@
   <ItemGroup>
     <ClCompile Include="global\src\debug.cpp" />
     <ClCompile Include="global\src\reader.cpp" />
+    <ClCompile Include="global\src\reference_countable.cpp" />
     <ClCompile Include="global\src\table_printer.cpp" />
     <ClCompile Include="global\src\utilities.cpp" />
     <ClCompile Include="main\src\main.cpp" />

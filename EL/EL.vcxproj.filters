@@ -164,5 +164,8 @@
     <ClCompile Include="parser\src\lr1.cpp">
       <Filter>parser\src</Filter>
     </ClCompile>
+    <ClCompile Include="global\src\reference_countable.cpp">
+      <Filter>global\src</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

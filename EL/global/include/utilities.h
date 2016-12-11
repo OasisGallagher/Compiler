@@ -21,6 +21,9 @@ public:
 	static bool IsDigit(int c);
 	static bool IsLetter(int c);
 
+	template <class Iterator, class Comp>
+	static Iterator FindGroup(Iterator first, Iterator last, const Comp& comp);
+
 	template <class Iterator>
 	static std::string Concat(Iterator first, Iterator last, const char* seperator = " ");
 
@@ -65,4 +68,16 @@ std::string Utility::Concat(Iterator first, Iterator last, const char* seperator
 	}
 
 	return oss.str();
+}
+
+template <class Iterator, class Comp>
+Iterator Utility::FindGroup(Iterator first, Iterator last, const Comp& comp) {
+	Iterator current = first;
+	for (; ++current != last;) {
+		if (!comp(*first, *current)) {
+			return current;
+		}
+	}
+
+	return current;
 }

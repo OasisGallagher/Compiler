@@ -17,42 +17,36 @@ $C
 $C $S $SPlus
 
 ================== LR1 Edges ===================
-( { $SPlus : ， $S, zero }, { $S : ， $C $C, zero }, { $C : ， c $C, c }, { $C : ， c $C, d }, { $C : ， d, c }, { $C : ， d, d }, $S ) => { { $SPlus : $S ，, zero } }
-( { $SPlus : ， $S, zero }, { $S : ， $C $C, zero }, { $C : ， c $C, c }, { $C : ， c $C, d }, { $C : ， d, c }, { $C : ， d, d }, $C ) => { { $S : $C ， $C, zero }, { $C : ， c $C, zero }, { $C : ， d, zero } }
-( { $SPlus : ， $S, zero }, { $S : ， $C $C, zero }, { $C : ， c $C, c }, { $C : ， c $C, d }, { $C : ， d, c }, { $C : ， d, d }, c ) => { { $C : ， c $C, c }, { $C : ， c $C, d }, { $C : c ， $C, c }, { $C : c ， $C, d }, { $C : ， d, c }, { $C : ， d, d } }
-( { $SPlus : ， $S, zero }, { $S : ， $C $C, zero }, { $C : ， c $C, c }, { $C : ， c $C, d }, { $C : ， d, c }, { $C : ， d, d }, d ) => { { $C : d ，, c }, { $C : d ，, d } }
-( { $S : $C ， $C, zero }, { $C : ， c $C, zero }, { $C : ， d, zero }, c ) => { { $C : ， c $C, zero }, { $C : c ， $C, zero }, { $C : ， d, zero } }
-( { $S : $C ， $C, zero }, { $C : ， c $C, zero }, { $C : ， d, zero }, d ) => { { $C : d ，, zero } }
-( { $C : ， c $C, zero }, { $C : c ， $C, zero }, { $C : ， d, zero }, $C ) => { { $C : c $C ，, zero } }
-( { $C : ， c $C, zero }, { $C : c ， $C, zero }, { $C : ， d, zero }, c ) => { { $C : ， c $C, zero }, { $C : c ， $C, zero }, { $C : ， d, zero } }
-( { $C : ， c $C, zero }, { $C : c ， $C, zero }, { $C : ， d, zero }, d ) => { { $C : d ，, zero } }
-( { $C : ， c $C, c }, { $C : ， c $C, d }, { $C : c ， $C, c }, { $C : c ， $C, d }, { $C : ， d, c }, { $C : ， d, d }, $C ) => { { $C : c $C ，, c }, { $C : c $C ，, d } }
-( { $C : ， c $C, c }, { $C : ， c $C, d }, { $C : c ， $C, c }, { $C : c ， $C, d }, { $C : ， d, c }, { $C : ， d, d }, c ) => { { $C : ， c $C, c }, { $C : ， c $C, d }, { $C : c ， $C, c }, { $C : c ， $C, d }, { $C : ， d, c }, { $C : ， d, d } }
-( { $C : ， c $C, c }, { $C : ， c $C, d }, { $C : c ， $C, c }, { $C : c ， $C, d }, { $C : ， d, c }, { $C : ， d, d }, d ) => { { $C : d ，, c }, { $C : d ，, d } }
+( { { $SPlus : ， $S, zero }, { $S : ， $C $C, zero }, { $C : ， c $C, c }, { $C : ， c $C, d }, { $C : ， d, c }, { $C : ， d, d } }, $S ) => { { { $SPlus : $S ，, zero } } }
+( { { $SPlus : ， $S, zero }, { $S : ， $C $C, zero }, { $C : ， c $C, c }, { $C : ， c $C, d }, { $C : ， d, c }, { $C : ， d, d } }, $C ) => { { { $S : $C ， $C, zero }, { $C : ， c $C, zero }, { $C : ， d, zero } } }
+( { { $SPlus : ， $S, zero }, { $S : ， $C $C, zero }, { $C : ， c $C, c }, { $C : ， c $C, d }, { $C : ， d, c }, { $C : ， d, d } }, c ) => { { { $C : ， c $C, c }, { $C : ， c $C, d }, { $C : c ， $C, c }, { $C : c ， $C, d }, { $C : ， d, c }, { $C : ， d, d } } }
+( { { $SPlus : ， $S, zero }, { $S : ， $C $C, zero }, { $C : ， c $C, c }, { $C : ， c $C, d }, { $C : ， d, c }, { $C : ， d, d } }, d ) => { { { $C : d ，, c }, { $C : d ，, d } } }
+( { { $S : $C ， $C, zero }, { $C : ， c $C, zero }, { $C : ， d, zero } }, c ) => { { { $C : ， c $C, zero }, { $C : c ， $C, zero }, { $C : ， d, zero } } }
+( { { $S : $C ， $C, zero }, { $C : ， c $C, zero }, { $C : ， d, zero } }, d ) => { { { $C : d ，, zero } } }
+( { { $C : ， c $C, zero }, { $C : c ， $C, zero }, { $C : ， d, zero } }, $C ) => { { { $C : c $C ，, zero } } }
+( { { $C : ， c $C, zero }, { $C : c ， $C, zero }, { $C : ， d, zero } }, c ) => { { { $C : ， c $C, zero }, { $C : c ， $C, zero }, { $C : ， d, zero } } }
+( { { $C : ， c $C, zero }, { $C : c ， $C, zero }, { $C : ， d, zero } }, d ) => { { { $C : d ，, zero } } }
+( { { $C : ， c $C, c }, { $C : ， c $C, d }, { $C : c ， $C, c }, { $C : c ， $C, d }, { $C : ， d, c }, { $C : ， d, d } }, $C ) => { { { $C : c $C ，, c }, { $C : c $C ，, d } } }
+( { { $C : ， c $C, c }, { $C : ， c $C, d }, { $C : c ， $C, c }, { $C : c ， $C, d }, { $C : ， d, c }, { $C : ， d, d } }, c ) => { { { $C : ， c $C, c }, { $C : ， c $C, d }, { $C : c ， $C, c }, { $C : c ， $C, d }, { $C : ， d, c }, { $C : ， d, d } } }
+( { { $C : ， c $C, c }, { $C : ， c $C, d }, { $C : c ， $C, c }, { $C : c ， $C, d }, { $C : ， d, c }, { $C : ， d, d } }, d ) => { { { $C : d ，, c }, { $C : d ，, d } } }
 
 ================= LR1 Itemsets =================
-(0)	 { { $SPlus : ， $S, zero }, { $S : ， $C $C, zero }, { $C : ， c $C, c }, { $C : ， c $C, d }, { $C : ， d, c }, { $C : ， d, d } }
-(1)	 { { $SPlus : $S ，, zero } }
-(2)	 { { $S : $C ， $C, zero }, { $C : ， c $C, zero }, { $C : ， d, zero } }
-(3)	 { { $C : ， c $C, zero }, { $C : c ， $C, zero }, { $C : ， d, zero } }
-(4)	 { { $C : ， c $C, c }, { $C : ， c $C, d }, { $C : c ， $C, c }, { $C : c ， $C, d }, { $C : ， d, c }, { $C : ， d, d } }
-(5)	 { { $C : c $C ，, zero } }
-(6)	 { { $C : c $C ，, c }, { $C : c $C ，, d } }
-(7)	 { { $C : d ，, zero } }
-(8)	 { { $C : d ，, c }, { $C : d ，, d } }
+(0)	{ { $SPlus : ， $S, ( zero ) }, { $S : ， $C $C, ( zero ) }, { $C : ， c $C, ( c/d ) }, { $C : ， d, ( c/d ) } }
+(1)	{ { $SPlus : $S ，, ( zero ) } }
+(2)	{ { $S : $C ， $C, ( zero ) }, { $C : ， c $C, ( zero ) }, { $C : ， d, ( zero ) } }
+(3)	{ { $C : ， c $C, ( zero/c/d ) }, { $C : c ， $C, ( zero/c/d ) }, { $C : ， d, ( zero/c/d ) } }
+(4)	{ { $C : c $C ，, ( zero/c/d ) } }
+(5)	{ { $C : d ，, ( zero/c/d ) } }
 
 =================== LR1 DFA ====================
 +-----------------------------------------------------------------------------------------------------------+
 |            |  0+|  0-|  c|  d|  epsilon|  identifier|  newline|  number|  string|  zero|  $C|  $S|  $SPlus|
 +-----------------------------------------------------------------------------------------------------------+
-|           0|    |    |  4|  8|         |            |         |        |        |      |   2|   1|        |
+|           0|    |    |   |   |         |            |         |        |        |      |    |    |        |
 |           1|    |    |   |   |         |            |         |        |        |      |    |    |        |
-|           2|    |    |  3|  7|         |            |         |        |        |      |    |    |        |
-|           3|    |    |  3|  7|         |            |         |        |        |      |   5|    |        |
-|           4|    |    |  4|  8|         |            |         |        |        |      |   6|    |        |
+|           2|    |    |   |   |         |            |         |        |        |      |    |    |        |
+|           3|    |    |   |   |         |            |         |        |        |      |    |    |        |
+|           4|    |    |   |   |         |            |         |        |        |      |    |    |        |
 |           5|    |    |   |   |         |            |         |        |        |      |    |    |        |
-|           6|    |    |   |   |         |            |         |        |        |      |    |    |        |
-|           7|    |    |   |   |         |            |         |        |        |      |    |    |        |
-|           8|    |    |   |   |         |            |         |        |        |      |    |    |        |
 +-----------------------------------------------------------------------------------------------------------+
 

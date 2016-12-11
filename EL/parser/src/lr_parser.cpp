@@ -1,3 +1,4 @@
+#include "debug.h"
 #include "action.h"
 #include "matrix.h"
 #include "scanner.h"
@@ -30,7 +31,7 @@ GrammarSymbol LRParser::ParseNextSymbol(TokenPosition& position, void*& addr, Fi
 
 bool LRParser::ParseFile(SyntaxTree* tree, FileScanner* fileScanner) {
 	TokenPosition position = { 0 };
-	GrammarSymbol a;
+	GrammarSymbol a = nullptr;
 
 	std::vector<int> stateStack(1, 0);
 	std::vector<void*> valueStack(1, nullptr);
