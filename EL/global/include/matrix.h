@@ -2,23 +2,25 @@
 #include <map>
 #include <functional>
 
-template <class Kty1, class Kty2, class Ty>
+template <class key_type>
+struct matrix_comparer : public std::binary_function <key_type, key_type, bool> {
+	bool operator () (const key_type& lhs, const key_type& rhs) const {
+		if (lhs.first == rhs.first) {
+			return lhs.second < rhs.second;
+		}
+
+		return lhs.first < rhs.first;
+	}
+};
+
+template <class Kty1, class Kty2, class Ty, class Comp = matrix_comparer<std::pair<Kty1, Kty2>>>
 class matrix {
 public:
 	typedef Kty1 first_key_type;
 	typedef Kty2 second_key_type;
 	typedef std::pair<first_key_type, second_key_type> key_type;
 	typedef Ty value_type;
-
-	typedef struct KeyComparer : public std::binary_function <key_type, key_type, bool > {
-		bool operator () (const key_type& lhs, const key_type& rhs) const {
-			if (lhs.first == rhs.first) {
-				return lhs.second < rhs.second;
-			}
-
-			return lhs.first < rhs.first;
-		}
-	} comparer_type;
+	typedef Comp comparer_type;
 
 	typedef std::map<key_type, value_type, comparer_type> container_type;
 	typedef typename container_type::iterator iterator;

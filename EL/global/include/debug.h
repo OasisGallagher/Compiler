@@ -20,3 +20,6 @@ private:
 
 #define Assert(expression, message)	\
 	(void)((!!(expression)) || (Debug::Break(std::string(#expression) + ": " + message,  __FILE__, __LINE__), 0))
+
+#define Verify(expression, message)	\
+	(void)((!!(expression)) || (Debug::Break(std::string(#expression) + ": " + message,  __FILE__, __LINE__), 0))

@@ -1,11 +1,11 @@
 #include "lr0.h"
-#include "lr1.h"
+#include "LALR.h"
 
 #include "lr_table.h"
 #include "grammar_symbol.h"
 
 LRTable::LRTable() {
-	impl_ = new LR1();
+	impl_ = new LALR();
 }
 
 LRTable::~LRTable() {

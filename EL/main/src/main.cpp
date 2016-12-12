@@ -4,30 +4,11 @@
 #include "language.h"
 #include "syntax_tree.h"
 
-class Point {
-public:
-	void X(float x) {
-		x_ = x;
-	}
-	void Y(float y) {
-		y_ = y;
-	}
-
-	float X() const {
-		return x_;
-	}
-	float Y() const {
-		return y_;
-	}
-private:
-	float x_, y_;
-};
-
 int main() {
 	Debug::EnableMemoryLeakCheck();
 
 	LanguageParameter lp;
-	lp.productions = "main/config/lr_grammar.txt";
+	lp.productions = "main//config//lr_grammar.txt";
 
 	Language* lang = new Language(&lp);
 

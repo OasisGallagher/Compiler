@@ -22,6 +22,7 @@
     <ClInclude Include="parser\include\action.h" />
     <ClInclude Include="parser\include\grammar.h" />
     <ClInclude Include="parser\include\grammar_symbol.h" />
+    <ClInclude Include="parser\include\lalr.h" />
     <ClInclude Include="parser\include\language.h" />
     <ClInclude Include="parser\include\lr0.h" />
     <ClInclude Include="parser\include\lr1.h" />
@@ -45,6 +46,7 @@
     <ClCompile Include="parser\src\action.cpp" />
     <ClCompile Include="parser\src\grammar.cpp" />
     <ClCompile Include="parser\src\grammar_symbol.cpp" />
+    <ClCompile Include="parser\src\lalr.cpp" />
     <ClCompile Include="parser\src\language.cpp" />
     <ClCompile Include="parser\src\lr0.cpp" />
     <ClCompile Include="parser\src\lr1.cpp" />

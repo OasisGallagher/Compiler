@@ -1,3 +1,5 @@
+#include <cstdio>
+
 #include "debug.h"
 #include "utilities.h"
 
@@ -55,4 +57,18 @@ std::string Utility::Trim(const std::string& text) {
 	}
 
 	return std::string(text.begin() + left, text.begin() + right + 1);
+}
+
+void Utility::Split(std::vector<std::string>& answer, const std::string& str, const char* seperator) {
+	size_t from = 0, sl = strlen(seperator), pos;
+	do {
+		pos = str.find(seperator, from);
+		if (pos == std::string::npos) {
+			answer.push_back(str.substr(from, pos));
+			break;
+		}
+
+		answer.push_back(str.substr(from, pos - from));
+		from = pos + sl;
+	} while (true);
 }

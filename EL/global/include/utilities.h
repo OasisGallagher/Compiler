@@ -1,5 +1,6 @@
 #pragma once
 #include <map>
+#include <vector>
 #include <string>
 #include <fstream>
 
@@ -26,6 +27,8 @@ public:
 
 	template <class Iterator>
 	static std::string Concat(Iterator first, Iterator last, const char* seperator = " ");
+
+	static void Split(std::vector<std::string>& answer, const std::string& str, const char* seperator);
 
 	static std::string Heading(const std::string& text);
 private:
