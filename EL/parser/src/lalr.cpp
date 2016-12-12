@@ -92,12 +92,8 @@ bool LALR::GetLR1EdgeTarget(LR1Itemset& answer, const LR1Itemset& src, const Gra
 void LALR::CalculateLR1EdgeTarget(LR1Itemset& answer, const LR1Itemset& src, const GrammarSymbol& symbol) {
 	for (LR1Itemset::const_iterator ite = src.begin(); ite != src.end(); ++ite) {
 		const Condinate* cond = grammars_->GetTargetCondinate(ite->cpos, nullptr);
-		SymbolVector::const_iterator pos = std::find(cond->symbols.begin(), cond->symbols.end(), symbol);
-		if (pos == cond->symbols.end()) {
-			continue;
-		}
 
-		if (ite->dpos != (int)std::distance(cond->symbols.begin(), pos)) {
+		if (ite->dpos >= (int)cond->symbols.size() || cond->symbols[ite->dpos] != symbol) {
 			continue;
 		}
 
