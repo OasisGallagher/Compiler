@@ -31,6 +31,8 @@ void Parser::InitializeTerminalSymbolContainer() {
 	terminalSymbols_.insert(std::make_pair(GrammarSymbol::positive.ToString(), GrammarSymbol::positive));
 	terminalSymbols_.insert(std::make_pair(GrammarSymbol::negative.ToString(), GrammarSymbol::negative));
 	terminalSymbols_.insert(std::make_pair(GrammarSymbol::identifier.ToString(), GrammarSymbol::identifier));
+
+	nonterminalSymbols_.insert(std::make_pair(GrammarSymbol::program.ToString(), GrammarSymbol::program));
 }
 
 GrammarSymbol Parser::CreateSymbol(const std::string& text) {
@@ -57,8 +59,6 @@ GrammarSymbol Parser::CreateSymbol(const std::string& text) {
 }
 
 bool Parser::SetGrammars(const char* productions) {
-	Clear();
-
 	TextScanner textScanner;
 	GrammarReader reader(productions);
 	const GrammarTextContainer& cont = reader.GetGrammars();

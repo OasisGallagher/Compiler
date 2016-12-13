@@ -18,8 +18,12 @@ private:
 	static void SetConsoleColor(int color);
 };
 
-#define Assert(expression, message)	\
-	(void)((!!(expression)) || (Debug::Break(std::string(#expression) + ": " + message,  __FILE__, __LINE__), 0))
-
 #define Verify(expression, message)	\
 	(void)((!!(expression)) || (Debug::Break(std::string(#expression) + ": " + message,  __FILE__, __LINE__), 0))
+
+//#if _DEBUG
+#define Assert(expression, message)	\
+	Verify(expression, message)
+//#else
+//	(void)0
+//#endif

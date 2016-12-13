@@ -37,7 +37,7 @@ bool LRParser::ParseFile(SyntaxTree* tree, FileScanner* fileScanner) {
 	std::vector<void*> valueStack(1, nullptr);
 	std::vector<GrammarSymbol> symbolStack(1, GrammarSymbol::zero);
 
-	LRAction action = { LRActionError };
+	LRAction action = { LRActionShift };
 	int nextState = 0, reduceCount = 0;
 	void* addr = nullptr;
 
@@ -54,12 +54,7 @@ bool LRParser::ParseFile(SyntaxTree* tree, FileScanner* fileScanner) {
 		}
 
 		if (action.actionType == LRActionShift) {
-			nextState = lrTable_->GetNextState(stateStack.back(), a);
-			if (nextState < 0) {
-				Debug::LogError("empty goto item(" + std::to_string(stateStack.back()) + ", " + a.ToString() + ")");
-				return false;
-			}
-
+			nextState = action.actionParameter;
 			stateStack.push_back(nextState);
 			symbolStack.push_back(a);
 			valueStack.push_back(addr);
@@ -75,7 +70,7 @@ bool LRParser::ParseFile(SyntaxTree* tree, FileScanner* fileScanner) {
 			symbolStack.erase(symbolStack.end() - length, symbolStack.end());
 			valueStack.erase(valueStack.end() - length, valueStack.end());
 
-			nextState = lrTable_->GetNextState(stateStack.back(), g->GetLhs());
+			nextState = lrTable_->GetNextGotoState(stateStack.back(), g->GetLhs());
 			if (nextState < 0) {
 				Debug::LogError("empty goto item(" + std::to_string(stateStack.back()) + ", " + g->GetLhs().ToString() + ")");
 				return false;
@@ -83,7 +78,8 @@ bool LRParser::ParseFile(SyntaxTree* tree, FileScanner* fileScanner) {
 
 			stateStack.push_back(nextState);
 			symbolStack.push_back(g->GetLhs());
-			valueStack.push_back(cond->action->Invoke(valueStack));
+			// TODO: action missing.
+			valueStack.push_back((cond->action != nullptr) ? cond->action->Invoke(valueStack) : nullptr);
 		}
 
 	} while (action.actionType != LRActionAccept);

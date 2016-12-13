@@ -73,6 +73,14 @@ public:
 	virtual bool Match(const ScannerToken& token) const;
 };
 
+class Program : public TerminalSymbol {
+public:
+	Program();
+
+public:
+	virtual bool Match(const ScannerToken& token) const;
+};
+
 class Negative : public TerminalSymbol {
 public:
 	Negative();
@@ -152,6 +160,7 @@ public:
 	static GrammarSymbol string;
 	static GrammarSymbol newline;
 	static GrammarSymbol epsilon;
+	static GrammarSymbol program;
 	static GrammarSymbol negative;
 	static GrammarSymbol positive;
 	static GrammarSymbol identifier;

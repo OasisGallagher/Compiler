@@ -41,7 +41,7 @@ void Debug::Break(const std::string& message, const char* file, int line) {
 	oss << message << "\n";
 	oss << "at " << file << ":" << line;
 	Debug::LogError(oss.str());
-	abort();
+	__asm int 3;
 }
 
 void Debug::EnableMemoryLeakCheck() {

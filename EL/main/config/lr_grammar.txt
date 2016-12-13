@@ -1,9 +1,95 @@
-$SPlus
-	: $S
+$program
+	: $stmt_seq		$$ = $1
+	
+$id
+	: identifier	$$ = symbol($1)
+	
+$num
+	: number		  $$ = constant($1)
+	| - $num		  $$ = make("-", $0, $1)
+	| - ( $num )	$$ = make("-", $0, $2)
+	| + $num		  $$ = $1
+	| + ( $num )	$$ = $2
 
-$S
-	: $C $C
-
-$C
-	: c $C
-	| d
+$str
+	: string		$$ = literal($1)
+		
+$stmt_seq
+	: $stmt_seq ; 				    $$ = $2
+	| $stmt_seq ; $stmt		    $$ = make(";", $3, $1)
+	| $stmt_seq newline		    $$ = $2
+	| $stmt_seq newline $stmt	$$ = make(";", $3, $1)
+	| $stmt						        $$ = $1
+	
+$stmt
+	: $if_stmt			  $$ = $1
+	| $while_stmt		  $$ = $1
+	| $assign_stmt		$$ = $1
+	| $read_stmt		  $$ = $1
+	| $write_stmt		  $$ = $1
+	| $do_while_stmt	$$ = $1
+	| $function_def		$$ = $1
+	| $function_call	$$ = $1
+	
+$if_stmt
+	: if ( $exp ) { }									                $$ = make("if", $4, $0, $0)
+	| if ( $exp ) { $stmt_seq }							          $$ = make("if", $5, $2, $0)
+	| if ( $exp ) { } else { }							          $$ = make("if", $7, $0, $0)
+	| if ( $exp ) { } else { $stmt_seq }				      $$ = make("if", $9, $0, $2)
+	| if ( $exp ) { $stmt_seq } else { }				      $$ = make("if", $8, $5, $0)	
+	| if ( $exp ) { $stmt_seq } else { $stmt_seq }		$$ = make("if", $9, $6, $2)
+	
+$while_stmt
+	: while ( $exp ) { }				      $$ = make("while", $4, $0)
+	| while ( $exp ) { $stmt_seq }		$$ = make("while", $5, $2)
+	
+$do_while_stmt
+	: do { } while ( $exp )				    $$ = make("do_while", $2, $0)
+	| do { $stmt_seq } while ( $exp )	$$ = make("do_while", $2, $6)
+	
+$assign_stmt
+	: $id = $exp						$$ = make("=", $3, $1)
+	
+$read_stmt
+	: read $id							$$ = make("read", $1)
+	
+$write_stmt
+	: write $id							$$ = make("write", $1)
+	
+$exp 
+	: $simple_exp < $simple_exp			$$ = make("<", $3, $1)
+	| $simple_exp <= $simple_exp		$$ = make("<=", $3, $1)
+	| $simple_exp == $simple_exp		$$ = make("==", $3, $1)
+	| $simple_exp >= $simple_exp		$$ = make(">=", $3, $1)
+	| $simple_exp > $simple_exp			$$ = make(">", $3, $1)
+	| $simple_exp						        $$ = $1
+	
+$simple_exp
+	: $simple_exp + $term				$$ = make("+", $3, $1)
+	| $simple_exp - $term				$$ = make("-", $3, $1)
+	| $term								      $$ = $1
+	
+$term
+	: $term * $factor					$$ = make("*", $3, $1)
+	| $term / $factor					$$ = make("/", $3, $1)
+	| $factor							    $$ = $1
+	
+$factor
+	: ( $exp )						$$ = $2
+	| $num								$$ = $1
+	| $str								$$ = $1
+	| $id								  $$ = $1
+	
+$function_def
+	: function $id ( ) { }							            $$ = make("function", $5, $0, $0)
+	| function $id ( ) { $stmt_seq }				        $$ = make("function", $6, $0, $2)
+	| function $id ( $argument_list ) { }			      $$ = make("function", $6, $4, $0)
+	| function $id ( $argument_list ) { $stmt_seq }	$$ = make("function", $7, $5, $2)
+	
+$function_call
+	: $id ( )						        $$ = make("function_call", $3, $0)
+	| $id ( $argument_list )		$$ = make("function_call", $4, $2)
+	
+$argument_list
+	: $factor						        $$ = make("argument_list", $1, $0)
+	| $argument_list, $factor		$$ = make("argument_list", $3, $1)

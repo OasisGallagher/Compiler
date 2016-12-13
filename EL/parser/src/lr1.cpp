@@ -4,6 +4,21 @@
 #include "debug.h"
 #include "grammar.h"
 
+bool Forwards::operator <(const Forwards& other) const {
+	const_iterator first1 = begin(), first2 = other.begin();
+	for (; first1 != end() && first2 != other.end(); ++first1, ++first2) {
+		if (*first1 != *first2) {
+			return *first1 < *first2;
+		}
+	}
+
+	if (first1 == end() && first2 == other.end()) {
+		return false;
+	}
+
+	return first1 == end();
+}
+
 bool Forwards::insert(const GrammarSymbol& symbol) {
 	if (std::find(begin(), end(), symbol) == end()) {
 		ptr_->push_back(symbol);
@@ -13,16 +28,12 @@ bool Forwards::insert(const GrammarSymbol& symbol) {
 	return false;
 }
 
-LR1Item::LR1Item(int condinatepos, int dotpos, const GrammarSymbol& forwardSymbol, SymbolVector* forwardSymbols)
-	: cpos(condinatepos), dpos(dotpos), forward(forwardSymbol), forwards(forwardSymbols) {
+LR1Item::LR1Item(int cp, int dp, const Forwards& fs)
+	: cpos(cp), dpos(dp), forwards(fs) {
 }
 
 bool LR1Item::operator < (const LR1Item& other) const {
 	if (cpos == other.cpos) {
-		if (dpos == other.dpos) {
-			return forward < other.forward;
-		}
-
 		return dpos < other.dpos;
 	}
 
@@ -30,7 +41,7 @@ bool LR1Item::operator < (const LR1Item& other) const {
 }
 
 bool LR1Item::operator ==(const LR1Item& other) const {
-	return cpos == other.cpos && dpos == other.dpos && forward == other.forward;
+	return cpos == other.cpos && dpos == other.dpos;
 }
 
 std::string LR1Item::ToString(const GrammarContainer& grammars) const {
@@ -58,12 +69,7 @@ std::string LR1Item::ToString(const GrammarContainer& grammars) const {
 	}
 
 	oss << ", ";
-	if (forward) {
-		oss << forward.ToString();
-	}
-	else {
-		oss << "( " << Utility::Concat(forwards.begin(), forwards.end(), "/") << " )";
-	}
+	oss << "( " << Utility::Concat(forwards.begin(), forwards.end(), "/") << " )";
 
 	return oss.str();
 }
@@ -96,6 +102,21 @@ bool LR1Itemset::operator == (const LR1Itemset& other) const {
 	}
 
 	return first1 == end() && first2 == other.end();
+}
+
+bool LR1Itemset::insert(const LR1Item& item) {
+	bool result = false;
+	for (SymbolVector::const_iterator ite = item.forwards.begin(); ite != item.forwards.end(); ++ite) {
+		std::pair<iterator, bool> state = ptr_->insert(item);
+		if (state.second) {
+			result = true;
+		}
+		else if (((LR1Item&)(*state.first)).forwards.insert(*ite)) {
+			result = true;
+		}
+	}
+
+	return result;
 }
 
 const std::string& LR1Itemset::GetName() const {
@@ -148,6 +169,33 @@ std::string LR1ItemsetContainer::ToString(const GrammarContainer& grammars) cons
 	}
 
 	return oss.str();
+}
+
+bool LR1ItemsetContainer::ItemSetComparer::operator()(const LR1Itemset& lhs, const LR1Itemset& rhs) const {
+	LR1Itemset::const_iterator first1 = lhs.begin(), first2 = rhs.begin();
+	for (; first1 != lhs.end() && first2 != rhs.end(); ++first1, ++first2) {
+		if (CompareItemSet(*first1, *first2) || CompareItemSet(*first2, *first1)) {
+			return CompareItemSet(*first1, *first2);
+		}
+	}
+
+	if (first1 == lhs.end() && first2 == rhs.end()) {
+		return false;
+	}
+
+	return first1 == lhs.end();
+}
+
+bool LR1ItemsetContainer::ItemSetComparer::CompareItemSet(const LR1Item& lhs, const LR1Item& rhs) const {
+	if (lhs.cpos == rhs.cpos) {
+		if (lhs.dpos == rhs.dpos) {
+			return lhs.forwards < rhs.forwards;
+		}
+
+		return lhs.dpos < rhs.dpos;
+	}
+
+	return lhs.cpos < rhs.cpos;
 }
 
 std::string LR1EdgeTable::ToString(const GrammarContainer& grammars) const {

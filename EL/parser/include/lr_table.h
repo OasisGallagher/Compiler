@@ -11,7 +11,7 @@ public:
 	bool Create(const LRSetupParameter& parameter);
 
 	LRAction GetAction(int state, const GrammarSymbol& symbol);
-	int GetNextState(int state, const GrammarSymbol& symbol);
+	int GetNextGotoState(int state, const GrammarSymbol& symbol);
 
 	std::string ToString() const;
 

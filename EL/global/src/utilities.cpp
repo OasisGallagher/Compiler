@@ -59,8 +59,8 @@ std::string Utility::Trim(const std::string& text) {
 	return std::string(text.begin() + left, text.begin() + right + 1);
 }
 
-void Utility::Split(std::vector<std::string>& answer, const std::string& str, const char* seperator) {
-	size_t from = 0, sl = strlen(seperator), pos;
+void Utility::Split(std::vector<std::string>& answer, const std::string& str, char seperator) {
+	size_t from = 0, pos;
 	do {
 		pos = str.find(seperator, from);
 		if (pos == std::string::npos) {
@@ -69,6 +69,6 @@ void Utility::Split(std::vector<std::string>& answer, const std::string& str, co
 		}
 
 		answer.push_back(str.substr(from, pos - from));
-		from = pos + sl;
+		from = pos + 1;
 	} while (true);
 }

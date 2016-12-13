@@ -22,13 +22,16 @@ public:
 	static bool IsDigit(int c);
 	static bool IsLetter(int c);
 
+	template <class Iterator>
+	static Iterator FindGroup(Iterator first, Iterator last);
+
 	template <class Iterator, class Comp>
 	static Iterator FindGroup(Iterator first, Iterator last, const Comp& comp);
 
 	template <class Iterator>
 	static std::string Concat(Iterator first, Iterator last, const char* seperator = " ");
 
-	static void Split(std::vector<std::string>& answer, const std::string& str, const char* seperator);
+	static void Split(std::vector<std::string>& answer, const std::string& str, char seperator);
 
 	static std::string Heading(const std::string& text);
 private:
@@ -71,6 +74,12 @@ std::string Utility::Concat(Iterator first, Iterator last, const char* seperator
 	}
 
 	return oss.str();
+}
+
+template <class Iterator>
+Iterator Utility::FindGroup(Iterator first, Iterator last) {
+	typedef std::iterator_traits<Iterator>::value_type value_type;
+	return FindGroup(first, last, std::equal_to<value_type>());
 }
 
 template <class Iterator, class Comp>

@@ -10,6 +10,7 @@ GrammarSymbol GrammarSymbol::number = new Number();
 GrammarSymbol GrammarSymbol::string = new String();
 GrammarSymbol GrammarSymbol::newline = new Newline();
 GrammarSymbol GrammarSymbol::epsilon = new Epsilon();
+GrammarSymbol GrammarSymbol::program = new Program();
 GrammarSymbol GrammarSymbol::positive = new Positive();
 GrammarSymbol GrammarSymbol::negative = new Negative();
 GrammarSymbol GrammarSymbol::identifier = new Identifier();
@@ -47,7 +48,11 @@ bool GrammarSymbol::Match(const ScannerToken& token) const {
 }
 
 std::string GrammarSymbol::ToString() const {
-	return ptr_->ToString();
+	if (ptr_ != nullptr) {
+		return ptr_->ToString();
+	}
+
+	return "null";
 }
 
 std::string GrammarSymbolContainer::ToString() const {
@@ -175,6 +180,14 @@ bool Identifier::Match(const ScannerToken& token) const {
 
 Identifier::Identifier() : TerminalSymbol("identifier") {
 
+}
+
+Program::Program() : TerminalSymbol("$program") {
+
+}
+
+bool Program::Match(const ScannerToken& token) const {
+	return true;
 }
 
 bool Positive::Match(const ScannerToken& token) const {

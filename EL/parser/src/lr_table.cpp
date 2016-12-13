@@ -1,6 +1,6 @@
-#include "lr0.h"
-#include "LALR.h"
+#include <sstream>
 
+#include "lalr.h"
 #include "lr_table.h"
 #include "grammar_symbol.h"
 
@@ -23,12 +23,23 @@ LRAction LRTable::GetAction(int state, const GrammarSymbol& symbol) {
 	return action;
 }
 
-int LRTable::GetNextState(int state, const GrammarSymbol& symbol) {
+int LRTable::GetNextGotoState(int state, const GrammarSymbol& symbol) {
 	int answer = -1;
 	gotoTable_.get(state, symbol, answer);
 	return answer;
 }
 
 std::string LRTable::ToString() const {
-	return impl_->ToString();
+	std::ostringstream oss;
+	oss << impl_->ToString();
+
+	oss << Utility::Heading(" Action Table ") << "\n";
+	oss << actionTable_.ToString();
+
+	oss << "\n\n";
+
+	oss << Utility::Heading(" Goto Table ") << "\n";
+	oss << gotoTable_.ToString();
+
+	return oss.str();
 }

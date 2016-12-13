@@ -18,6 +18,8 @@ enum LRActionType {
 struct LRAction {
 	LRActionType actionType;
 	int actionParameter;
+
+	std::string ToString() const;
 };
 
 class LRGotoTable : public matrix<int, GrammarSymbol, int> {

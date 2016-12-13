@@ -10,8 +10,14 @@ class Forwards {
 public:
 	typedef SymbolVector::iterator iterator;
 	typedef SymbolVector::const_iterator const_iterator;
+	typedef SymbolVector::const_reference const_reference;
 
 public:
+	bool operator < (const Forwards& other) const;
+
+public:
+	const_reference at(int i) const { return ptr_->at(i); }
+	int size() const { return ptr_->size(); }
 	iterator begin() { return ptr_->begin(); }
 	iterator end() { return ptr_->end(); }
 
@@ -24,18 +30,15 @@ public:
 struct LR1Item {
 	int cpos, dpos;
 
-	GrammarSymbol forward;
 	Forwards forwards;
 
-	LR1Item(int condinatepos, int dotpos, const GrammarSymbol& forwardSymbol, SymbolVector* forwardSymbols = nullptr);
+	LR1Item(int cp, int dp, const Forwards& fs);
 
 	bool operator < (const LR1Item& other) const;
 	bool operator == (const LR1Item& other) const;
 
 	std::string ToString(const GrammarContainer& grammars) const;
 };
-
-
 
 class LR1Itemset {
 	typedef class : public std::set <LR1Item> {
@@ -62,7 +65,7 @@ public:
 	int size() const { return ptr_->size(); }
 	bool empty() const { return ptr_->empty(); }
 
-	bool insert(const LR1Item& item) { return ptr_->insert(item).second; }
+	bool insert(const LR1Item& item);
 
 public:
 	bool operator < (const LR1Itemset& other) const;
@@ -84,7 +87,12 @@ private:
 typedef std::vector<LR1Itemset> LR1ItemsetVector;
 
 class LR1ItemsetContainer {
-	typedef std::set<LR1Itemset> container_type;
+	typedef struct ItemSetComparer {
+		bool operator ()(const LR1Itemset& lhs, const LR1Itemset& rhs) const;
+		bool CompareItemSet(const LR1Item& lhs, const LR1Item& rhs) const;
+	} comparer_type;
+
+	typedef std::set<LR1Itemset, comparer_type> container_type;
 
 public:
 	typedef container_type::iterator iterator;
@@ -102,7 +110,9 @@ public:
 	int size() const { return (int)container_.size(); }
 
 	bool find(const std::string& name, LR1Itemset& answer);
-	bool insert(const LR1Itemset& itemset) { return container_.insert(itemset).second; }
+
+	typedef std::pair<iterator, bool> insert_status;
+	insert_status insert(const LR1Itemset& itemset) { return container_.insert(itemset); }
 
 public:
 	std::string ToString(const GrammarContainer& grammars) const;
@@ -115,26 +125,3 @@ class LR1EdgeTable : public matrix <std::string, GrammarSymbol, std::string> {
 public:
 	std::string ToString(const GrammarContainer& grammars) const;
 };
-
-struct ItemCoreComparer {
-	bool operator ()(const LR1Item& lhs, const LR1Item& rhs) const {
-		return lhs.cpos == rhs.cpos && lhs.dpos == rhs.dpos;
-	}
-};
-
-static ItemCoreComparer itemCoreComparer;
-
-struct ItemSetCoreComparer {
-	bool operator ()(const LR1Itemset& lhs, const LR1Itemset& rhs) const {
-		LR1Itemset::const_iterator first1 = lhs.begin(), first2 = rhs.begin();
-		for (; first1 != lhs.end() && first2 != rhs.end(); ++first1, ++first2) {
-			if (!(itemCoreComparer(*first1, *first2))) {
-				return false;
-			}
-		}
-
-		return first1 == lhs.end() && first2 == rhs.end();
-	}
-};
-
-static ItemSetCoreComparer itemSetCoreComparer;

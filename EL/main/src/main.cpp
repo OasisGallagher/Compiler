@@ -16,10 +16,10 @@ int main() {
 
 	SyntaxTree tree;
 
-	/*if (lang->Parse(&tree, "main/debug/test.el")) {
+	if (lang->Parse(&tree, "main/debug/test.el")) {
 		Debug::Log("\n" + Utility::Heading(" SyntaxTree "));
 		Debug::Log(tree.ToString());
-	}*/
+	}
 
  	delete lang;
 

@@ -16,15 +16,16 @@ public:
 protected:
 	virtual bool CreateLRParsingTable(LRGotoTable& gotoTable, LRActionTable& actionTable);
 
+	bool CreateGotoTable(LRGotoTable &gotoTable);
+	bool CreateActionTable(LRActionTable &actionTable);
+
 private:
-	void Merge();
-	void MergeItemsets(const LR1ItemsetVector& itemsets);
-	void MergeNewItemset(LR1Itemset &newSet, LR1ItemsetVector::const_iterator first, LR1ItemsetVector::const_iterator last);
+	void MergeItemsets();
+	void MergeNewItemset(LR1Itemset &newSet, LR1ItemsetContainer::const_iterator first, LR1ItemsetContainer::const_iterator last);
+	void FindMergeTarget(LR1Itemset& answer, const std::string& name, const LR1ItemsetContainer& newItemsets);
 
 	void RecalculateEdges(LR1EdgeTable& newEdges, const LR1ItemsetContainer& newItemsets);
 	void RecalculateNewEdgeTarget(LR1Itemset& answer, const LR1Itemset& current, const GrammarSymbol& symbol, const LR1ItemsetContainer& newItemsets);
-
-	void MergeForwardSymbols(LR1Itemset& answer, const LR1Itemset& itemset);
 
 	bool CreateLR1Itemsets();
 	bool CreateLR1ItemsetsOnePass();
@@ -33,7 +34,9 @@ private:
 	bool CalculateLR1ItemsetOnePass(LR1Itemset& answer);
 
 	bool GetLR1EdgeTarget(LR1Itemset& answer, const LR1Itemset& src, const GrammarSymbol& symbol);
-	void CalculateLR1EdgeTarget(LR1Itemset& answer, const LR1Itemset& src, const GrammarSymbol& symbol);
+	bool CalculateLR1EdgeTarget(LR1Itemset& answer, const LR1Itemset& src, const GrammarSymbol& symbol);
+
+	int StateName2Integer(const std::string& name);
 private:
 	GrammarContainer* grammars_;
 	GrammarSymbolContainer* terminalSymbols_;
