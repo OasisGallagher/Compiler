@@ -2,6 +2,8 @@
 #include "lr1.h"
 #include "lr_impl.h"
 
+struct Condinate;
+
 class LALR : public LRImpl {
 public:
 	LALR();
@@ -22,8 +24,9 @@ protected:
 private:
 	void MergeItemsets();
 	void MergeNewItemset(LR1Itemset &newSet, LR1ItemsetContainer::const_iterator first, LR1ItemsetContainer::const_iterator last);
-	void FindMergeTarget(LR1Itemset& answer, const std::string& name, const LR1ItemsetContainer& newItemsets);
+	void FindMergeTarget(LR1Itemset& answer, const LR1ItemsetName& name, const LR1ItemsetContainer& newItemsets);
 
+	void NormalizeStateNames(LR1EdgeTable& newEdges, LR1ItemsetContainer& newItemsets);
 	void RecalculateEdges(LR1EdgeTable& newEdges, const LR1ItemsetContainer& newItemsets);
 	void RecalculateNewEdgeTarget(LR1Itemset& answer, const LR1Itemset& current, const GrammarSymbol& symbol, const LR1ItemsetContainer& newItemsets);
 
@@ -32,11 +35,11 @@ private:
 
 	void CalculateLR1Itemset(LR1Itemset& answer);
 	bool CalculateLR1ItemsetOnePass(LR1Itemset& answer);
+	void CalculateLR1ItemsetByLhs(LR1Itemset& answer, const LR1Item& item, const GrammarSymbol& lhs, const Condinate* cond);
 
 	bool GetLR1EdgeTarget(LR1Itemset& answer, const LR1Itemset& src, const GrammarSymbol& symbol);
 	bool CalculateLR1EdgeTarget(LR1Itemset& answer, const LR1Itemset& src, const GrammarSymbol& symbol);
 
-	int StateName2Integer(const std::string& name);
 private:
 	GrammarContainer* grammars_;
 	GrammarSymbolContainer* terminalSymbols_;

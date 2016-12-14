@@ -5,6 +5,8 @@
 #include <Windows.h>
 #include "debug.h"
 
+clock_t Timer::start_;
+
 const int red = 12;
 const int white = 7;
 const int yellow = 14;
@@ -46,4 +48,12 @@ void Debug::Break(const std::string& message, const char* file, int line) {
 
 void Debug::EnableMemoryLeakCheck() {
 	_CrtSetDbgFlag(_CrtSetDbgFlag(_CRTDBG_REPORT_FLAG) | _CRTDBG_LEAK_CHECK_DF);
+}
+
+void Timer::Start() {
+	start_ = clock();
+}
+
+float Timer::Stop() {
+	return ((float)clock() - start_) / CLOCKS_PER_SEC;
 }

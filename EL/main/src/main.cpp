@@ -7,10 +7,12 @@
 int main() {
 	Debug::EnableMemoryLeakCheck();
 
+	Timer::Start();
 	LanguageParameter lp;
 	lp.productions = "main//config//lr_grammar.txt";
 
 	Language* lang = new Language(&lp);
+	Debug::Log(Utility::Format("%.2f seconds used to create parser.", Timer::Stop()));
 
 	Debug::Log(lang->ToString());
 

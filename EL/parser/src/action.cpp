@@ -170,8 +170,8 @@ Action* ActionParser::CreateAction(const std::string& cmd) {
 	char token[MAX_TOKEN_CHARACTERS];
 	ScannerTokenType tokenType = scanner.GetToken(token);
 
-	// TODO: 
 	if (tokenType == ScannerTokenEndOfFile) {
+		Debug::LogError("empty command");
 		return nullptr;
 	}
 

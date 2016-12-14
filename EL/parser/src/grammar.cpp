@@ -73,14 +73,7 @@ void Grammar::AddCondinate(const std::string& action, const SymbolVector& symbol
 	Condinate* ptr = new Condinate(symbols, action);
 	ptr->symbols = symbols;
 
-	if (ptr->symbols.front() == lhs_) {
-		// Add left recursion condinate to front.
-		// TODO: O(n).
-		condinates_.insert(condinates_.begin(), ptr);
-	}
-	else {
-		condinates_.push_back(ptr);
-	}
+	condinates_.push_back(ptr);
 }
 
 const CondinateContainer& Grammar::GetCondinates() const {
@@ -140,16 +133,14 @@ Grammar* GrammarContainer::FindGrammar(const GrammarSymbol& lhs, int* index) {
 	return g;
 }
 
-const Condinate* GrammarContainer::GetTargetCondinate(int cpos, Grammar** g) const {
+const Condinate* GrammarContainer::GetTargetCondinate(int cpos, Grammar** grammar) const {
 	int gi = Utility::Highword(cpos);
 	int ci = Utility::Loword(cpos);
-	// TODO: index grammar list...
-	GrammarContainer::const_iterator ite = begin();
-	std::advance(ite, gi);
+	Grammar* g = at(gi);
 
-	if (g != nullptr) {
-		*g = *ite;
+	if (grammar != nullptr) {
+		*grammar = g;
 	}
 
-	return (*ite)->GetCondinates()[ci];
+	return g->GetCondinates()[ci];
 }

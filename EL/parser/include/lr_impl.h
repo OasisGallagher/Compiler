@@ -19,6 +19,9 @@ struct LRAction {
 	LRActionType actionType;
 	int actionParameter;
 
+	bool operator == (const LRAction& other) const;
+	bool operator != (const LRAction& other) const;
+
 	std::string ToString() const;
 };
 
@@ -50,4 +53,7 @@ public:
 
 	virtual bool Parse(LRGotoTable& gotoTable, LRActionTable& actionTable) = 0;
 	virtual void Setup(const LRSetupParameter& parameter) = 0;
+
+protected:
+	bool InsertActionTable(LRActionTable &actionTable, int src, const GrammarSymbol& symbol, const LRAction& action);
 };

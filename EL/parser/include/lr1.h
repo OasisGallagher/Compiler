@@ -8,6 +8,9 @@ class GrammarContainer;
 class Forwards {
 	IMPLEMENT_REFERENCE_COUNTABLE(Forwards, SymbolVector);
 public:
+	Forwards();
+
+public:
 	typedef SymbolVector::iterator iterator;
 	typedef SymbolVector::const_iterator const_iterator;
 	typedef SymbolVector::const_reference const_reference;
@@ -32,6 +35,7 @@ struct LR1Item {
 
 	Forwards forwards;
 
+	LR1Item(int cp, int dp);
 	LR1Item(int cp, int dp, const Forwards& fs);
 
 	bool operator < (const LR1Item& other) const;
@@ -40,10 +44,28 @@ struct LR1Item {
 	std::string ToString(const GrammarContainer& grammars) const;
 };
 
+class LR1ItemsetName {
+	IMPLEMENT_REFERENCE_COUNTABLE(LR1ItemsetName, std::string);
+
+public:
+	LR1ItemsetName();
+	LR1ItemsetName(const char* name);
+	LR1ItemsetName(const std::string& name);
+
+public:
+	bool operator < (const LR1ItemsetName& other) const { return *ptr_ < *other.ptr_; }
+	bool operator == (const LR1ItemsetName& other) const { return *ptr_ == *other.ptr_; }
+
+public:
+	bool empty() const { return ptr_->empty(); }
+	void assign(const std::string& other) { ptr_->assign(other); }
+	const std::string& ToString() const { return *ptr_; }
+};
+
 class LR1Itemset {
 	typedef class : public std::set <LR1Item> {
 		friend class LR1Itemset;
-		std::string name_;
+		LR1ItemsetName name_;
 	} container_type;
 
 	IMPLEMENT_REFERENCE_COUNTABLE(LR1Itemset, container_type);
@@ -72,8 +94,11 @@ public:
 	bool operator == (const LR1Itemset& other) const;
 
 public:
-	const std::string& GetName() const;
+	const LR1ItemsetName& GetName() const;
+
+	void SetName(const char* name); 
 	void SetName(const std::string& name);
+	void SetName(const LR1ItemsetName& name);
 	std::string ToString(const GrammarContainer& grammars) const;
 
 private:
@@ -85,13 +110,13 @@ private:
 };
 
 typedef std::vector<LR1Itemset> LR1ItemsetVector;
+struct ItemSetComparer {
+	bool operator ()(const LR1Itemset& lhs, const LR1Itemset& rhs) const;
+	bool CompareItemSet(const LR1Item& lhs, const LR1Item& rhs) const;
+};
 
 class LR1ItemsetContainer {
-	typedef struct ItemSetComparer {
-		bool operator ()(const LR1Itemset& lhs, const LR1Itemset& rhs) const;
-		bool CompareItemSet(const LR1Item& lhs, const LR1Item& rhs) const;
-	} comparer_type;
-
+	typedef ItemSetComparer comparer_type;
 	typedef std::set<LR1Itemset, comparer_type> container_type;
 
 public:
@@ -121,7 +146,7 @@ private:
 	container_type container_;
 };
 
-class LR1EdgeTable : public matrix <std::string, GrammarSymbol, std::string> {
+class LR1EdgeTable : public matrix <LR1ItemsetName, GrammarSymbol, LR1ItemsetName> {
 public:
 	std::string ToString(const GrammarContainer& grammars) const;
 };

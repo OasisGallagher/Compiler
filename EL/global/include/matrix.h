@@ -26,6 +26,8 @@ public:
 	typedef typename container_type::iterator iterator;
 	typedef typename container_type::const_iterator const_iterator;
 
+	typedef std::pair<iterator, bool> insert_status;
+
 public:
 	value_type& at(const first_key_type& k1, const second_key_type& k2) {
 		return cont_[std::make_pair(k1, k2)];
@@ -51,8 +53,8 @@ public:
 		return true;
 	}
 
-	bool insert(const first_key_type& k1, const second_key_type& k2, const value_type& val) {
-		return cont_.insert(std::make_pair(std::make_pair(k1, k2), val)).second;
+	insert_status insert(const first_key_type& k1, const second_key_type& k2, const value_type& val) {
+		return cont_.insert(std::make_pair(std::make_pair(k1, k2), val));
 	}
 
 	iterator find(const first_key_type& k1, const second_key_type& k2) {

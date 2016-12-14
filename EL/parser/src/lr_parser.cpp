@@ -66,6 +66,8 @@ bool LRParser::ParseFile(SyntaxTree* tree, FileScanner* fileScanner) {
 			int length = cond->symbols.size();
 			Debug::Log(std::to_string(++reduceCount) + "\tReduce `" + Utility::Concat(symbolStack.end() - length, symbolStack.end()) + "` to `" + g->GetLhs().ToString() + "`");
 
+			void* newValue = (cond->action != nullptr) ? cond->action->Invoke(valueStack) : nullptr;
+
 			stateStack.erase(stateStack.end() - length, stateStack.end());
 			symbolStack.erase(symbolStack.end() - length, symbolStack.end());
 			valueStack.erase(valueStack.end() - length, valueStack.end());
@@ -78,8 +80,7 @@ bool LRParser::ParseFile(SyntaxTree* tree, FileScanner* fileScanner) {
 
 			stateStack.push_back(nextState);
 			symbolStack.push_back(g->GetLhs());
-			// TODO: action missing.
-			valueStack.push_back((cond->action != nullptr) ? cond->action->Invoke(valueStack) : nullptr);
+			valueStack.push_back(newValue);
 		}
 
 	} while (action.actionType != LRActionAccept);
@@ -106,9 +107,9 @@ void LRParser::Clear() {
 
 std::string LRParser::ToString() const {
 	std::ostringstream oss;
-	oss << Parser::ToString();
 
-	oss << "\n\n";
+	//oss << Parser::ToString();
+	//oss << "\n\n";
 
 	oss << lrTable_->ToString();
 

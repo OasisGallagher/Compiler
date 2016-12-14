@@ -31,7 +31,7 @@ int LRTable::GetNextGotoState(int state, const GrammarSymbol& symbol) {
 
 std::string LRTable::ToString() const {
 	std::ostringstream oss;
-	oss << impl_->ToString();
+	//oss << impl_->ToString();
 
 	oss << Utility::Heading(" Action Table ") << "\n";
 	oss << actionTable_.ToString();

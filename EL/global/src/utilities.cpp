@@ -1,9 +1,10 @@
-#include <cstdio>
+#include <cstdarg>
 
 #include "debug.h"
 #include "utilities.h"
 
-#define HEADING_LENGTH		48
+#define HEADING_LENGTH			48
+#define FORMAT_BUFFER_LENGTH	64
 
 std::string Utility::Heading(const std::string& text) {
 	Assert(HEADING_LENGTH >= (int)text.length(), "invalid parameter");
@@ -30,15 +31,15 @@ bool Utility::IsBlankText(const char* text, const char** pos) {
 	return true;
 }
 
-bool Utility::ParseInteger(const char* text, int* answer) {
+bool Utility::ParseInteger(const std::string& text, int* answer) {
 	int integer = 0;
 
-	for (; *text != 0; ++text) {
-		if (!Utility::IsDigit(*text)) {
+	for (const char* ptr = text.c_str(); *ptr != 0; ++ptr) {
+		if (!Utility::IsDigit(*ptr)) {
 			return false;
 		}
 
-		integer = integer * 10 + *text - '0';
+		integer = integer * 10 + *ptr - '0';
 	}
 
 	if (answer != nullptr) {
@@ -57,6 +58,19 @@ std::string Utility::Trim(const std::string& text) {
 	}
 
 	return std::string(text.begin() + left, text.begin() + right + 1);
+}
+
+std::string Utility::Format(const char* format, ...) {
+	char buffer[FORMAT_BUFFER_LENGTH] = { 0 };
+
+	va_list ap;
+	va_start(ap, format);
+	int n = vsnprintf(buffer, FORMAT_BUFFER_LENGTH, format, ap);
+	va_end(ap);
+
+	Assert(n >= 0 && n < FORMAT_BUFFER_LENGTH, "format error");
+
+	return buffer;
 }
 
 void Utility::Split(std::vector<std::string>& answer, const std::string& str, char seperator) {

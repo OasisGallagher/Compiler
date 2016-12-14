@@ -1,5 +1,4 @@
 #pragma once
-#include <list>
 #include <vector>
 #include "grammar_symbol.h"
 
@@ -45,8 +44,8 @@ private:
 	CondinateContainer condinates_;
 };
 
-class GrammarContainer : public std::list<Grammar*> {
+class GrammarContainer : public std::vector<Grammar*> {
 public:
 	Grammar* FindGrammar(const GrammarSymbol& lhs, int* index);
-	const Condinate* GetTargetCondinate(int cpos, Grammar** g) const;
+	const Condinate* GetTargetCondinate(int cpos, Grammar** grammar) const;
 };

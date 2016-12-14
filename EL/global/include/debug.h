@@ -1,4 +1,5 @@
 #pragma once
+#include <ctime>
 #include <string>
 #include <crtdbg.h>
 
@@ -13,17 +14,28 @@ public:
 	static void Break(const std::string& message, const char* file, int line);
 
 	static void EnableMemoryLeakCheck();
+
 private:
 	Debug();
 	static void SetConsoleColor(int color);
 };
 
+class Timer {
+public:
+	static void Start();
+	static float Stop();
+
+private:
+	Timer();
+	static clock_t start_;
+};
+
 #define Verify(expression, message)	\
 	(void)((!!(expression)) || (Debug::Break(std::string(#expression) + ": " + message,  __FILE__, __LINE__), 0))
 
-//#if _DEBUG
+#if _DEBUG
 #define Assert(expression, message)	\
 	Verify(expression, message)
-//#else
-//	(void)0
-//#endif
+#else
+	(void)0
+#endif
