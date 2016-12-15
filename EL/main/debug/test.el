@@ -1,1 +1,2 @@
-c c c d c d
+x = 3
+write x;

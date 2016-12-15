@@ -22,13 +22,15 @@ protected:
 	bool CreateActionTable(LRActionTable &actionTable);
 
 private:
+	typedef std::map<LR1ItemsetName, LR1ItemsetName> ItemsetNameMap;
+
+private:
 	void MergeItemsets();
 	void MergeNewItemset(LR1Itemset &newSet, LR1ItemsetContainer::const_iterator first, LR1ItemsetContainer::const_iterator last);
-	void FindMergeTarget(LR1Itemset& answer, const LR1ItemsetName& name, const LR1ItemsetContainer& newItemsets);
 
-	void NormalizeStateNames(LR1EdgeTable& newEdges, LR1ItemsetContainer& newItemsets);
-	void RecalculateEdges(LR1EdgeTable& newEdges, const LR1ItemsetContainer& newItemsets);
-	void RecalculateNewEdgeTarget(LR1Itemset& answer, const LR1Itemset& current, const GrammarSymbol& symbol, const LR1ItemsetContainer& newItemsets);
+	void NormalizeStateNames(LR1ItemsetContainer& newItemsets);
+	void RecalculateEdges(LR1EdgeTable& newEdges, LR1ItemsetContainer& newItemsets, ItemsetNameMap& nameMap);
+	void RecalculateNewEdgeTarget(LR1EdgeTable& newEdges, const LR1Itemset& current, const GrammarSymbol& symbol, ItemsetNameMap& nameMap);
 
 	bool CreateLR1Itemsets();
 	bool CreateLR1ItemsetsOnePass();
@@ -39,6 +41,8 @@ private:
 
 	bool GetLR1EdgeTarget(LR1Itemset& answer, const LR1Itemset& src, const GrammarSymbol& symbol);
 	bool CalculateLR1EdgeTarget(LR1Itemset& answer, const LR1Itemset& src, const GrammarSymbol& symbol);
+
+	bool ParseLRAction(LRActionTable & actionTable, const LR1ItemsetName& name, const LR1Item &item);
 
 private:
 	GrammarContainer* grammars_;

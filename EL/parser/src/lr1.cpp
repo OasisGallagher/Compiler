@@ -142,7 +142,6 @@ bool LR1Itemset::insert(const LR1Item& item) {
 }
 
 const LR1ItemsetName& LR1Itemset::GetName() const {
-	Assert(!ptr_->name_.empty(), "invalid name");
 	return ptr_->name_;
 }
 
@@ -176,16 +175,40 @@ std::string LR1Itemset::ToString(const GrammarContainer& grammars) const {
 	return oss.str();
 }
 
-bool LR1ItemsetContainer::find(const std::string& name, LR1Itemset& answer) {
-	// TODO:
-	for (iterator ite = begin(); ite != end(); ++ite) {
-		if (ite->GetName().ToString() == name) {
-			answer = *ite;
-			return true;
+LR1Itemset& LR1ItemsetContainer::operator[](const std::string& name) {
+	dictionary::iterator pos = dict_.find(name);
+	Assert(pos != dict_.end(), "can not find item named " + name);
+	return pos->second;
+}
+
+LR1Itemset& LR1ItemsetContainer::operator[](const LR1ItemsetName& name) {
+	return operator[](name.ToString());
+}
+
+bool LR1ItemsetContainer::insert(LR1Itemset& itemset) {
+	std::pair<iterator, bool> status = container_.insert(itemset);
+	if (itemset.GetName().empty()) {
+		if (status.second) {
+			itemset.SetName(std::to_string(size() - 1));
+		}
+		else {
+			itemset.SetName(status.first->GetName());
 		}
 	}
 
-	return false;
+	dict_.insert(std::make_pair(itemset.GetName().ToString(), itemset));
+	return status.second;
+}
+
+LR1ItemsetContainer& LR1ItemsetContainer::operator = (const LR1ItemsetContainer& other) {
+	container_ = other.container_;
+	
+	dict_.clear();
+	//for (LR1ItemsetContainer::const_iterator ite = other.begin(); ite != other.end(); ++ite) {
+	//	dict_.insert(std::make_pair(ite->GetName(), *ite));
+	//}
+
+	return *this;
 }
 
 std::string LR1ItemsetContainer::ToString(const GrammarContainer& grammars) const {
@@ -237,13 +260,13 @@ std::string LR1EdgeTable::ToString(const GrammarContainer& grammars) const {
 		seperator = "\n";
 
 		oss << "( ";
-		oss << ite->first.first.ToString();// .ToString(grammars);
+		oss << ite->first.first.ToString();
 		oss << ", ";
 		oss << ite->first.second.ToString();
 		oss << " )";
 
 		oss << " => ";
-		oss << ite->second.ToString();// .ToString(grammars);
+		oss << ite->second.ToString();
 	}
 
 	return oss.str();

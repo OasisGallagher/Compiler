@@ -335,19 +335,11 @@ bool TextScanner::IsUnaryOperator() {
 }
 
 FileScanner::FileScanner(const char* path) 
-	: reader_(new FileReader(path, true, false)), lineno_(0) {
-	/*symbols_ = new Table < Symbol >();
-	numberLiterals_ = new Table < NumberLiteral >();
-	stringLiterals_ = new Table < StringLiteral >();*/
+	: reader_(new FileReader(path, true, true)), lineno_(0) {
 }
 
 FileScanner::~FileScanner() {
 	delete reader_;
-	/*
-	delete symbols_;
-	delete numberLiterals_;
-	delete stringLiterals_;
-	*/
 }
 
 bool FileScanner::GetToken(ScannerToken* token, TokenPosition* pos) {
@@ -379,24 +371,4 @@ bool FileScanner::GetToken(ScannerToken* token, TokenPosition* pos) {
 	strcpy(token->text, buffer);
 
 	return true;
-}
-
-ScannerTokenType FileScanner::GetReserveTokenType(const char* name) {
-// 	if (strcmp(name, "if") == 0) {
-// 		return ScannerTokenIf;
-// 	}
-// 
-// 	if (strcmp(name, "else") == 0) {
-// 		return ScannerTokenElse;
-// 	}
-// 
-// 	if (strcmp(name, "then") == 0) {
-// 		return ScannerTokenThen;
-// 	}
-// 
-// 	if (strcmp(name, "end") == 0) {
-// 		return ScannerTokenEnd;
-// 	}
-
-	return ScannerTokenError;
 }

@@ -38,7 +38,7 @@ bool LRParser::ParseFile(SyntaxTree* tree, FileScanner* fileScanner) {
 	std::vector<GrammarSymbol> symbolStack(1, GrammarSymbol::zero);
 
 	LRAction action = { LRActionShift };
-	int nextState = 0, reduceCount = 0;
+	int nextState = 0;
 	void* addr = nullptr;
 
 	do {
@@ -55,6 +55,8 @@ bool LRParser::ParseFile(SyntaxTree* tree, FileScanner* fileScanner) {
 
 		if (action.actionType == LRActionShift) {
 			nextState = action.actionParameter;
+			Debug::Log(">> Shift symbol `" + a.ToString() + "`. Goto state " + std::to_string(nextState) + ".");
+
 			stateStack.push_back(nextState);
 			symbolStack.push_back(a);
 			valueStack.push_back(addr);
@@ -64,7 +66,8 @@ bool LRParser::ParseFile(SyntaxTree* tree, FileScanner* fileScanner) {
 			const Condinate* cond = grammars_.GetTargetCondinate(action.actionParameter, &g);
 
 			int length = cond->symbols.size();
-			Debug::Log(std::to_string(++reduceCount) + "\tReduce `" + Utility::Concat(symbolStack.end() - length, symbolStack.end()) + "` to `" + g->GetLhs().ToString() + "`");
+
+			std::string log = ">> Reduce `" + Utility::Concat(symbolStack.end() - length, symbolStack.end()) + "` to `" + g->GetLhs().ToString() + "`. ";
 
 			void* newValue = (cond->action != nullptr) ? cond->action->Invoke(valueStack) : nullptr;
 
@@ -73,6 +76,8 @@ bool LRParser::ParseFile(SyntaxTree* tree, FileScanner* fileScanner) {
 			valueStack.erase(valueStack.end() - length, valueStack.end());
 
 			nextState = lrTable_->GetNextGotoState(stateStack.back(), g->GetLhs());
+			Debug::Log(log + "Goto state " + std::to_string(nextState) + ".");
+
 			if (nextState < 0) {
 				Debug::LogError("empty goto item(" + std::to_string(stateStack.back()) + ", " + g->GetLhs().ToString() + ")");
 				return false;

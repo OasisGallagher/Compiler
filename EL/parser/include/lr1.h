@@ -55,6 +55,7 @@ public:
 public:
 	bool operator < (const LR1ItemsetName& other) const { return *ptr_ < *other.ptr_; }
 	bool operator == (const LR1ItemsetName& other) const { return *ptr_ == *other.ptr_; }
+	bool operator != (const LR1ItemsetName& other) const { return *ptr_ != *other.ptr_; }
 
 public:
 	bool empty() const { return ptr_->empty(); }
@@ -110,18 +111,32 @@ private:
 };
 
 typedef std::vector<LR1Itemset> LR1ItemsetVector;
+
 struct ItemSetComparer {
 	bool operator ()(const LR1Itemset& lhs, const LR1Itemset& rhs) const;
 	bool CompareItemSet(const LR1Item& lhs, const LR1Item& rhs) const;
+};
+
+struct ItemSetNameComparer {
+	bool operator ()(const LR1Itemset& lhs, const LR1Itemset& rhs) const {
+		return lhs.GetName() < rhs.GetName();
+	}
 };
 
 class LR1ItemsetContainer {
 	typedef ItemSetComparer comparer_type;
 	typedef std::set<LR1Itemset, comparer_type> container_type;
 
+	typedef std::map<std::string, LR1Itemset> dictionary;
+
 public:
 	typedef container_type::iterator iterator;
 	typedef container_type::const_iterator const_iterator;
+
+public:
+	LR1ItemsetContainer& operator = (const LR1ItemsetContainer& other);
+	LR1Itemset& operator[](const std::string& name);
+	LR1Itemset& operator[](const LR1ItemsetName& name);
 
 public:
 	iterator begin() { return container_.begin(); }
@@ -134,15 +149,13 @@ public:
 
 	int size() const { return (int)container_.size(); }
 
-	bool find(const std::string& name, LR1Itemset& answer);
-
-	typedef std::pair<iterator, bool> insert_status;
-	insert_status insert(const LR1Itemset& itemset) { return container_.insert(itemset); }
+	bool insert(LR1Itemset& itemset);
 
 public:
 	std::string ToString(const GrammarContainer& grammars) const;
 
 private:
+	dictionary dict_;
 	container_type container_;
 };
 

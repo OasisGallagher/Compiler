@@ -3,6 +3,7 @@
 #include <sstream>
 #include <fstream>
 #include <Windows.h>
+
 #include "debug.h"
 
 clock_t Timer::start_;
@@ -43,7 +44,9 @@ void Debug::Break(const std::string& message, const char* file, int line) {
 	oss << message << "\n";
 	oss << "at " << file << ":" << line;
 	Debug::LogError(oss.str());
-	__asm int 3;
+
+	MessageBox(NULL, message.c_str(), "Assertion Failed", MB_OK | MB_ICONERROR);
+	abort();
 }
 
 void Debug::EnableMemoryLeakCheck() {

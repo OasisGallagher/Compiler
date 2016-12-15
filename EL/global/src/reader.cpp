@@ -54,10 +54,11 @@ void GrammarReader::ReadGrammars() {
 	char buffer[MAX_LINE_CHARACTERS];
 	char* ptr = buffer;
 
+	int line;
 	GrammarText g;
 	std::string text;
 
-	for (; fileReader_.ReadLine(ptr, MAX_LINE_CHARACTERS, nullptr);) {
+	for (; fileReader_.ReadLine(ptr, MAX_LINE_CHARACTERS, &line);) {
 		const char* pos = nullptr;
 		if (Utility::IsBlankText(ptr, &pos)) {
 			if (!g.Empty()) {
@@ -74,6 +75,7 @@ void GrammarReader::ReadGrammars() {
 		}
 
 		const char* tabpos = SplitGrammar(ptr);
+		Assert(*tabpos != 0, Utility::Format("missing \\t between production and action at line %d.", line));
 
 		g.productions.push_back(std::make_pair(Utility::Trim(std::string(ptr, tabpos)), Utility::Trim(std::string(tabpos))));
 	}

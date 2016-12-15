@@ -29,6 +29,12 @@ public:
 	typedef std::pair<iterator, bool> insert_status;
 
 public:
+	matrix& operator = (const matrix& other) {
+		cont_ = other.cont_;
+		return *this;
+	}
+
+public:
 	value_type& at(const first_key_type& k1, const second_key_type& k2) {
 		return cont_[std::make_pair(k1, k2)];
 	}
@@ -51,6 +57,10 @@ public:
 
 		answer = ite->second;
 		return true;
+	}
+
+	void insert(const_iterator first, const_iterator last) {
+		cont_.insert(first, last);
 	}
 
 	insert_status insert(const first_key_type& k1, const second_key_type& k2, const value_type& val) {

@@ -48,9 +48,6 @@ public:
 	bool GetToken(ScannerToken* token, TokenPosition* pos);
 
 private:
-	ScannerTokenType GetReserveTokenType(const char* name);
-
-private:
 	int lineno_;
 	FileReader* reader_;
 	TextScanner textScanner_;
