@@ -3,15 +3,16 @@
 
 #include "lalr.h"
 #include "debug.h"
+#include "define.h"
 #include "grammar.h"
 #include "table_printer.h"
 
-#define NAME_SEPERATOR '.'
-
 LALR::LALR() {
+	builder_ = new LR1ItemsetBuilder;
 }
 
 LALR::~LALR() {
+	delete builder_;
 }
 
 void LALR::Setup(const LRSetupParameter& parameter) {
@@ -24,12 +25,17 @@ void LALR::Setup(const LRSetupParameter& parameter) {
 }
 
 bool LALR::Parse(LRGotoTable& gotoTable, LRActionTable& actionTable) {
+	Debug::Log("Create itemsets.");
 	if (!CreateLR1Itemsets()) {
 		return false;
 	}
 
-	Debug::Log("Create parsing table.");
+	Debug::Log("Merge itemsets.");
+	if (!MergeItemsets()) {
+		return false;
+	}
 
+	Debug::Log("Create parsing table.");
 	return CreateLRParsingTable(gotoTable, actionTable);
 }
 
@@ -47,14 +53,10 @@ bool LALR::CreateLR1Itemsets() {
 	itemset.insert(start);
 	CalculateLR1Itemset(itemset);
 	
-	itemsets_.insert(itemset);
+	builder_->insert(itemset);
 
-	Debug::Log("Create itemsets.");
 	for (; CreateLR1ItemsetsOnePass();) {
 	}
-
-	Debug::Log("Merge itemsets.");
-	MergeItemsets();
 
 	return true;
 }
@@ -133,8 +135,7 @@ void LALR::CalculateLR1Itemset(LR1Itemset& answer) {
 bool LALR::GetLR1EdgeTarget(LR1Itemset& answer, const LR1Itemset& src, const GrammarSymbol& symbol) {
 	LR1EdgeTable::iterator pos = edges_.find(src.GetName(), symbol);
 	if (pos != edges_.end()) {
-		answer = itemsets_[pos->second];
-		//itemsets_.find(pos->second.ToString(), answer);
+		answer = builder_->operator[](pos->second);
 		return false;
 	}
 
@@ -165,7 +166,7 @@ bool LALR::CalculateLR1EdgeTarget(LR1Itemset& answer, const LR1Itemset& src, con
 		return false;
 	}
 
-	return itemsets_.insert(answer);
+	return builder_->insert(answer);
 }
 
 bool LALR::CalculateLR1ItemsetOnePass(LR1Itemset& answer) {
@@ -197,14 +198,16 @@ bool LALR::CalculateLR1ItemsetOnePass(LR1Itemset& answer) {
 
 void LALR::CalculateLR1ItemsetByLhs(LR1Itemset& answer, const LR1Item& item, const GrammarSymbol& lhs, const Condinate* cond) {
 	int gi = 1;
-	const CondinateContainer& conds = grammars_->FindGrammar(lhs, &gi)->GetCondinates();
+	Grammar* grammar = grammars_->FindGrammar(lhs, &gi);
+	const CondinateContainer& conds = grammar->GetCondinates();
 
 	SymbolVector beta(cond->symbols.begin() + item.dpos + 1, cond->symbols.end());
+
+	GrammarSymbolSet firstSet;
 
 	for (SymbolVector::const_iterator fi = item.forwards.begin(); fi != item.forwards.end(); ++fi) {
 		beta.push_back(*fi);
 
-		GrammarSymbolSet firstSet;
 		firstSetContainer_->GetFirstSet(firstSet, beta.begin(), beta.end());
 
 		for (GrammarSymbolSet::iterator fsi = firstSet.begin(); fsi != firstSet.end(); ++fsi) {
@@ -221,12 +224,13 @@ void LALR::CalculateLR1ItemsetByLhs(LR1Itemset& answer, const LR1Item& item, con
 		}
 
 		beta.pop_back();
+		firstSet.clear();
 	}
 }
 
 bool LALR::CreateLR1ItemsetsOnePass() {
 	bool setChanged = false;
-	for (LR1ItemsetContainer::iterator ite = itemsets_.begin(); ite != itemsets_.end(); ++ite) {
+	for (LR1ItemsetContainer::iterator ite = builder_->begin(); ite != builder_->end(); ++ite) {
 		for (GrammarSymbolContainer::iterator ite2 = terminalSymbols_->begin(); ite2 != terminalSymbols_->end(); ++ite2) {
 			LR1Itemset itemset;
 			setChanged = GetLR1EdgeTarget(itemset, *ite, ite2->second) || setChanged;
@@ -241,48 +245,25 @@ bool LALR::CreateLR1ItemsetsOnePass() {
 	return setChanged;
 }
 
-void LALR::MergeItemsets() {
-	LR1ItemsetContainer newItemsets;
-	LR1ItemsetContainer::const_iterator first = itemsets_.begin(), pos;
-
+bool LALR::MergeItemsets() {
 	ItemsetNameMap nameMap;
-
-	do {
-		pos = Utility::FindGroup(first, itemsets_.end());
-		LR1Itemset newSet;
-
-		std::string nameText;
-		LR1ItemsetName newSetName;
-
-		char seperator = 0;
-		for (LR1ItemsetContainer::const_iterator ite = first; ite != pos; ++ite) {
-			if (seperator != 0) {
-				nameText += seperator;
-			}
-
-			seperator = NAME_SEPERATOR;
-			nameText += ite->GetName().ToString();
-			nameMap.insert(std::make_pair(ite->GetName(), newSetName));
-		}
-
-		newSetName.assign(nameText);
-		newSet.SetName(newSetName);
-
-		MergeNewItemset(newSet, first, pos);
-
-		newItemsets.insert(newSet);
-
-		first = pos;
-	} while (first != itemsets_.end());
+	LR1ItemsetContainer newItemsets;
+	builder_->Merge(newItemsets, nameMap);
 
 	LR1EdgeTable newEdges;
 	RecalculateEdges(newEdges, newItemsets, nameMap);
+
 	NormalizeStateNames(newItemsets);
 
 	edges_.clear();
 	edges_.insert(newEdges.begin(), newEdges.end());
 
 	itemsets_ = newItemsets;
+
+	delete builder_;
+	builder_ = nullptr;
+
+	return true;
 }
 
 void LALR::NormalizeStateNames(LR1ItemsetContainer& newItemsets) {
@@ -310,11 +291,11 @@ void LALR::RecalculateNewEdgeTarget(LR1EdgeTable& newEdges, const LR1Itemset& cu
 	std::vector<std::string> states;
 	typedef std::vector<std::string>::iterator vsiterator;
 
-	Utility::Split(states, current.GetName().ToString(), NAME_SEPERATOR);
+	Utility::Split(states, current.GetName().ToString(), ITEMSET_NAME_SEPERATOR);
 
 	for (vsiterator si = states.begin(); si != states.end(); ++si) {
-		LR1Itemset source = itemsets_[*si];
-		//itemsets_.find(*si, source);
+		LR1Itemset source = builder_->operator[](*si);
+
 		Assert(!source.empty(), "invalid source state");
 
 		LR1ItemsetName target;
@@ -326,26 +307,6 @@ void LALR::RecalculateNewEdgeTarget(LR1EdgeTable& newEdges, const LR1Itemset& cu
 		Assert(!newTarget.empty(), "invalid new target");
 
 		newEdges.insert(current.GetName(), symbol, newTarget);
-	}
-}
-
-void LALR::MergeNewItemset(LR1Itemset &newSet, LR1ItemsetContainer::const_iterator first, LR1ItemsetContainer::const_iterator last) {
-	for (int i = 0; i < first->size(); ++i) {
-		LR1Itemset::iterator current = first->begin();
-		std::advance(current, i);
-
-		LR1Item newItem(current->cpos, current->dpos);
-
-		for (LR1ItemsetContainer::const_iterator ite = first; ite != last; ++ite) {
-			LR1Itemset::const_iterator ite2 = ite->begin();
-			std::advance(ite2, i);
-
-			for (Forwards::const_iterator svi = ite2->forwards.begin(); svi != ite2->forwards.end(); ++svi) {
-				newItem.forwards.insert(*svi);
-			}
-		}
-
-		newSet.insert(newItem);
 	}
 }
 
@@ -383,7 +344,7 @@ std::string LALR::ToString() const {
 
 	tp.AddHeader();
 
-	for (LR1ItemsetContainer::const_iterator ite = itemsets_.begin(); ite != itemsets_.end(); ++ite) {
+	for (LR1ItemsetContainer::const_iterator ite = builder_->begin(); ite != builder_->end(); ++ite) {
 		tp << ite->GetName().ToString();
 		LR1ItemsetName target;
 		for (GrammarSymbolContainer::const_iterator ite2 = terminalSymbols_->begin(); ite2 != terminalSymbols_->end(); ++ite2) {

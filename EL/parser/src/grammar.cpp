@@ -80,29 +80,6 @@ const CondinateContainer& Grammar::GetCondinates() const {
 	return condinates_;
 }
 
-void Grammar::SortCondinates() {
-	struct CondinateComparer : public std::binary_function < Condinate*, Condinate*, bool > {
-		bool operator () (const Condinate* lhs, const Condinate* rhs) const {
-			SymbolVector::const_iterator lite = lhs->symbols.begin(), rite = rhs->symbols.begin();
-			for (; lite != lhs->symbols.end() && rite != rhs->symbols.end() && *lite == *rite;) {
-				++lite, ++rite;
-			}
-
-			if (lite == lhs->symbols.end()) {
-				return false;
-			}
-
-			if (rite == rhs->symbols.end()) {
-				return true;
-			}
-
-			return *lite > *rite;
-		}
-	};
-
-	std::sort(condinates_.begin(), condinates_.end(), CondinateComparer());
-}
-
 std::string Grammar::ToString() const {
 	std::ostringstream oss;
 	oss.width(22);

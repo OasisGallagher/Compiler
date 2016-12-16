@@ -1,5 +1,7 @@
 #pragma once
 
+#define ITEMSET_NAME_SEPERATOR			'.'
+
 // 标记的最大字符数.
 #define MAX_TOKEN_CHARACTERS			32
 
@@ -14,3 +16,4 @@
 
 // 正号.
 #define POSITIVE_SIGN					"0+"
+

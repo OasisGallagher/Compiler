@@ -15,7 +15,8 @@ public:
 	static bool IsBlankText(const char* text, const char** pos = nullptr);
 
 	// 只解析简单的正整数.
-	static bool ParseInteger(const std::string& text, int* answer = nullptr);
+	static int ParseInteger(const std::string& text);
+	static bool ParseInteger(const std::string& text, int* answer);
 
 	static std::string Format(const char* format, ...);
 

@@ -22,11 +22,7 @@ protected:
 	bool CreateActionTable(LRActionTable &actionTable);
 
 private:
-	typedef std::map<LR1ItemsetName, LR1ItemsetName> ItemsetNameMap;
-
-private:
-	void MergeItemsets();
-	void MergeNewItemset(LR1Itemset &newSet, LR1ItemsetContainer::const_iterator first, LR1ItemsetContainer::const_iterator last);
+	bool MergeItemsets();
 
 	void NormalizeStateNames(LR1ItemsetContainer& newItemsets);
 	void RecalculateEdges(LR1EdgeTable& newEdges, LR1ItemsetContainer& newItemsets, ItemsetNameMap& nameMap);
@@ -53,5 +49,6 @@ private:
 	GrammarSymbolSetTable* followSetContainer;
 
 	LR1EdgeTable edges_;
+	LR1ItemsetBuilder* builder_;
 	LR1ItemsetContainer itemsets_;
 };

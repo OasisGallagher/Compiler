@@ -2,6 +2,7 @@
 
 #include "lr1.h"
 #include "debug.h"
+#include "define.h"
 #include "grammar.h"
 
 Forwards::Forwards() {
@@ -175,17 +176,84 @@ std::string LR1Itemset::ToString(const GrammarContainer& grammars) const {
 	return oss.str();
 }
 
-LR1Itemset& LR1ItemsetContainer::operator[](const std::string& name) {
+std::string LR1ItemsetContainer::ToString(const GrammarContainer& grammars) const {
+	std::ostringstream oss;
+	const char* seperator = "";
+	int index = 0;
+	for (const_iterator ite = begin(); ite != end(); ++ite) {
+		oss << seperator;
+		seperator = "\n";
+		oss << ite->ToString(grammars);
+	}
+
+	return oss.str();
+}
+
+bool LR1ItemsetBuilder::Merge(LR1ItemsetContainer& itemsets, ItemsetNameMap& nameMap) {
+	const_iterator first = begin(), pos;
+
+	do {
+		pos = Utility::FindGroup(first, end());
+		LR1Itemset newSet;
+
+		std::string nameText;
+		LR1ItemsetName newSetName;
+
+		char seperator = 0;
+		for (LR1ItemsetContainer::const_iterator ite = first; ite != pos; ++ite) {
+			if (seperator != 0) {
+				nameText += seperator;
+			}
+
+			seperator = ITEMSET_NAME_SEPERATOR;
+			nameText += ite->GetName().ToString();
+			nameMap.insert(std::make_pair(ite->GetName(), newSetName));
+		}
+
+		newSetName.assign(nameText);
+		newSet.SetName(newSetName);
+
+		MergeNewItemset(newSet, first, pos);
+
+		itemsets.insert(newSet);
+
+		first = pos;
+	} while (first != end());
+
+	return true;
+}
+
+void LR1ItemsetBuilder::MergeNewItemset(LR1Itemset &newSet, const_iterator first, const_iterator last) {
+	for (int i = 0; i < first->size(); ++i) {
+		LR1Itemset::iterator current = first->begin();
+		std::advance(current, i);
+
+		LR1Item newItem(current->cpos, current->dpos);
+
+		for (LR1ItemsetContainer::const_iterator ite = first; ite != last; ++ite) {
+			LR1Itemset::const_iterator ite2 = ite->begin();
+			std::advance(ite2, i);
+
+			for (Forwards::const_iterator svi = ite2->forwards.begin(); svi != ite2->forwards.end(); ++svi) {
+				newItem.forwards.insert(*svi);
+			}
+		}
+
+		newSet.insert(newItem);
+	}
+}
+
+LR1Itemset& LR1ItemsetBuilder::operator[](const std::string& name) {
 	dictionary::iterator pos = dict_.find(name);
 	Assert(pos != dict_.end(), "can not find item named " + name);
 	return pos->second;
 }
 
-LR1Itemset& LR1ItemsetContainer::operator[](const LR1ItemsetName& name) {
+LR1Itemset& LR1ItemsetBuilder::operator[](const LR1ItemsetName& name) {
 	return operator[](name.ToString());
 }
 
-bool LR1ItemsetContainer::insert(LR1Itemset& itemset) {
+bool LR1ItemsetBuilder::insert(LR1Itemset& itemset) {
 	std::pair<iterator, bool> status = container_.insert(itemset);
 	if (itemset.GetName().empty()) {
 		if (status.second) {
@@ -198,30 +266,6 @@ bool LR1ItemsetContainer::insert(LR1Itemset& itemset) {
 
 	dict_.insert(std::make_pair(itemset.GetName().ToString(), itemset));
 	return status.second;
-}
-
-LR1ItemsetContainer& LR1ItemsetContainer::operator = (const LR1ItemsetContainer& other) {
-	container_ = other.container_;
-	
-	dict_.clear();
-	//for (LR1ItemsetContainer::const_iterator ite = other.begin(); ite != other.end(); ++ite) {
-	//	dict_.insert(std::make_pair(ite->GetName(), *ite));
-	//}
-
-	return *this;
-}
-
-std::string LR1ItemsetContainer::ToString(const GrammarContainer& grammars) const {
-	std::ostringstream oss;
-	const char* seperator = "";
-	int index = 0;
-	for (const_iterator ite = begin(); ite != end(); ++ite) {
-		oss << seperator;
-		seperator = "\n";
-		oss << ite->ToString(grammars);
-	}
-
-	return oss.str();
 }
 
 bool ItemSetComparer::operator()(const LR1Itemset& lhs, const LR1Itemset& rhs) const {

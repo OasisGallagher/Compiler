@@ -32,7 +32,6 @@ public:
 public:
 	void SetLhs(const GrammarSymbol& symbol);
 	void AddCondinate(const std::string& action, const SymbolVector& symbols);
-	void SortCondinates();
 
 	const GrammarSymbol& GetLhs() const;
 	const CondinateContainer& GetCondinates() const;

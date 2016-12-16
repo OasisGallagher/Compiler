@@ -123,18 +123,22 @@ struct ItemSetNameComparer {
 	}
 };
 
-class LR1ItemsetContainer {
-	typedef ItemSetComparer comparer_type;
-	typedef std::set<LR1Itemset, comparer_type> container_type;
+class LR1ItemsetContainer : public std::set <LR1Itemset, ItemSetComparer> {
+public:
+	std::string ToString(const GrammarContainer& grammars) const;
+};
 
+typedef std::map<LR1ItemsetName, LR1ItemsetName> ItemsetNameMap;
+
+class LR1ItemsetBuilder {
 	typedef std::map<std::string, LR1Itemset> dictionary;
 
 public:
+	typedef LR1ItemsetContainer container_type;
 	typedef container_type::iterator iterator;
 	typedef container_type::const_iterator const_iterator;
 
 public:
-	LR1ItemsetContainer& operator = (const LR1ItemsetContainer& other);
 	LR1Itemset& operator[](const std::string& name);
 	LR1Itemset& operator[](const LR1ItemsetName& name);
 
@@ -152,7 +156,10 @@ public:
 	bool insert(LR1Itemset& itemset);
 
 public:
-	std::string ToString(const GrammarContainer& grammars) const;
+	bool Merge(LR1ItemsetContainer& itemsets, ItemsetNameMap& nameMap);
+
+private:
+	void MergeNewItemset(LR1Itemset &newSet, const_iterator first, const_iterator last);
 
 private:
 	dictionary dict_;

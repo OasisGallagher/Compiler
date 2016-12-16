@@ -221,7 +221,7 @@ Action* ActionParser::CreateAction(const std::string& cmd) {
 		}
 	}
 
-	Assert(action != nullptr, "invalid action " + token);
+	Assert(action != nullptr, std::string("invalid action ") + token);
 	action->SetArgument(argument);
 
 	return action;

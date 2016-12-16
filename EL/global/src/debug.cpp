@@ -39,9 +39,13 @@ void Debug::SetConsoleColor(int color) {
 	SetConsoleTextAttribute(handle, color);
 }
 
-void Debug::Break(const std::string& message, const char* file, int line) {
+std::string Debug::GetTime() {
+	return "";
+}
+
+void Debug::Break(const std::string& expression, const std::string& message, const char* file, int line) {
 	std::ostringstream oss;
-	oss << message << "\n";
+	oss << expression + ":\n" + message << "\n";
 	oss << "at " << file << ":" << line;
 	Debug::LogError(oss.str());
 

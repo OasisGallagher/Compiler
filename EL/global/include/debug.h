@@ -11,13 +11,14 @@ public:
 	static void LogWarning(const std::string& text);
 	static void LogError(const std::string& text);
 
-	static void Break(const std::string& message, const char* file, int line);
+	static void Break(const std::string& expression, const std::string& message, const char* file, int line);
 
 	static void EnableMemoryLeakCheck();
 
 private:
 	Debug();
 	static void SetConsoleColor(int color);
+	static std::string GetTime();
 };
 
 class Timer {
@@ -31,7 +32,7 @@ private:
 };
 
 #define Verify(expression, message)	\
-	(void)((!!(expression)) || (Debug::Break(std::string(#expression) + ": " + message,  __FILE__, __LINE__), 0))
+	(void)((!!(expression)) || (Debug::Break(#expression, message,  __FILE__, __LINE__), 0))
 
 #if _DEBUG
 #define Assert(expression, message)	\

@@ -31,6 +31,13 @@ bool Utility::IsBlankText(const char* text, const char** pos) {
 	return true;
 }
 
+int Utility::ParseInteger(const std::string& text) {
+	int answer = INT_MIN;
+	bool status = ParseInteger(text, &answer);
+	Assert(status, "invalid integer :" + text);
+	return answer;
+}
+
 bool Utility::ParseInteger(const std::string& text, int* answer) {
 	int integer = 0;
 

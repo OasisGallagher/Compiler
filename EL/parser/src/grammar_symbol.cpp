@@ -105,6 +105,10 @@ void FirstSetTable::GetFirstSet(GrammarSymbolSet& answer, SymbolVector::iterator
 	}
 
 	for (; first != last; ++first) {
+		if (first->ToString() == "$stmt_sequence") {
+			__asm int 3
+		}
+
 		if (first->SymbolType() == GrammarSymbolTerminal) {
 			answer.insert(*first);
 

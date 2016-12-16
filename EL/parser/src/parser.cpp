@@ -1,5 +1,6 @@
 #include <sstream>
 
+#include "debug.h"
 #include "table.h"
 #include "reader.h"
 #include "parser.h"
@@ -84,6 +85,9 @@ bool Parser::SetGrammars(const char* productions) {
 			symbols.clear();
 		}
 	}
+
+	Assert(!grammars_.empty(), "grammar container is empty");
+	Assert(grammars_.front()->GetLhs() == GrammarSymbol::program, "invalid grammar. missing $program.");
 
 	CreateFirstSets();
 	CreateFollowSets();
