@@ -115,7 +115,8 @@ std::string LRParser::ToString() const {
 
 	//oss << Parser::ToString();
 	//oss << "\n\n";
-
+	oss << firstSetContainer_.ToString();
+	oss << "\n\n";
 	oss << lrTable_->ToString();
 
 	return oss.str();

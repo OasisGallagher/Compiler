@@ -3,15 +3,12 @@ $program
 
 $stmt_sequence
 	| $stmt_sequence ; $statement			$$ = make(";", $3, $1)
-	| $stmt_sequence newline $statement		$$ = make(";", $3, $1)
 	| $statement							$$ = $1
 
 $statement
 	: $if_stmt			$$ = $1
 	| $assign_stmt		$$ = $1
 	| ;					$$ = $1
-	| newline			$$ = $1
-	| epsilon			$$ = $1
 
 $if_stmt
 	| if ( $exp ) { $stmt_sequence }							$$ = make("if", $5, $2, $0)

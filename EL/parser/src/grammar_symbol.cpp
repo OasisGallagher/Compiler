@@ -99,32 +99,26 @@ std::string GrammarSymbolSetTable::ToString() const {
 }
 
 void FirstSetTable::GetFirstSet(GrammarSymbolSet& answer, SymbolVector::iterator first, SymbolVector::iterator last) {
-	if (first == last) {
-		answer.insert(GrammarSymbol::epsilon);
-		return;
+	for (; first != last; ++first) {
+		Assert(find(*first) != end(), "logic error");
+		GrammarSymbolSet& firstSet = at(*first);
+		bool hasEpsilon = false;
+		for (GrammarSymbolSet::iterator ite = firstSet.begin(); ite != firstSet.end(); ++ite) {
+			if (*ite != GrammarSymbol::epsilon) {
+				answer.insert(*ite);
+			}
+			else {
+				hasEpsilon = true;
+			}
+		}
+
+		if (!hasEpsilon) {
+			break;
+		}
 	}
 
-	for (; first != last; ++first) {
-		if (first->ToString() == "$stmt_sequence") {
-			__asm int 3
-		}
-
-		if (first->SymbolType() == GrammarSymbolTerminal) {
-			answer.insert(*first);
-
-			if (*first != GrammarSymbol::epsilon) {
-				break;
-			}
-		}
-		else {
-			Assert(find(*first) != end(), "logic error");
-			GrammarSymbolSet& firstSet = this->at(*first);
-			answer.insert(firstSet.begin(), firstSet.end());
-
-			if (firstSet.find(GrammarSymbol::epsilon) == firstSet.end()) {
-				break;
-			}
-		}
+	if (first == last) {
+		answer.insert(GrammarSymbol::epsilon);
 	}
 }
 

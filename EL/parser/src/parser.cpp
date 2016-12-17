@@ -179,6 +179,10 @@ void Parser::DestroyGammars() {
 }
 
 void Parser::CreateFirstSets() {
+	for (GrammarSymbolContainer::const_iterator ite = terminalSymbols_.begin(); ite != terminalSymbols_.end(); ++ite) {
+		firstSetContainer_[ite->second].insert(ite->second);
+	}
+
 	for (; CreateFirstSetsOnePass();) {
 	}
 }
@@ -193,21 +197,12 @@ bool Parser::CreateFirstSetsOnePass() {
 
 		for (CondinateContainer::const_iterator ite2 = conds.begin(); ite2 != conds.end(); ++ite2) {
 			Condinate* c = *ite2;
-			GrammarSymbol& front = c->symbols.front();
-
-			if (front.SymbolType() == GrammarSymbolTerminal) {
-				anySetModified = firstSet.insert(c->symbols.front()).second || anySetModified;
-				continue;
-			}
-
 			SymbolVector::iterator ite3 = c->symbols.begin();
+
 			for (; ite3 != c->symbols.end(); ++ite3) {
 				GrammarSymbol& current = *ite3;
-				if (current.SymbolType() != GrammarSymbolNonterminal) {
-					break;
-				}
 
-				anySetModified = MergeNonEpsilonElements(firstSet, firstSetContainer_[front]) || anySetModified;
+				anySetModified = MergeNonEpsilonElements(firstSet, firstSetContainer_[current]) || anySetModified;
 
 				GrammarSymbolSet& currentFirstSet = firstSetContainer_[current];
 				if (currentFirstSet.find(GrammarSymbol::epsilon) == currentFirstSet.end()) {

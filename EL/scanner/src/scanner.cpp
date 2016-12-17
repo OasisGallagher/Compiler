@@ -335,7 +335,7 @@ bool TextScanner::IsUnaryOperator() {
 }
 
 FileScanner::FileScanner(const char* path) 
-	: reader_(new FileReader(path, true, true)), lineno_(0) {
+	: reader_(new FileReader(path, true, false)), lineno_(0) {
 }
 
 FileScanner::~FileScanner() {
