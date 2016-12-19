@@ -2,6 +2,7 @@
 #include "lr1.h"
 #include "lr_impl.h"
 
+class Grammar;
 struct Condinate;
 
 class LALR : public LRImpl {
@@ -33,11 +34,13 @@ private:
 
 	void CalculateLR1Itemset(LR1Itemset& answer);
 	bool CalculateLR1ItemsetOnePass(LR1Itemset& answer);
+	void CalculateClosureItems(LR1Itemset& answer, const GrammarSymbolSet& firsts, Grammar* g, int gi);
 	void CalculateLR1ItemsetByLhs(LR1Itemset& answer, const LR1Item& item, const GrammarSymbol& lhs, const Condinate* cond);
 
 	bool GetLR1EdgeTarget(LR1Itemset& answer, const LR1Itemset& src, const GrammarSymbol& symbol);
 	bool CalculateLR1EdgeTarget(LR1Itemset& answer, const LR1Itemset& src, const GrammarSymbol& symbol);
 
+	bool IsNullable(const GrammarSymbol& symbol);
 	bool ParseLRAction(LRActionTable & actionTable, const LR1ItemsetName& name, const LR1Item &item);
 
 private:
