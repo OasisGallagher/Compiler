@@ -2,4 +2,64 @@ $program
 	: $stmt_sequence	$$ = $1
 
 $stmt_sequence
-	: epsilon			$$ = $1
+	| $stmt_sequence ; $statement			$$ = make(";", $3, $1)
+	| $statement							$$ = $1
+
+$statement
+	: $if_stmt		$$ = $1
+	| $assign_stmt		$$ = $1
+	| epsilon		$$ = $1
+
+$if_stmt
+	| if ( $exp ) { $stmt_sequence }							$$ = make("if", $5, $2, $0)
+	| if ( $exp ) { $stmt_sequence } else { $stmt_sequence }	$$ = make("if", $9, $6, $2)
+
+$assign_stmt
+	: $id = $exp		$$ = make("=", $3, $1)
+
+$exp 
+	: $simple_exp $comparison_op $simple_exp	$$ = make("comparison", $3, $1)
+	| $simple_exp								$$ = $1
+
+$comparison_op
+	: <		$$ = $1
+	| <=	$$ = $1
+	| >		$$ = $1
+	| >=	$$ = $1
+	| ==	$$ = $1
+
+$simple_exp
+	: $simple_exp $addop $term	$$ = make("+", $3, $1)
+	| $term						$$ = $1
+
+$addop
+	: +		$$ = $1
+	| -		$$ = $1
+
+$term
+	: $term $mulop $factor		$$ = make("*", $3, $1)
+	| $factor					$$ = $1
+
+$mulop
+	: *		$$ = $1
+	| /		$$ = $1
+	
+$id
+	: identifier	$$ = symbol($1)
+	
+$num
+	: number		$$ = constant($1)
+	| - $num		$$ = make("-", $0, $1)
+	| - ( $num )	$$ = make("-", $0, $2)
+	| + $num		$$ = $1
+	| + ( $num )	$$ = $2
+
+$str
+	: string		$$ = literal($1)
+	
+$factor
+	: ( $exp )		$$ = $2
+	| $num			$$ = $1
+	| $str			$$ = $1
+	| $id			$$ = $1
+	
