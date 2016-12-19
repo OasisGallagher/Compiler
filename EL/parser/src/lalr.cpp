@@ -46,11 +46,16 @@ bool LALR::CreateLRParsingTable(LRGotoTable& gotoTable, LRActionTable& actionTab
 bool LALR::CreateLR1Itemsets() {
 	LR1Item start(0, 0);
 	start.forwards.insert(GrammarSymbol::zero);
-	
 	LR1Itemset itemset;
 	itemset.SetName("0");
 
 	itemset.insert(start);
+	if (IsNullable(grammars_->at(0)->GetCondinates()[0]->symbols[0])) {
+		LR1Item start2(0, 1);
+		start2.forwards.insert(GrammarSymbol::zero);
+		itemset.insert(start2);
+	}
+
 	CalculateLR1Itemset(itemset);
 	
 	builder_->insert(itemset);
@@ -152,11 +157,16 @@ bool LALR::CalculateLR1EdgeTarget(LR1Itemset& answer, const LR1Itemset& src, con
 	for (LR1Itemset::const_iterator ite = src.begin(); ite != src.end(); ++ite) {
 		const Condinate* cond = grammars_->GetTargetCondinate(ite->cpos, nullptr);
 
+		if (cond->symbols.front() == GrammarSymbol::epsilon) {
+			continue;
+		}
+
 		if (ite->dpos >= (int)cond->symbols.size() || cond->symbols[ite->dpos] != symbol) {
 			continue;
 		}
 
 		LR1Item item(ite->cpos, ite->dpos + 1, ite->forwards);
+		std::string str = item.ToString(*grammars_);
 		answer.insert(item);
 	}
 
@@ -207,24 +217,42 @@ void LALR::CalculateLR1ItemsetByLhs(LR1Itemset& answer, const LR1Item& item, con
 
 	for (SymbolVector::const_iterator fi = item.forwards.begin(); fi != item.forwards.end(); ++fi) {
 		beta.push_back(*fi);
-
 		firstSetContainer_->GetFirstSet(firstSet, beta.begin(), beta.end());
+		beta.pop_back();
 
-		for (GrammarSymbolSet::iterator fsi = firstSet.begin(); fsi != firstSet.end(); ++fsi) {
-			if (fsi->SymbolType() == GrammarSymbolNonterminal) {
-				continue;
+		CalculateClosureItems(answer, firstSet, grammar, gi);
+
+		firstSet.clear();
+	}
+}
+
+void LALR::CalculateClosureItems(LR1Itemset& answer, const GrammarSymbolSet& firsts, Grammar* g, int gi) {
+	const CondinateContainer& conds = g->GetCondinates();
+
+	for (GrammarSymbolSet::const_iterator fsi = firsts.begin(); fsi != firsts.end(); ++fsi) {
+		int index = 0;
+		for (CondinateContainer::const_iterator ci = conds.begin(); ci != conds.end(); ++ci, ++index) {
+			const Condinate* tc = *ci;
+			SymbolVector::const_iterator ite = tc->symbols.begin();
+			int dpos = 0;
+
+			for (; ite != tc->symbols.end(); ++ite, ++dpos) {
+				LR1Item newItem(Utility::MakeDword(index, gi), dpos);
+				newItem.forwards.insert(*fsi);
+				answer.insert(newItem);
+				std::string str = newItem.ToString(*grammars_);
+				std::string sym = ite->ToString();
+				if(*ite == GrammarSymbol::epsilon || !IsNullable(*ite)) {
+					break;
+				}
 			}
 
-			int index = 0;
-			for (CondinateContainer::const_iterator ci = conds.begin(); ci != conds.end(); ++ci, ++index) {
-				LR1Item newItem(Utility::MakeDword(index, gi), 0);
+			if (ite == tc->symbols.end()) {
+				LR1Item newItem(Utility::MakeDword(index, gi), dpos);
 				newItem.forwards.insert(*fsi);
 				answer.insert(newItem);
 			}
 		}
-
-		beta.pop_back();
-		firstSet.clear();
 	}
 }
 
@@ -310,6 +338,11 @@ void LALR::RecalculateNewEdgeTarget(LR1EdgeTable& newEdges, const LR1Itemset& cu
 	}
 }
 
+bool LALR::IsNullable(const GrammarSymbol& symbol) {
+	GrammarSymbolSet& firsts = firstSetContainer_->at(symbol);
+	return firsts.find(GrammarSymbol::epsilon) != firsts.end();
+}
+
 std::string LALR::ToString() const {
 	std::ostringstream oss;
 	
@@ -344,7 +377,7 @@ std::string LALR::ToString() const {
 
 	tp.AddHeader();
 
-	for (LR1ItemsetContainer::const_iterator ite = builder_->begin(); ite != builder_->end(); ++ite) {
+	for (LR1ItemsetContainer::const_iterator ite = itemsets_.begin(); ite != itemsets_.end(); ++ite) {
 		tp << ite->GetName().ToString();
 		LR1ItemsetName target;
 		for (GrammarSymbolContainer::const_iterator ite2 = terminalSymbols_->begin(); ite2 != terminalSymbols_->end(); ++ite2) {

@@ -65,7 +65,7 @@ bool LRParser::ParseFile(SyntaxTree* tree, FileScanner* fileScanner) {
 			Grammar* g = nullptr;
 			const Condinate* cond = grammars_.GetTargetCondinate(action.actionParameter, &g);
 
-			int length = cond->symbols.size();
+			int length = cond->symbols.front() == GrammarSymbol::epsilon ? 0 : cond->symbols.size();
 
 			std::string log = ">> Reduce `" + Utility::Concat(symbolStack.end() - length, symbolStack.end()) + "` to `" + g->GetLhs().ToString() + "`. ";
 
@@ -113,8 +113,9 @@ void LRParser::Clear() {
 std::string LRParser::ToString() const {
 	std::ostringstream oss;
 
-	//oss << Parser::ToString();
-	//oss << "\n\n";
+	oss << Parser::ToString();
+	oss << "\n\n";
+
 	oss << firstSetContainer_.ToString();
 	oss << "\n\n";
 	oss << lrTable_->ToString();
