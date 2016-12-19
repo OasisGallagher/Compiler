@@ -157,6 +157,8 @@ bool Parser::ParseProductions(TextScanner* textScanner, SymbolVector& symbols) {
 		symbols.push_back(CreateSymbol(token));
 	}
 
+	Assert(symbols.front() != GrammarSymbol::epsilon || symbols.size() == 1, "invalid epsilon usage.");
+
 	return true;
 }
 
