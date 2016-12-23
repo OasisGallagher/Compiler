@@ -55,7 +55,7 @@ bool LRParser::ParseFile(SyntaxTree* tree, FileScanner* fileScanner) {
 
 		if (action.actionType == LRActionShift) {
 			nextState = action.actionParameter;
-			Debug::Log(">> Shift symbol `" + a.ToString() + "`. Goto state " + std::to_string(nextState) + ".");
+			Debug::Log(">> Shift\t`" + a.ToString() + "`. Goto state " + std::to_string(nextState) + ".");
 
 			stateStack.push_back(nextState);
 			symbolStack.push_back(a);
@@ -67,7 +67,7 @@ bool LRParser::ParseFile(SyntaxTree* tree, FileScanner* fileScanner) {
 
 			int length = cond->symbols.front() == GrammarSymbol::epsilon ? 0 : cond->symbols.size();
 
-			std::string log = ">> Reduce `" + Utility::Concat(symbolStack.end() - length, symbolStack.end()) + "` to `" + g->GetLhs().ToString() + "`. ";
+			std::string log = ">> Reduce\t`" + Utility::Concat(symbolStack.end() - length, symbolStack.end()) + "` to `" + g->GetLhs().ToString() + "`. ";
 
 			void* newValue = (cond->action != nullptr) ? cond->action->Invoke(valueStack) : nullptr;
 
@@ -91,6 +91,8 @@ bool LRParser::ParseFile(SyntaxTree* tree, FileScanner* fileScanner) {
 	} while (action.actionType != LRActionAccept);
 
 	tree->SetRoot((SyntaxNode*)valueStack.back());
+
+	Debug::Log("");
 	Debug::Log(Utility::Heading("Accept"));
 
 	return true;
@@ -113,11 +115,11 @@ void LRParser::Clear() {
 std::string LRParser::ToString() const {
 	std::ostringstream oss;
 
-	oss << Parser::ToString();
-	oss << "\n\n";
+	//oss << Parser::ToString();
+	//oss << "\n\n";
 
-	oss << firstSetContainer_.ToString();
-	oss << "\n\n";
+	//oss << firstSetContainer_.ToString();
+	//oss << "\n\n";
 	oss << lrTable_->ToString();
 
 	return oss.str();

@@ -2,7 +2,6 @@
 #include "language.h"
 
 #include "lr_parser.h"
-#include "operator_precedence_parser.h"
 
 Language::Language(LanguageParameter* parameter) {
 	parser_ = new LRParser();

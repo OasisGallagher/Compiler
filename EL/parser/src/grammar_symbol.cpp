@@ -5,55 +5,14 @@
 #include "grammar_symbol.h"
 
 GrammarSymbol GrammarSymbol::null = nullptr;
-GrammarSymbol GrammarSymbol::zero = new Zero();
-GrammarSymbol GrammarSymbol::number = new Number();
-GrammarSymbol GrammarSymbol::string = new String();
-GrammarSymbol GrammarSymbol::newline = new Newline();
-GrammarSymbol GrammarSymbol::epsilon = new Epsilon();
-GrammarSymbol GrammarSymbol::program = new Program();
-GrammarSymbol GrammarSymbol::positive = new Positive();
-GrammarSymbol GrammarSymbol::negative = new Negative();
-GrammarSymbol GrammarSymbol::identifier = new Identifier();
-
-GrammarSymbol::GrammarSymbol()
-	: ptr_(nullptr) {
-}
-
-GrammarSymbol::operator bool() const {
-	return ptr_ != nullptr;
-}
-
-bool GrammarSymbol::operator == (const GrammarSymbol& other) const {
-	return ptr_ == other.ptr_;
-}
-
-bool GrammarSymbol::operator != (const GrammarSymbol& other) const {
-	return ptr_ != other.ptr_;
-}
-
-bool GrammarSymbol::operator < (const GrammarSymbol& other) const {
-	return ptr_ < other.ptr_;
-}
-
-bool GrammarSymbol::operator >(const GrammarSymbol& other) const {
-	return ptr_ > other.ptr_;
-}
-
-GrammarSymbolType GrammarSymbol::SymbolType() const {
-	return ptr_->SymbolType();
-}
-
-bool GrammarSymbol::Match(const ScannerToken& token) const {
-	return ptr_->Match(token);
-}
-
-std::string GrammarSymbol::ToString() const {
-	if (ptr_ != nullptr) {
-		return ptr_->ToString();
-	}
-
-	return "null";
-}
+GrammarSymbol GrammarSymbol::zero = new TerminalSymbol("zero");
+GrammarSymbol GrammarSymbol::number = new TerminalSymbol("number");
+GrammarSymbol GrammarSymbol::string = new TerminalSymbol("string");
+GrammarSymbol GrammarSymbol::epsilon = new TerminalSymbol("epsilon");
+GrammarSymbol GrammarSymbol::positive = new TerminalSymbol(POSITIVE_SIGN);
+GrammarSymbol GrammarSymbol::negative = new TerminalSymbol(NEGATIVE_SIGN);
+GrammarSymbol GrammarSymbol::identifier = new TerminalSymbol("identifier");
+GrammarSymbol GrammarSymbol::program = new NonterminalSymbol("Program");
 
 std::string GrammarSymbolContainer::ToString() const {
 	std::ostringstream oss;
@@ -128,114 +87,4 @@ GrammarSymbol SymbolFactory::Create(const std::string& text) {
 	}
 
 	return new NonterminalSymbol(text);
-}
-
-bool TerminalSymbol::Match(const ScannerToken& token) const {
-	return text_ == token.text;
-}
-
-GrammarSymbolType TerminalSymbol::SymbolType() const {
-	return GrammarSymbolTerminal;
-}
-
-TerminalSymbol::TerminalSymbol(const std::string& text) : GrammarSymbolBase(text) {
-
-}
-
-bool NonterminalSymbol::Match(const ScannerToken& token) const {
-	Assert(false, "match nonterminal symbol");
-	return false;
-}
-
-GrammarSymbolType NonterminalSymbol::SymbolType() const {
-	return GrammarSymbolNonterminal;
-}
-
-NonterminalSymbol::NonterminalSymbol(const std::string& text) : GrammarSymbolBase(text) {
-
-}
-
-bool Zero::Match(const ScannerToken& token) const {
-	Assert(false, "unable to compare zero with text");
-	return false;
-}
-
-Zero::Zero() : TerminalSymbol("zero") {
-
-}
-
-bool Epsilon::Match(const ScannerToken& token) const {
-	return true;
-}
-
-Epsilon::Epsilon() : TerminalSymbol("epsilon") {
-
-}
-
-bool Identifier::Match(const ScannerToken& token) const {
-	return token.tokenType == ScannerTokenIdentifier;
-}
-
-Identifier::Identifier() : TerminalSymbol("identifier") {
-
-}
-
-Program::Program() : TerminalSymbol("$program") {
-
-}
-
-bool Program::Match(const ScannerToken& token) const {
-	return true;
-}
-
-bool Positive::Match(const ScannerToken& token) const {
-	return token.tokenType == ScannerTokenPositive;
-}
-
-Positive::Positive() : TerminalSymbol(POSITIVE_SIGN) {
-
-}
-
-bool Negative::Match(const ScannerToken& token) const {
-	return token.tokenType == ScannerTokenNegative;
-}
-
-Negative::Negative() : TerminalSymbol(NEGATIVE_SIGN) {
-
-}
-
-bool Number::Match(const ScannerToken& token) const {
-	return token.tokenType == ScannerTokenNumber;
-}
-
-Number::Number() : TerminalSymbol("number") {
-
-}
-
-bool String::Match(const ScannerToken& token) const {
-	return token.tokenType == ScannerTokenString;
-}
-
-String::String() : TerminalSymbol("string") {
-
-}
-
-bool Newline::Match(const ScannerToken& token) const {
-	return token.tokenType == ScannerTokenNewline;
-}
-
-Newline::Newline() : TerminalSymbol("newline") {
-
-}
-
-const std::string& GrammarSymbolBase::ToString() {
-	return text_;
-}
-
-GrammarSymbolBase::GrammarSymbolBase(const std::string& text) : text_(text) {
-
-}
-
-GrammarSymbolBase::~GrammarSymbolBase() {
-
 }

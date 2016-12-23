@@ -50,7 +50,7 @@ void Debug::Break(const std::string& expression, const std::string& message, con
 	Debug::LogError(oss.str());
 
 	MessageBox(NULL, message.c_str(), "Assertion Failed", MB_OK | MB_ICONERROR);
-	abort();
+	__asm int 3
 }
 
 void Debug::EnableMemoryLeakCheck() {

@@ -107,6 +107,8 @@ Grammar* GrammarContainer::FindGrammar(const GrammarSymbol& lhs, int* index) {
 		*index = pos;
 	}
 
+	Assert(g != nullptr, "can not find grammar with lhs = " + lhs.ToString() + ".");
+
 	return g;
 }
 

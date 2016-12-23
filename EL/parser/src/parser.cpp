@@ -28,7 +28,6 @@ void Parser::InitializeTerminalSymbolContainer() {
 	terminalSymbols_.insert(std::make_pair(GrammarSymbol::number.ToString(), GrammarSymbol::number));
 	terminalSymbols_.insert(std::make_pair(GrammarSymbol::string.ToString(), GrammarSymbol::string));
 	terminalSymbols_.insert(std::make_pair(GrammarSymbol::epsilon.ToString(), GrammarSymbol::epsilon));
-	terminalSymbols_.insert(std::make_pair(GrammarSymbol::newline.ToString(), GrammarSymbol::newline));
 	terminalSymbols_.insert(std::make_pair(GrammarSymbol::positive.ToString(), GrammarSymbol::positive));
 	terminalSymbols_.insert(std::make_pair(GrammarSymbol::negative.ToString(), GrammarSymbol::negative));
 	terminalSymbols_.insert(std::make_pair(GrammarSymbol::identifier.ToString(), GrammarSymbol::identifier));
@@ -87,7 +86,7 @@ bool Parser::SetGrammars(const char* productions) {
 	}
 
 	Assert(!grammars_.empty(), "grammar container is empty");
-	Assert(grammars_.front()->GetLhs() == GrammarSymbol::program, "invalid grammar. missing $program.");
+	Assert(grammars_.front()->GetLhs() == GrammarSymbol::program, "invalid grammar. missing \"Program\".");
 
 	CreateFirstSets();
 	CreateFollowSets();
@@ -110,9 +109,6 @@ GrammarSymbol Parser::FindSymbol(const ScannerToken& token, void*& addr) {
 		answer = GrammarSymbol::string;
 		addr = literalTable_->Add(token.text);
 	}
-	else if (token.tokenType == ScannerTokenNewline) {
-		answer = GrammarSymbol::newline;
-	}
 	else if (token.tokenType == ScannerTokenPositive) {
 		answer = GrammarSymbol::positive;
 	}
@@ -134,6 +130,10 @@ GrammarSymbol Parser::FindSymbol(const ScannerToken& token, void*& addr) {
 		if (ite != nonterminalSymbols_.end()) {
 			answer = ite->second;
 		}
+	}
+
+	if (!answer) {
+		__asm int 3
 	}
 
 	return answer;

@@ -1,0 +1,47 @@
+Create itemsets.
+Merge itemsets.
+Create parsing table.
+0.21 seconds used to create parser.
+================== Goto Table ==================
+(0, TopStatementsPrefix) => 2
+(0, TopStatements) => 1
+(0, EmptyStatement) => 6
+(0, ExpressionStatement) => 7
+(0, TopStatement) => 3
+(0, Statement) => 5
+(0, Expression) => 11
+(0, AssignmentExpression) => 12
+(0, LeftSideExpression) => 14
+(0, SimpleExpression) => 16
+(0, CallExpression) => 17
+(0, PrimaryExpression) => 18
+(0, Number) => 19
+(0, String) => 20
+(0, Identifier) => 21
+(2, EmptyStatement) => 6
+(2, ExpressionStatement) => 7
+(2, TopStatement) => 4
+(2, Statement) => 5
+(2, Expression) => 11
+(2, AssignmentExpression) => 12
+(2, LeftSideExpression) => 14
+(2, SimpleExpression) => 16
+(2, CallExpression) => 17
+(2, PrimaryExpression) => 18
+(2, Number) => 19
+(2, String) => 20
+(2, Identifier) => 21
+(7, Semicolon) => 8
+(13, AssignmentExpression) => 15
+(13, LeftSideExpression) => 14
+(13, SimpleExpression) => 16
+(13, CallExpression) => 17
+(13, PrimaryExpression) => 18
+(13, Number) => 19
+(13, String) => 20
+(13, Identifier) => 21
+
+=====================Accept=====================
+
+================== SyntaxTree ==================
+

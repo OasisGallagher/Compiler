@@ -1,65 +1,56 @@
-$program
-	: $stmt_sequence	$$ = $1
+Program
+	: TopStatements	$$ = $1
 
-$stmt_sequence
-	| $stmt_sequence ; $statement			$$ = make(";", $3, $1)
-	| $statement							$$ = $1
+TopStatements
+	: epsilon				$$ = $1
+	| TopStatementsPrefix	$$ = $1
 
-$statement
-	: $if_stmt		$$ = $1
-	| $assign_stmt		$$ = $1
-	| epsilon		$$ = $1
+TopStatementsPrefix
+	: TopStatement						$$ = $1
+	| TopStatementsPrefix TopStatement	$$ = make("statements", $2, $1)
 
-$if_stmt
-	| if ( $exp ) { $stmt_sequence }							$$ = make("if", $5, $2, $0)
-	| if ( $exp ) { $stmt_sequence } else { $stmt_sequence }	$$ = make("if", $9, $6, $2)
+TopStatement
+	: Statement				$$ = $1
 
-$assign_stmt
-	: $id = $exp		$$ = make("=", $3, $1)
+Statement
+	: EmptyStatement					$$ = $1
+	| ExpressionStatement Semicolon		$$ = $2
 
-$exp 
-	: $simple_exp $comparison_op $simple_exp	$$ = make("comparison", $3, $1)
-	| $simple_exp								$$ = $1
-
-$comparison_op
-	: <		$$ = $1
-	| <=	$$ = $1
-	| >		$$ = $1
-	| >=	$$ = $1
-	| ==	$$ = $1
-
-$simple_exp
-	: $simple_exp $addop $term	$$ = make("+", $3, $1)
-	| $term						$$ = $1
-
-$addop
-	: +		$$ = $1
-	| -		$$ = $1
-
-$term
-	: $term $mulop $factor		$$ = make("*", $3, $1)
-	| $factor					$$ = $1
-
-$mulop
-	: *		$$ = $1
-	| /		$$ = $1
+EmptyStatement
+	: ;						$$ = $1
 	
-$id
+Semicolon
+	: ;						$$ = $1
+	
+ExpressionStatement
+	: Expression			$$ = $1
+	
+Expression
+	: AssignmentExpression	$$ = $1
+	
+AssignmentExpression
+	: LeftSideExpression = AssignmentExpression	$$ = make("assignment", $3, $1)
+	| SimpleExpression							$$ = $1
+
+LeftSideExpression
+	: CallExpression	$$ = $1
+	
+CallExpression
+	: PrimaryExpression	$$ = $1
+	
+PrimaryExpression
+	: SimpleExpression	$$ = $1
+	
+SimpleExpression
+	: Number		$$ = $1
+	| String		$$ = $1
+	| Identifier	$$ = $1
+	
+Identifier
 	: identifier	$$ = symbol($1)
 	
-$num
+Number
 	: number		$$ = constant($1)
-	| - $num		$$ = make("-", $0, $1)
-	| - ( $num )	$$ = make("-", $0, $2)
-	| + $num		$$ = $1
-	| + ( $num )	$$ = $2
 
-$str
+String
 	: string		$$ = literal($1)
-	
-$factor
-	: ( $exp )		$$ = $2
-	| $num			$$ = $1
-	| $str			$$ = $1
-	| $id			$$ = $1
-	

@@ -54,7 +54,7 @@ inline int Utility::MakeDword(int low, int high) {
 }
 
 inline bool Utility::IsTerminal(const std::string& token) {
-	return token.front() != '$';
+	return isupper(token.front()) == 0;
 }
 
 inline bool Utility::IsDigit(int c) {

@@ -161,7 +161,7 @@ void LR1Itemset::SetName(const LR1ItemsetName& name) {
 std::string LR1Itemset::ToString(const GrammarContainer& grammars) const {
 	std::ostringstream oss;
 
-	oss << "(" << GetName().ToString() << ")\t";
+	oss << "(" << GetName().ToString();// << ")\t";
 	oss << "{ ";
 
 	const char* seperator = "";
