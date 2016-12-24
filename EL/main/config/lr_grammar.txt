@@ -1,37 +1,193 @@
 Program
-	: TopStatements	$$ = $1
+	: TopStatements		$$ = $1
 
 TopStatements
-	: epsilon				$$ = $1
+	: epsilon				$$ = $0
 	| TopStatementsPrefix	$$ = $1
 
 TopStatementsPrefix
 	: TopStatement						$$ = $1
-	| TopStatementsPrefix TopStatement	$$ = make("statements", $2, $1)
+	| TopStatementsPrefix TopStatement	$$ = make("TopStatementsPrefix", $2, $1)
 
 TopStatement
 	: Statement				$$ = $1
+	| FunctionDefination	$$ = $1
 
 Statement
-	: EmptyStatement					$$ = $1
-	| ExpressionStatement Semicolon		$$ = $2
+	: EmptyStatement				$$ = $1
+	| ExpressionStatement ;			$$ = $2
+	| VariableDefination ;			$$ = $2
+	| Block							$$ = $1
+	| IfStatement					$$ = $1
+	| WhileStatement				$$ = $1
+	| ForStatement					$$ = $1
+	| ContinueStatement ;			$$ = $1
+	| BreakStatement ;				$$ = $1
+	| ReturnStatement ;				$$ = $1
 
 EmptyStatement
 	: ;						$$ = $1
 	
-Semicolon
-	: ;						$$ = $1
-	
 ExpressionStatement
 	: Expression			$$ = $1
+
+VariableDefination
+	: var VariableDeclarationList	$$ = make("VariableDefination", $1)
+
+VariableDeclarationList
+	: VariableDeclaration							$$ = $1
+	| VariableDeclarationList, VariableDefination	$$ = make("VariableDeclarationList", $2, $1)
+
+VariableDeclaration
+	: Identifier VariableInitializer				$$ = make("VariableDeclaration", $2, $1)
+
+VariableInitializer
+	: epsilon					$$ = $0
+	| = AssignmentExpression	$$ = make("VariableInitializer", $1)
+
+Block
+	: { BlockStatements }		$$ = $2
+
+BlockStatements
+	: epsilon					$$ = $0
+	| BlockStatementsPrefix		$$ = $1
+
+BlockStatementsPrefix
+	: Statement							$$ = $1
+	| BlockStatementsPrefix Statement	$$ = make("BlockStatementsPrefix", $2, $1)
+
+IfStatement
+	: if ParenthesizedExpression Statement					$$ = make("IfStatement", $2, $1, $0)
+	| if ParenthesizedExpression Statement else Statement	$$ = make("IfStatement", $4, $3, $1)
+	
+WhileStatement
+	: while ParenthesizedExpression Statement	$$ = make("WhileStatement", $2, $1)
+	
+ForStatement
+	: for ( ForInitializer ; OptionalExpession ; OptionalExpession ) Statement	$$ = make("ForStatement", $7, $5, $3, $1)
+	
+ForInitializer
+	: epsilon						$$ = $0
+	| Expression					$$ = $1
+	| var VariableDeclarationList	$$ = make("ForInitializer", $1)
+	
+ContinueStatement
+	: continue	$$ = make("ContinueStatement")
+	
+BreakStatement
+	: break		$$ = make("BreakStatement")
+	
+ReturnStatement
+	: return OptionalExpession	$$ = make("ReturnStatement", $1)
+	
+FunctionDefination
+	: NamedFunction			$$ = $1
+
+AnonymousFunction
+	: function FormalParametersAndBody	$$ = make("AnonymousFunction", $1)
+	
+NamedFunction
+	: function Identifier FormalParametersAndBody	$$ = make("NamedFunction", $2, $1)
+	
+FormalParametersAndBody
+	: epsilon					$$ = $0
+	| FormalParametersPrefix	$$ = $1
+	
+FormalParametersPrefix
+	: FormalParameter								$$ = $1
+	| FormalParametersPrefix , FormalParameter		$$ = make("FormalParametersPrefix", $3, $1)
+	
+FormalParameter
+	: Identifier	$$ = $1
 	
 Expression
-	: AssignmentExpression	$$ = $1
+	: AssignmentExpression					$$ = $1
+	| Expression , AssignmentExpression		$$ = make("Expression", $3, $1)
+	
+OptionalExpession
+	: epsilon		$$ = $0
+	| Expression	$$ = $1
 	
 AssignmentExpression
-	: LeftSideExpression = AssignmentExpression	$$ = make("assignment", $3, $1)
-	| SimpleExpression							$$ = $1
+	: ConditionalExpression											$$ = $1
+	| LeftSideExpression = AssignmentExpression						$$ = make("=", $3, $1)
+	| LeftSideExpression CompoundAssignment AssignmentExpression	$$ = make("CompoundAssignmentExpression", $3, $2, $1)
+	
+CompoundAssignment
+	: *=	$$ = make("*=")
+	| /=	$$ = make("/=")
+	| %=	$$ = make("%=")
+	| +=	$$ = make("+=")
+	| -=	$$ = make("-=")
+	| <<=	$$ = make("<<=")
+	| >>=	$$ = make(">>=")
+	| &=	$$ = make("&=")
+	| ^=	$$ = make("^=")
+	| |=	$$ = make("|=")
 
+ConditionalExpression
+	: LogicalOrExpression													$$ = $1
+	| LogicalOrExpression ? AssignmentExpression : AssignmentExpression		$$ = make("?:", $3, $1)
+	
+LogicalAndExpression
+	: BitwiseOrExpression							$$ = $1
+	| LogicalAndExpression && BitwiseOrExpression	$$ = make("&&", $3, $1)
+	
+LogicalOrExpression
+	: BitwiseAndExpression							$$ = $1
+	| LogicalOrExpression || BitwiseAndExpression	$$ = make("||", $3, $1)
+	
+BitwiseAndExpression
+	: EqualityExpression							$$ = $1
+	| BitwiseAndExpression & EqualityExpression		$$ = make("&", $3, $1)
+	
+BitwiseXorExpression
+	: BitwiseAndExpression							$$ = $1
+	| BitwiseXorExpression ^ BitwiseAndExpression	$$ = make("^", $3, $1)
+	
+BitwiseOrExpression
+	: BitwiseXorExpression							$$ = $1
+	| BitwiseOrExpression | BitwiseXorExpression	$$ = make("|", $3, $1)
+
+EqualityExpression
+	: RelationalExpression							$$ = $1
+	| EqualityExpression == RelationalExpression	$$ = make("==", $3, $1)
+	| EqualityExpression != RelationalExpression	$$ = make("!=", $3, $1)
+	
+RelationalExpression
+	: ShiftExpression								$$ = $1
+	| RelationalExpression < ShiftExpression		$$ = make("<", $3, $1)
+	| RelationalExpression > ShiftExpression		$$ = make(">", $3, $1)
+	| RelationalExpression <= ShiftExpression		$$ = make("<=", $3, $1)
+	| RelationalExpression >= ShiftExpression		$$ = make(">=", $3, $1)
+	
+ShiftExpression
+	: AdditiveExpression							$$ = $1
+	| ShiftExpression << AdditiveExpression			$$ = make("<<", $3, $1)
+	| ShiftExpression >> AdditiveExpression			$$ = make(">>", $3, $1)
+	
+AdditiveExpression
+	: MultiplicativeExpression						$$ = $1
+	| AdditiveExpression + MultiplicativeExpression	$$ = make("+", $3, $1)
+	| AdditiveExpression - MultiplicativeExpression	$$ = make("-", $3, $1)
+	
+MultiplicativeExpression
+	: UnaryExpression								$$ = $1
+	| MultiplicativeExpression * UnaryExpression	$$ = make("*", $3, $1)
+	| MultiplicativeExpression / UnaryExpression	$$ = make("/", $3, $1)
+	| MultiplicativeExpression % UnaryExpression	$$ = make("%", $3, $1)
+	
+UnaryExpression
+	: PostfixExpression
+	| delete LeftSideExpression
+	| void UnaryExpression
+	| ++ LeftSideExpression
+	| -- LeftSideExpression
+	| + UnaryExpression
+	| - UnaryExpression
+	| ~ UnaryExpression
+	| ! UnaryExpression
+	
 LeftSideExpression
 	: CallExpression	$$ = $1
 	
