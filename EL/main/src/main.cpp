@@ -4,8 +4,17 @@
 #include "language.h"
 #include "syntax_tree.h"
 
+#include "scanner.h"
+
 int main() {
 	Debug::EnableMemoryLeakCheck();
+
+	TextScanner scanner;
+	scanner.SetText("<< < ? ==<<<");
+	char token[256];
+	for (ScannerTokenType type; (type = scanner.GetToken(token)) != ScannerTokenEndOfFile;) {
+		printf("%s\n", token);
+	}
 
 	Timer::Start();
 	LanguageParameter lp;

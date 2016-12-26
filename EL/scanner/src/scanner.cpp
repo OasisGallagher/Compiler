@@ -7,6 +7,12 @@
 #include "utilities.h"
 #include "reader.h"
 
+#define STATE_START			-1
+#define STATE_DONE			0
+#define STATE_NUMBER		1
+#define STATE_STRING		2
+#define STATE_IDENTIFIER	3
+
 struct Compound {
 	const char* text;
 	ScannerTokenType type;
@@ -17,6 +23,7 @@ struct Compound {
 };
 
 static Compound compounds[] = {
+	/*
 	"+", ScannerTokenPlus,
 	"-", ScannerTokenMinus,
 	"*", ScannerTokenMultiply,
@@ -27,18 +34,14 @@ static Compound compounds[] = {
 	"{", ScannerTokenLeftParenthesis,
 	"}", ScannerTokenRightParenthesis,
 	";", ScannerTokenSemicolon,
-	":", 
+	":", ScannerTokenColon,
 	"<", ScannerTokenLess,
 	"<=", ScannerTokenLessEqual,
-};
-
-enum ScannerStateType {
-	ScannerStateStart = -1,
-	ScannerStateDone,
-
-	ScannerStateNumber,
-	ScannerStateString,
-	ScannerStateIdentifier,
+	*/
+	"<", ScannerTokenPlus,
+	"<<", ScannerTokenMinus,
+	"?", ScannerTokenMultiply,
+	"==", ScannerTokenDivide,
 };
 
 std::string TokenPosition::ToString() const {
@@ -94,17 +97,13 @@ ScannerTokenType TextScanner::GetToken(char* token, int* pos) {
 ScannerTokenType TextScanner::GetNextToken(char* token, int* pos) {
 	int count = sizeof(compounds) / sizeof(compounds[0]);
 	std::sort(compounds, compounds + count);
-	int currentState = -1;
 
-	ScannerStateType state = ScannerStateStart;
+	int ci = 0, bi = 0, ch = 0, state = STATE_START;
+	bool savech = false, unget = false;
+
 	ScannerTokenType tokenType = ScannerTokenError;
 
-	bool savech = false, unget = false;
-	int ch = 0;
-
-	int index = 0;
-
-	for (; state != ScannerStateDone;) {
+	for (; state != STATE_DONE;) {
 		if (!GetChar(&ch)) {
 			if (pos != nullptr) {
 				*pos = -1;
@@ -117,7 +116,7 @@ ScannerTokenType TextScanner::GetNextToken(char* token, int* pos) {
 		unget = false;
 
 		switch (state) {
-		case ScannerStateStart:
+		case STATE_START:
 			if (ch == '#') {
 				return ScannerTokenEndOfFile;
 			}
@@ -126,58 +125,61 @@ ScannerTokenType TextScanner::GetNextToken(char* token, int* pos) {
 				savech = false;
 			}
 			else if (Utility::IsDigit(ch)) {
-				state = ScannerStateNumber;
+				state = STATE_NUMBER;
 			}
 			else if (Utility::IsLetter(ch)) {
-				state = ScannerStateIdentifier;
+				state = STATE_IDENTIFIER;
 			}
 			else if (ch == '"') {
-				state = ScannerStateString;
+				state = STATE_STRING;
 				savech = false;
 			}
 			else if (ch == '\n') {
-				state = ScannerStateDone;
+				state = STATE_DONE;
 				tokenType = ScannerTokenNewline;
 			}
 			else {
 				int low = 0, high = 0;
-				for (; low < count && *compounds[low].text != ch; low++) {
+				for (; low < count && compounds[low].text[ci] != ch; low++) {
 				}
 
 				Assert(low < count, "can not find item leading with " + std::to_string(ch));
-				for (high = low; high < count && *compounds[high].text == ch; ++high) {
+				for (high = low + 1; high < count && compounds[high].text[ci] == ch; ++high) {
 				}
 
-				if (high - low == 1 && strlen(compounds[low].text) == 1) {
-					currentState = 0;
+				++ci;
+				if (high - low == 1 && strlen(compounds[low].text) == ci) {
+					state = STATE_DONE;
 					tokenType = compounds[low].type;
 				}
 				else {
-					currentState = Utility::MakeDword(low, high);
+					state = Utility::MakeDword(low, high);
 				}
+
+				savech = true;
 			}
 			break;
 
-		case ScannerStateString:
+		case STATE_STRING:
 			if (ch == '"') {
 				tokenType = ScannerTokenString;
 				savech = false;
-				state = ScannerStateDone;
+				state = STATE_DONE;
 			}
 			break;
 
-		case ScannerStateIdentifier:
+		case STATE_IDENTIFIER:
 			if (!Utility::IsDigit(ch) && !Utility::IsLetter(ch)) {
-				state = ScannerStateDone;
+				state = STATE_DONE;
 				tokenType = ScannerTokenIdentifier;
 				unget = true;
 				savech = false;
 			}
 			break;
 
-		case ScannerStateNumber:
+		case STATE_NUMBER:
 			if (!Utility::IsDigit(ch)) {
-				state = ScannerStateDone;
+				state = STATE_DONE;
 				tokenType = ScannerTokenNumber;
 				unget = true;
 				savech = false;
@@ -185,16 +187,31 @@ ScannerTokenType TextScanner::GetNextToken(char* token, int* pos) {
 			break;
 
 		default:
-			int low = Utility::Loword(currentState);
-			int high = Utility::Highword(currentState);
-			Assert(high != 0, "invalid state " + std::to_string(currentState));
-			for (; low != high; ++low) {
-				if (compounds[low].text[1] == ch) {
-					currentState = 0;
-					tokenType = compounds[low].type;
-					break;
-				}
+			int low = Utility::Loword(state), high = Utility::Highword(state);
+			int tmp = low, length = ci;
+			for (; tmp < high && ch != 0 && compounds[tmp].text[ci] != ch; tmp++) {
 			}
+
+			savech = (tmp != high);
+
+			if (tmp > low && tmp < high) {
+				low = tmp;
+				++length;
+			}
+
+			high = low + 1;
+			for (; high < count && ch != 0 && compounds[high].text[ci] == ch; ++high) {
+			}
+
+			++ci;
+			if (high - low == 1 && strlen(compounds[low].text) == length) {
+				state = STATE_DONE;
+				tokenType = compounds[low].type;
+			}
+			else {
+				state = Utility::MakeDword(low, high);
+			}
+
 			break;
 		}
 
@@ -203,16 +220,16 @@ ScannerTokenType TextScanner::GetNextToken(char* token, int* pos) {
 		}
 
 		if (savech) {
-			Assert(index < MAX_TOKEN_CHARACTERS, "invalid token.");
-			tokenBuffer_[index++] = ch;
+			Assert(bi < MAX_TOKEN_CHARACTERS, "invalid token.");
+			tokenBuffer_[bi++] = ch;
 		}
 	}
 
-	strncpy(token, tokenBuffer_, index);
-	token[index] = 0;
+	strncpy(token, tokenBuffer_, bi);
+	token[bi] = 0;
 
 	if (pos != nullptr) {
-		*pos = 1 + current_ - start_ - index;
+		*pos = 1 + current_ - start_ - bi;
 	}
 
 	return tokenType;
