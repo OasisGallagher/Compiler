@@ -84,8 +84,6 @@ public:
 	static GrammarSymbol string;
 	static GrammarSymbol epsilon;
 	static GrammarSymbol program;
-	static GrammarSymbol negative;
-	static GrammarSymbol positive;
 	static GrammarSymbol identifier;
 
 private:

@@ -9,8 +9,6 @@ GrammarSymbol GrammarSymbol::zero = new TerminalSymbol("zero");
 GrammarSymbol GrammarSymbol::number = new TerminalSymbol("number");
 GrammarSymbol GrammarSymbol::string = new TerminalSymbol("string");
 GrammarSymbol GrammarSymbol::epsilon = new TerminalSymbol("epsilon");
-GrammarSymbol GrammarSymbol::positive = new TerminalSymbol(POSITIVE_SIGN);
-GrammarSymbol GrammarSymbol::negative = new TerminalSymbol(NEGATIVE_SIGN);
 GrammarSymbol GrammarSymbol::identifier = new TerminalSymbol("identifier");
 GrammarSymbol GrammarSymbol::program = new NonterminalSymbol("Program");
 

@@ -1,6 +1,5 @@
 #pragma once
 
-#include <map>
 #include <string>
 #include "token.h"
 
@@ -17,17 +16,13 @@ private:
 	void UngetChar();
 	ScannerTokenType GetNextToken(char* token, int* pos = nullptr);
 
-	bool IsUnaryOperator();
-
+private:
 	char* lineBuffer_;
 	char* tokenBuffer_;
 
 	char* start_;
 	char* dest_;
 	char* current_;
-
-	char* lastToken_;
-	ScannerTokenType lastTokenType_;
 };
 
 class FileReader;

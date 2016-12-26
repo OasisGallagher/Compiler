@@ -146,7 +146,11 @@ bool ActionMake::ParseParameters(TextScanner& scanner, Argument& argument) {
 	argument.text = token;
 
 	tokenType = scanner.GetToken(token);
-	Assert(tokenType == ScannerTokenComma, "invalid parameter");
+	if (tokenType == ScannerTokenRightParenthesis) {
+		return true;
+	}
+
+	Assert(tokenType == ScannerTokenComma, "invalid parameter, lhs = " + argument.text + ".");
 
 	return Action::ParseParameters(scanner, argument);
 }
@@ -237,7 +241,7 @@ bool ActionParser::IsOperand(const char* text) {
 	}
 
 	++text;
-	if (*text != '$' && !Utility::ParseInteger(text)) {
+	if (*text != '$' && !Utility::ParseInteger(text, nullptr)) {
 		return false;
 	}
 

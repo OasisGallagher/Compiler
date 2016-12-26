@@ -28,8 +28,6 @@ void Parser::InitializeTerminalSymbolContainer() {
 	terminalSymbols_.insert(std::make_pair(GrammarSymbol::number.ToString(), GrammarSymbol::number));
 	terminalSymbols_.insert(std::make_pair(GrammarSymbol::string.ToString(), GrammarSymbol::string));
 	terminalSymbols_.insert(std::make_pair(GrammarSymbol::epsilon.ToString(), GrammarSymbol::epsilon));
-	terminalSymbols_.insert(std::make_pair(GrammarSymbol::positive.ToString(), GrammarSymbol::positive));
-	terminalSymbols_.insert(std::make_pair(GrammarSymbol::negative.ToString(), GrammarSymbol::negative));
 	terminalSymbols_.insert(std::make_pair(GrammarSymbol::identifier.ToString(), GrammarSymbol::identifier));
 
 	nonterminalSymbols_.insert(std::make_pair(GrammarSymbol::program.ToString(), GrammarSymbol::program));
@@ -62,8 +60,8 @@ bool Parser::SetGrammars(const char* productions) {
 	TextScanner textScanner;
 	GrammarReader reader(productions);
 	const GrammarTextContainer& cont = reader.GetGrammars();
-	for (GrammarTextContainer::const_iterator ite = cont.begin();
-		ite != cont.end(); ++ite) {
+	int test = 0;
+	for (GrammarTextContainer::const_iterator ite = cont.begin(); ite != cont.end(); ++ite) {
 		const GrammarText& g = *ite;
 		
 		Grammar* grammar = new Grammar(CreateSymbol(g.lhs));
@@ -73,7 +71,7 @@ bool Parser::SetGrammars(const char* productions) {
 
 		for (GrammarText::ProductionTextContainer::const_iterator ite2 = g.productions.begin(); ite2 != g.productions.end(); ++ite2) {
 			const ProductionText& pr = *ite2;
-			
+			++test;
 			textScanner.SetText(pr.first.c_str());
 			
 			if (!ParseProductions(&textScanner, symbols)) {
@@ -108,12 +106,6 @@ GrammarSymbol Parser::FindSymbol(const ScannerToken& token, void*& addr) {
 	else if (token.tokenType == ScannerTokenString) {
 		answer = GrammarSymbol::string;
 		addr = literalTable_->Add(token.text);
-	}
-	else if (token.tokenType == ScannerTokenPositive) {
-		answer = GrammarSymbol::positive;
-	}
-	else if (token.tokenType == ScannerTokenNegative) {
-		answer = GrammarSymbol::negative;
 	}
 	else if (Utility::IsTerminal(token.text)) {
 		GrammarSymbolContainer::const_iterator pos = terminalSymbols_.find(token.text);
