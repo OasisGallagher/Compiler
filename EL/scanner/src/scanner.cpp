@@ -23,25 +23,48 @@ struct Compound {
 };
 
 static Compound compounds[] = {
-	/*
 	"+", ScannerTokenPlus,
 	"-", ScannerTokenMinus,
 	"*", ScannerTokenMultiply,
 	"/", ScannerTokenDivide,
+	"%", ScannerTokenMod,
+
+	"+=", ScannerTokenPlusEqual,
+	"-=", ScannerTokenMinusEqual,
+	"*=", ScannerTokenMultiplyEqual,
+	"/=", ScannerTokenDivideEqual,
+	"%=", ScannerTokenModEqual,
+
+	"&", ScannerTokenBitwiseAnd,
 	"|", ScannerTokenBitwiseOr,
-	"(", ScannerTokenLeftBrace,
-	")", ScannerTokenRightBrace,
-	"{", ScannerTokenLeftParenthesis,
-	"}", ScannerTokenRightParenthesis,
+	"^", ScannerTokenBitwiseXor,
+
+	"&=", ScannerTokenBitwiseAndEqual,
+	"|=", ScannerTokenBitwiseOrEqual,
+	"^=", ScannerTokenBitwiseXorEqual,
+
+	"<", ScannerTokenLess,
+	">", ScannerTokenGreater,
+	"=", ScannerTokenAssign,
+
+	"<=", ScannerTokenLessEqual,
+	">=", ScannerTokenGreaterEqual,
+	"==", ScannerTokenEqual,
+
+	"{", ScannerTokenLeftBrace,
+	"}", ScannerTokenRightBrace,
+
+	"(", ScannerTokenLeftParenthesis,
+	")", ScannerTokenRightParenthesis,
+	
+	"[", ScannerTokenLeftSquareBracket,
+	"]", ScannerTokenRightSquareBracket,
+	
+	"?", ScannerTokenQuestionmark,
 	";", ScannerTokenSemicolon,
 	":", ScannerTokenColon,
-	"<", ScannerTokenLess,
-	"<=", ScannerTokenLessEqual,
-	*/
-	"<", ScannerTokenPlus,
-	"<<", ScannerTokenMinus,
-	"?", ScannerTokenMultiply,
-	"==", ScannerTokenDivide,
+	",", ScannerTokenComma,
+	".", ScannerTokenDot,
 };
 
 std::string TokenPosition::ToString() const {
