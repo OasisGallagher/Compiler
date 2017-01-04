@@ -47,12 +47,26 @@ bool LALR::CreateLR1Itemsets() {
 	LR1Itemset itemset;
 	AddLR1Items(itemset, GrammarSymbol::zero, grammars_->front(), 0);
 
+	itemset.SetName("0");
 	CalculateLR1Itemset(itemset);
 	
 	builder_->insert(itemset);
 
+	char buffer[16];
+	int pass = 1, length = 2;
+	printf("pass = 1.");
 	for (; CreateLR1ItemsetsOnePass();) {
+		for (int i = 0; i < length; ++i) {
+			buffer[i] = '\b';
+		}
+		buffer[length] = 0;
+		printf(buffer);
+
+		length = sprintf(buffer, "%d.", ++pass);
+		printf(buffer);
 	}
+
+	printf("\n");
 
 	return true;
 }
@@ -182,8 +196,12 @@ bool LALR::CalculateLR1ItemsetOnePass(LR1Itemset& answer) {
 		if (b.SymbolType() == GrammarSymbolTerminal) {
 			continue;
 		}
+		
+		int gi = 0;
+		Grammar* g = grammars_->FindGrammar(b, &gi);
+		AddLR1Items(newItems, b, gi);
 
-		CalculateLR1Items(newItems, current, b, cond);
+		//CalculateLR1Items(newItems, current, b, cond);
 	}
 
 	bool setChanged = false;
@@ -226,7 +244,6 @@ void LALR::AddLR1Items(LR1Itemset& answer, const GrammarSymbol& forward, Grammar
 
 		for (; ite != tc->symbols.end(); ++ite, ++dpos) {
 			LR1Item newItem(Utility::MakeDword(index, gi), dpos);
-			newItem.forwards.insert(forward);
 			answer.insert(newItem);
 
 			if (*ite == GrammarSymbol::epsilon || !IsNullable(*ite))  {
@@ -236,7 +253,6 @@ void LALR::AddLR1Items(LR1Itemset& answer, const GrammarSymbol& forward, Grammar
 
 		if (ite == tc->symbols.end()) {
 			LR1Item newItem(Utility::MakeDword(index, gi), dpos);
-			newItem.forwards.insert(forward);
 			answer.insert(newItem);
 		}
 	}
@@ -244,7 +260,8 @@ void LALR::AddLR1Items(LR1Itemset& answer, const GrammarSymbol& forward, Grammar
 
 bool LALR::CreateLR1ItemsetsOnePass() {
 	bool setChanged = false;
-	for (LR1ItemsetContainer::iterator ite = builder_->begin(); ite != builder_->end(); ++ite) {
+	LR1ItemsetContainer cont = builder_->GetContainer();
+	for (LR1ItemsetContainer::iterator ite = cont.begin(); ite != cont.end(); ++ite) {
 		for (GrammarSymbolContainer::iterator ite2 = terminalSymbols_->begin(); ite2 != terminalSymbols_->end(); ++ite2) {
 			LR1Itemset itemset;
 			setChanged = GetLR1EdgeTarget(itemset, *ite, ite2->second) || setChanged;

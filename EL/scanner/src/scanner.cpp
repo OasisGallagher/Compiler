@@ -35,9 +35,19 @@ static Compound compounds[] = {
 	"/=", ScannerTokenDivideEqual,
 	"%=", ScannerTokenModEqual,
 
+	"++", ScannerTokenSelfIncrement,
+	"--", ScannerTokenSelfDecrement,
+
+	"<<", ScannerTokenShiftLeft,
+	">>", ScannerTokenShiftRight,
+
+	"<<=", ScannerTokenShiftLeftEqual,
+	">>=", ScannerTokenShiftRightEqual,
+
 	"&", ScannerTokenBitwiseAnd,
 	"|", ScannerTokenBitwiseOr,
 	"^", ScannerTokenBitwiseXor,
+	"~", ScannerTokenBitwiseNot,
 
 	"&=", ScannerTokenBitwiseAndEqual,
 	"|=", ScannerTokenBitwiseOrEqual,
@@ -47,9 +57,13 @@ static Compound compounds[] = {
 	">", ScannerTokenGreater,
 	"=", ScannerTokenAssign,
 
+	"||", ScannerTokenOr,
+	"&&", ScannerTokenAnd,
+
 	"<=", ScannerTokenLessEqual,
 	">=", ScannerTokenGreaterEqual,
 	"==", ScannerTokenEqual,
+	"!=", ScannerTokenNotEqual,
 
 	"{", ScannerTokenLeftBrace,
 	"}", ScannerTokenRightBrace,
@@ -61,6 +75,7 @@ static Compound compounds[] = {
 	"]", ScannerTokenRightSquareBracket,
 	
 	"?", ScannerTokenQuestionmark,
+	"!", ScannerTokenExclamation,
 	";", ScannerTokenSemicolon,
 	":", ScannerTokenColon,
 	",", ScannerTokenComma,
@@ -117,12 +132,20 @@ ScannerTokenType TextScanner::GetToken(char* token, int* pos) {
 	return GetNextToken(token, pos);
 }
 
+void Narrow(int& low, int& high, int count, int ci, int ch) {
+	for (; low < count && compounds[low].text[ci] != ch; ++low) {
+	}
+
+	for (high = low + 1; high < count && compounds[high].text[ci] == ch; ++high) {
+	}
+}
+
 ScannerTokenType TextScanner::GetNextToken(char* token, int* pos) {
 	int count = sizeof(compounds) / sizeof(compounds[0]);
 	std::sort(compounds, compounds + count);
 
 	int ci = 0, bi = 0, ch = 0, state = STATE_START;
-	bool savech = false, unget = false;
+	bool savech = true, unget = false;
 
 	ScannerTokenType tokenType = ScannerTokenError;
 
@@ -163,12 +186,14 @@ ScannerTokenType TextScanner::GetNextToken(char* token, int* pos) {
 			}
 			else {
 				int low = 0, high = 0;
-				for (; low < count && compounds[low].text[ci] != ch; low++) {
+
+				for (; low < count && compounds[low].text[ci] != ch; ++low) {
 				}
 
-				Assert(low < count, "can not find item leading with " + std::to_string(ch));
 				for (high = low + 1; high < count && compounds[high].text[ci] == ch; ++high) {
 				}
+
+				Assert(high <= count, std::string("can not find item leading with ") + (char)ch + ".");
 
 				++ci;
 				if (high - low == 1 && strlen(compounds[low].text) == ci) {
@@ -211,28 +236,41 @@ ScannerTokenType TextScanner::GetNextToken(char* token, int* pos) {
 
 		default:
 			int low = Utility::Loword(state), high = Utility::Highword(state);
-			int tmp = low, length = ci;
-			for (; tmp < high && ch != 0 && compounds[tmp].text[ci] != ch; tmp++) {
-			}
-
-			savech = (tmp != high);
-
-			if (tmp > low && tmp < high) {
-				low = tmp;
-				++length;
-			}
-
-			high = low + 1;
-			for (; high < count && ch != 0 && compounds[high].text[ci] == ch; ++high) {
-			}
-
-			++ci;
-			if (high - low == 1 && strlen(compounds[low].text) == length) {
+			
+			savech = false;
+			if (ch == 0) {
+				Assert(strlen(compounds[low].text) == ci, "invalid symbol");
 				state = STATE_DONE;
 				tokenType = compounds[low].type;
 			}
 			else {
-				state = Utility::MakeDword(low, high);
+				int nl = low;
+				for (; nl < high && compounds[nl].text[ci] != ch; ++nl) {
+				}
+
+				if (nl < high) {
+					low = nl;
+				}
+
+				int nh = low + 1;
+				for (; nh < high && compounds[nh].text[ci] == ch; ++nh) {
+				}
+				high = nh;
+
+				savech = (compounds[low].text[ci] == ch);
+				unget = !savech;
+
+				if (savech) {
+					++ci;
+				}
+
+				if (high - low == 1 && strlen(compounds[low].text) == ci) {
+					state = STATE_DONE;
+					tokenType = compounds[low].type;
+				}
+				else {
+					state = Utility::MakeDword(low, high);
+				}
 			}
 
 			break;

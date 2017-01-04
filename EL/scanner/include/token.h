@@ -23,9 +23,19 @@ enum ScannerTokenType {
 	ScannerTokenDivideEqual,
 	ScannerTokenModEqual,
 
+	ScannerTokenSelfIncrement,
+	ScannerTokenSelfDecrement,
+
+	ScannerTokenShiftLeft,
+	ScannerTokenShiftRight,
+
+	ScannerTokenShiftLeftEqual,
+	ScannerTokenShiftRightEqual,
+
 	ScannerTokenBitwiseAnd,
 	ScannerTokenBitwiseOr,
 	ScannerTokenBitwiseXor,
+	ScannerTokenBitwiseNot,
 
 	ScannerTokenBitwiseAndEqual,
 	ScannerTokenBitwiseOrEqual,
@@ -35,9 +45,13 @@ enum ScannerTokenType {
 	ScannerTokenGreater,
 	ScannerTokenAssign,
 
+	ScannerTokenOr,
+	ScannerTokenAnd,
+
 	ScannerTokenLessEqual,
 	ScannerTokenGreaterEqual,
 	ScannerTokenEqual,
+	ScannerTokenNotEqual,
 
 	ScannerTokenLeftBrace,
 	ScannerTokenRightBrace,
@@ -49,6 +63,7 @@ enum ScannerTokenType {
 	ScannerTokenRightSquareBracket,
 	
 	ScannerTokenQuestionmark,
+	ScannerTokenExclamation,
 	ScannerTokenSemicolon,
 	ScannerTokenColon,
 	ScannerTokenComma,

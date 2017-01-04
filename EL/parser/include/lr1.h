@@ -156,6 +156,9 @@ public:
 	bool insert(LR1Itemset& itemset);
 
 public:
+	container_type GetContainer() { return container_; }
+
+public:
 	bool Merge(LR1ItemsetContainer& itemsets, ItemsetNameMap& nameMap);
 
 private:

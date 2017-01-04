@@ -33,10 +33,10 @@ std::string LRTable::ToString() const {
 	std::ostringstream oss;
 	//oss << impl_->ToString();
 
-	//oss << Utility::Heading(" Action Table ") << "\n";
-	//oss << actionTable_.ToString();
+	oss << Utility::Heading(" Action Table ") << "\n";
+	oss << actionTable_.ToString();
 
-	//oss << "\n\n";
+	oss << "\n\n";
 
 	oss << Utility::Heading(" Goto Table ") << "\n";
 	oss << gotoTable_.ToString();
