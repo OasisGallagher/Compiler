@@ -1,5 +1,5 @@
 #pragma once
-#include <ctime>
+#include <stack>
 #include <string>
 #include <crtdbg.h>
 
@@ -15,20 +15,16 @@ public:
 
 	static void EnableMemoryLeakCheck();
 
+	static void StartSample(const std::string& text);
+	static void EndSample();
+
 private:
 	Debug();
 	static void SetConsoleColor(int color);
 	static std::string GetTime();
-};
-
-class Timer {
-public:
-	static void Start();
-	static float Stop();
 
 private:
-	Timer();
-	static clock_t start_;
+	static std::stack<std::string> samples_;
 };
 
 #define Verify(expression, message)	\

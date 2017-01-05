@@ -50,7 +50,7 @@ private:
 	GrammarSymbolContainer* nonterminalSymbols_;
 
 	FirstSetTable* firstSetContainer_;
-	GrammarSymbolSetTable* followSetContainer;
+	GrammarSymbolSetTable* followSetContainer_;
 
 	LR1EdgeTable edges_;
 	LR1ItemsetBuilder* builder_;

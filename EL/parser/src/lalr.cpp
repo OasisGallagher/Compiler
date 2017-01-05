@@ -21,7 +21,7 @@ void LALR::Setup(const LRSetupParameter& parameter) {
 	nonterminalSymbols_ = parameter.nonterminalSymbols;
 
 	firstSetContainer_ = parameter.firstSetContainer;
-	followSetContainer = parameter.followSetContainer;
+	followSetContainer_ = parameter.followSetContainer;
 }
 
 bool LALR::Parse(LRGotoTable& gotoTable, LRActionTable& actionTable) {
@@ -44,29 +44,25 @@ bool LALR::CreateLRParsingTable(LRGotoTable& gotoTable, LRActionTable& actionTab
 }
 
 bool LALR::CreateLR1Itemsets() {
+	Debug::StartSample("initialize");
+
 	LR1Itemset itemset;
 	AddLR1Items(itemset, GrammarSymbol::zero, grammars_->front(), 0);
-
 	itemset.SetName("0");
 	CalculateLR1Itemset(itemset);
+
+	Debug::EndSample();
 	
 	builder_->insert(itemset);
 
-	char buffer[16];
-	int pass = 1, length = 2;
-	printf("pass = 1.");
+	int pass = 1;
+	Debug::StartSample(Utility::Format("CreateLR1Itemsets pass = %d", pass));
 	for (; CreateLR1ItemsetsOnePass();) {
-		for (int i = 0; i < length; ++i) {
-			buffer[i] = '\b';
-		}
-		buffer[length] = 0;
-		printf(buffer);
-
-		length = sprintf(buffer, "%d.", ++pass);
-		printf(buffer);
+		Debug::EndSample();
+		Debug::StartSample(Utility::Format("CreateLR1Itemsets pass = %d", ++pass));
 	}
 
-	printf("\n");
+	Debug::EndSample();
 
 	return true;
 }
@@ -168,7 +164,6 @@ bool LALR::CalculateLR1EdgeTarget(LR1Itemset& answer, const LR1Itemset& src, con
 		}
 
 		LR1Item item(ite->cpos, ite->dpos + 1, ite->forwards);
-		std::string str = item.ToString(*grammars_);
 		answer.insert(item);
 	}
 
@@ -197,11 +192,7 @@ bool LALR::CalculateLR1ItemsetOnePass(LR1Itemset& answer) {
 			continue;
 		}
 		
-		int gi = 0;
-		Grammar* g = grammars_->FindGrammar(b, &gi);
-		AddLR1Items(newItems, b, gi);
-
-		//CalculateLR1Items(newItems, current, b, cond);
+		CalculateLR1Items(newItems, current, b, cond);
 	}
 
 	bool setChanged = false;
@@ -218,13 +209,13 @@ void LALR::CalculateLR1Items(LR1Itemset& answer, const LR1Item& item, const Gram
 	const CondinateContainer& conds = grammar->GetCondinates();
 
 	SymbolVector beta(cond->symbols.begin() + item.dpos + 1, cond->symbols.end());
+	beta.push_back(GrammarSymbol::null);
 
 	GrammarSymbolSet firstSet;
 
 	for (SymbolVector::const_iterator fi = item.forwards.begin(); fi != item.forwards.end(); ++fi) {
-		beta.push_back(*fi);
+		beta.back() = *fi;
 		firstSetContainer_->GetFirstSet(firstSet, beta.begin(), beta.end());
-		beta.pop_back();
 
 		for (GrammarSymbolSet::const_iterator fsi = firstSet.begin(); fsi != firstSet.end(); ++fsi) {
 			AddLR1Items(answer, *fsi, grammar, gi);
@@ -244,6 +235,7 @@ void LALR::AddLR1Items(LR1Itemset& answer, const GrammarSymbol& forward, Grammar
 
 		for (; ite != tc->symbols.end(); ++ite, ++dpos) {
 			LR1Item newItem(Utility::MakeDword(index, gi), dpos);
+			newItem.forwards.insert(forward);
 			answer.insert(newItem);
 
 			if (*ite == GrammarSymbol::epsilon || !IsNullable(*ite))  {
@@ -253,6 +245,7 @@ void LALR::AddLR1Items(LR1Itemset& answer, const GrammarSymbol& forward, Grammar
 
 		if (ite == tc->symbols.end()) {
 			LR1Item newItem(Utility::MakeDword(index, gi), dpos);
+			newItem.forwards.insert(forward);
 			answer.insert(newItem);
 		}
 	}

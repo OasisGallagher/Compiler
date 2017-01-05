@@ -1,3 +1,4 @@
+#include <ctime>
 #include <string>
 #include <iostream>
 #include <sstream>
@@ -5,8 +6,9 @@
 #include <Windows.h>
 
 #include "debug.h"
+#include "utilities.h"
 
-clock_t Timer::start_;
+std::stack<std::string> Debug::samples_;
 
 const int red = 12;
 const int white = 7;
@@ -57,10 +59,16 @@ void Debug::EnableMemoryLeakCheck() {
 	_CrtSetDbgFlag(_CrtSetDbgFlag(_CRTDBG_REPORT_FLAG) | _CRTDBG_LEAK_CHECK_DF);
 }
 
-void Timer::Start() {
-	start_ = clock();
+void Debug::StartSample(const std::string& text) {
+	clock_t now = clock();
+	samples_.push(text + "@" + std::to_string(now));
 }
 
-float Timer::Stop() {
-	return ((float)clock() - start_) / CLOCKS_PER_SEC;
+void Debug::EndSample() {
+	std::string samp = samples_.top();
+	int pos = samp.rfind('@');
+	samples_.pop();
+	clock_t elapsed = clock() - atol(samp.c_str() + pos + 1);
+	samp[pos] = 0;
+	Debug::Log(Utility::Format("\"%s\" costs %.2f seconds.", samp.c_str(), ((float)elapsed / CLOCKS_PER_SEC)));
 }
