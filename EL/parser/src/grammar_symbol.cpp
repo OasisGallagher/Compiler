@@ -6,6 +6,7 @@
 
 GrammarSymbol GrammarSymbol::null = nullptr;
 GrammarSymbol GrammarSymbol::zero = new TerminalSymbol("zero");
+GrammarSymbol GrammarSymbol::unknown = new TerminalSymbol("#");
 GrammarSymbol GrammarSymbol::number = new TerminalSymbol("number");
 GrammarSymbol GrammarSymbol::string = new TerminalSymbol("string");
 GrammarSymbol GrammarSymbol::epsilon = new TerminalSymbol("epsilon");
@@ -57,8 +58,14 @@ std::string GrammarSymbolSetTable::ToString() const {
 
 void FirstSetTable::GetFirstSet(GrammarSymbolSet& answer, SymbolVector::iterator first, SymbolVector::iterator last) {
 	for (; first != last; ++first) {
-		Assert(find(*first) != end(), "logic error");
-		GrammarSymbolSet& firstSet = at(*first);
+		iterator pos = find(*first);
+		if (pos == end()) {
+			Assert(first->SymbolType() == GrammarSymbolTerminal, "invalid symbol" + first->ToString());
+			answer.insert(*first); 
+			break;
+		}
+
+		GrammarSymbolSet& firstSet = pos->second;
 		bool hasEpsilon = false;
 		for (GrammarSymbolSet::iterator ite = firstSet.begin(); ite != firstSet.end(); ++ite) {
 			if (*ite != GrammarSymbol::epsilon) {

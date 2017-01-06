@@ -82,6 +82,7 @@ public:
 	static GrammarSymbol zero;
 	static GrammarSymbol number;
 	static GrammarSymbol string;
+	static GrammarSymbol unknown;
 	static GrammarSymbol epsilon;
 	static GrammarSymbol program;
 	static GrammarSymbol identifier;

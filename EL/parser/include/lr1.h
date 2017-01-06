@@ -5,15 +5,25 @@
 
 class GrammarContainer;
 
+struct Forward {
+	bool spontaneous;
+	GrammarSymbol symbol;
+
+	std::string ToString() const {
+		return symbol.ToString();
+	}
+};
+
 class Forwards {
-	IMPLEMENT_REFERENCE_COUNTABLE(Forwards, SymbolVector);
+	typedef std::vector<Forward> container_type;
+	IMPLEMENT_REFERENCE_COUNTABLE(Forwards, container_type);
 public:
 	Forwards();
 
 public:
-	typedef SymbolVector::iterator iterator;
-	typedef SymbolVector::const_iterator const_iterator;
-	typedef SymbolVector::const_reference const_reference;
+	typedef container_type::iterator iterator;
+	typedef container_type::const_iterator const_iterator;
+	typedef container_type::const_reference const_reference;
 
 public:
 	bool operator < (const Forwards& other) const;
@@ -27,7 +37,7 @@ public:
 	const_iterator begin() const { return ptr_->begin(); }
 	const_iterator end() const { return ptr_->end(); }
 
-	bool insert(const GrammarSymbol& symbol);
+	bool insert(const GrammarSymbol& symbol, bool spontaneous);
 };
 
 struct LR1Item {
@@ -41,32 +51,15 @@ struct LR1Item {
 	bool operator < (const LR1Item& other) const;
 	bool operator == (const LR1Item& other) const;
 
+	bool IsCore() const;
+
 	std::string ToString(const GrammarContainer& grammars) const;
-};
-
-class LR1ItemsetName {
-	IMPLEMENT_REFERENCE_COUNTABLE(LR1ItemsetName, std::string);
-
-public:
-	LR1ItemsetName();
-	LR1ItemsetName(const char* name);
-	LR1ItemsetName(const std::string& name);
-
-public:
-	bool operator < (const LR1ItemsetName& other) const { return *ptr_ < *other.ptr_; }
-	bool operator == (const LR1ItemsetName& other) const { return *ptr_ == *other.ptr_; }
-	bool operator != (const LR1ItemsetName& other) const { return *ptr_ != *other.ptr_; }
-
-public:
-	bool empty() const { return ptr_->empty(); }
-	void assign(const std::string& other) { ptr_->assign(other); }
-	const std::string& ToString() const { return *ptr_; }
 };
 
 class LR1Itemset {
 	typedef class : public std::set <LR1Item> {
 		friend class LR1Itemset;
-		LR1ItemsetName name_;
+		std::string name_;
 	} container_type;
 
 	IMPLEMENT_REFERENCE_COUNTABLE(LR1Itemset, container_type);
@@ -80,9 +73,13 @@ public:
 
 public:
 	iterator begin() { return ptr_->begin(); }
-	iterator end() { return ptr_->end(); }
 	const_iterator begin() const { return ptr_->begin(); }
+
+	iterator end() { return ptr_->end(); }
 	const_iterator end() const { return ptr_->end(); }
+
+	iterator find(const LR1Item& item) { return ptr_->find(item); }
+	const_iterator find(const LR1Item& item) const { return ptr_->find(item); }
 
 	void clear() { ptr_->clear(); }
 	int size() const { return ptr_->size(); }
@@ -95,11 +92,11 @@ public:
 	bool operator == (const LR1Itemset& other) const;
 
 public:
-	const LR1ItemsetName& GetName() const;
+	void RemoveNoncoreItems();
 
-	void SetName(const char* name); 
+	const std::string& GetName() const;
 	void SetName(const std::string& name);
-	void SetName(const LR1ItemsetName& name);
+
 	std::string ToString(const GrammarContainer& grammars) const;
 
 private:
@@ -110,66 +107,17 @@ private:
 #pragma pop_macro("new")
 };
 
-typedef std::vector<LR1Itemset> LR1ItemsetVector;
-
-struct ItemSetComparer {
-	bool operator ()(const LR1Itemset& lhs, const LR1Itemset& rhs) const;
-	bool CompareItemSet(const LR1Item& lhs, const LR1Item& rhs) const;
-};
-
-struct ItemSetNameComparer {
-	bool operator ()(const LR1Itemset& lhs, const LR1Itemset& rhs) const {
-		return lhs.GetName() < rhs.GetName();
-	}
-};
-
-class LR1ItemsetContainer : public std::set <LR1Itemset, ItemSetComparer> {
+class LR1ItemsetContainer : public std::set <LR1Itemset> {
 public:
 	std::string ToString(const GrammarContainer& grammars) const;
 };
 
-typedef std::map<LR1ItemsetName, LR1ItemsetName> ItemsetNameMap;
-
-class LR1ItemsetBuilder {
-	typedef std::map<std::string, LR1Itemset> dictionary;
-
+class Propagations : public std::map <LR1Itemset, LR1ItemsetContainer> {
 public:
-	typedef LR1ItemsetContainer container_type;
-	typedef container_type::iterator iterator;
-	typedef container_type::const_iterator const_iterator;
-
-public:
-	LR1Itemset& operator[](const std::string& name);
-	LR1Itemset& operator[](const LR1ItemsetName& name);
-
-public:
-	iterator begin() { return container_.begin(); }
-	iterator end() { return container_.end(); }
-
-	const_iterator begin() const { return container_.begin(); }
-	const_iterator end() const { return container_.end(); }
-
-	void clear() { container_.clear(); }
-
-	int size() const { return (int)container_.size(); }
-
-	bool insert(LR1Itemset& itemset);
-
-public:
-	container_type GetContainer() { return container_; }
-
-public:
-	bool Merge(LR1ItemsetContainer& itemsets, ItemsetNameMap& nameMap);
-
-private:
-	void MergeNewItemset(LR1Itemset &newSet, const_iterator first, const_iterator last);
-
-private:
-	dictionary dict_;
-	container_type container_;
+	std::string ToString(const GrammarContainer& grammars) const;
 };
 
-class LR1EdgeTable : public matrix <LR1ItemsetName, GrammarSymbol, LR1ItemsetName> {
+class LR1EdgeTable : public matrix <LR1Itemset, GrammarSymbol, LR1Itemset> {
 public:
 	std::string ToString(const GrammarContainer& grammars) const;
 };
