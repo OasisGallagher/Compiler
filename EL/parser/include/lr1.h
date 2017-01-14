@@ -37,23 +37,44 @@ public:
 	const_iterator begin() const { return ptr_->begin(); }
 	const_iterator end() const { return ptr_->end(); }
 
+	void erase(const GrammarSymbol& symbol);
 	bool insert(const GrammarSymbol& symbol, bool spontaneous);
 };
 
-struct LR1Item {
-	int cpos, dpos;
-
-	Forwards forwards;
-
-	LR1Item(int cp, int dp);
-	LR1Item(int cp, int dp, const Forwards& fs);
+class LR1Item {
+	struct Impl {
+		int cpos, dpos;
+		Forwards forwards;
+	};
+	IMPLEMENT_REFERENCE_COUNTABLE(LR1Item, Impl);
+	
+public:
+	LR1Item(int cpos, int dpos);
+	LR1Item(int cpos, int dpos, const Forwards& forwards);
 
 	bool operator < (const LR1Item& other) const;
 	bool operator == (const LR1Item& other) const;
 
+	int GetCpos() const { return ptr_->cpos; }
+	void SetCpos(int pos) { ptr_->cpos = pos; }
+
+	int GetDpos() const { return ptr_->dpos; }
+	int SetDpos(int pos) { return ptr_->dpos = pos; }
+
+	Forwards& GetForwards() { return ptr_->forwards; }
+	const Forwards& GetForwards() const { return ptr_->forwards; }
+
 	bool IsCore() const;
 
+	std::string ToRawString() const;
 	std::string ToString(const GrammarContainer& grammars) const;
+
+private:
+#pragma push_macro("new")
+#undef new
+	// LR1Item不可以通过new分配.
+	void* operator new(size_t);
+#pragma pop_macro("new")
 };
 
 class LR1Itemset {
@@ -109,10 +130,11 @@ private:
 
 class LR1ItemsetContainer : public std::set <LR1Itemset> {
 public:
+	LR1Item FindItem(int cpos, int dpos);
 	std::string ToString(const GrammarContainer& grammars) const;
 };
 
-class Propagations : public std::map <LR1Itemset, LR1ItemsetContainer> {
+class Propagations : public std::map <LR1Item, LR1Itemset> {
 public:
 	std::string ToString(const GrammarContainer& grammars) const;
 };

@@ -27,8 +27,12 @@ protected:
 private:
 	bool IsNullable(const GrammarSymbol& symbol);
 
+	void PropagateSymbols();
+	bool PropagateSymbolsOnePass();
+	bool PropagateFrom(const LR1Item &src);
+
 	void CalculateForwardsAndPropagations(const GrammarSymbol& symbol);
-	void AddForwardsAndPropagations(LR1Item& item, const LR1Itemset& src, const LR1Itemset& itemset);
+	void AddForwardsAndPropagations(LR1Item& item, const LR1Itemset& itemset);
 
 	bool CalculateLR1EdgeTarget(LR1Itemset& answer, const LR1Itemset& src, const GrammarSymbol& symbol);
 

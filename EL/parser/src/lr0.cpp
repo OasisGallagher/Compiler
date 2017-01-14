@@ -26,7 +26,7 @@ bool LR0::CreateLR0Itemsets(LR1ItemsetContainer& itemsets, LR1EdgeTable& edges) 
 
 	for (LR1ItemsetContainer::iterator ite = itemsets_.begin(); ite != itemsets_.end(); ++ite) {
 		LR1Itemset& item = (LR1Itemset&)*ite;
-		item.RemoveNoncoreItems();
+		//item.RemoveNoncoreItems();
 		Assert(item.size() > 0, "invalid itemset");
 		itemsets.insert(item);
 	}
@@ -94,13 +94,13 @@ bool LR0::CalculateClosureOnePass(LR1Itemset& answer) {
 	LR1Itemset newItems;
 	for (LR1Itemset::iterator isi = answer.begin(); isi != answer.end(); ++isi) {
 		const LR1Item& current = *isi;
-		const Condinate* cond = p_.grammars->GetTargetCondinate(current.cpos, nullptr);
+		const Condinate* cond = p_.grammars->GetTargetCondinate(current.GetCpos(), nullptr);
 
-		if (current.dpos >= (int)cond->symbols.size()) {
+		if (current.GetDpos() >= (int)cond->symbols.size()) {
 			continue;
 		}
 
-		const GrammarSymbol& b = cond->symbols[current.dpos];
+		const GrammarSymbol& b = cond->symbols[current.GetDpos()];
 
 		if (b.SymbolType() == GrammarSymbolTerminal) {
 			continue;
@@ -135,17 +135,17 @@ bool LR0::GetLR1EdgeTarget(LR1Itemset& answer, const LR1Itemset& src, const Gram
 
 bool LR0::CalculateLR1EdgeTarget(LR1Itemset& answer, const LR1Itemset& src, const GrammarSymbol& symbol) {
 	for (LR1Itemset::const_iterator ite = src.begin(); ite != src.end(); ++ite) {
-		const Condinate* cond = p_.grammars->GetTargetCondinate(ite->cpos, nullptr);
+		const Condinate* cond = p_.grammars->GetTargetCondinate(ite->GetCpos(), nullptr);
 
 		if (cond->symbols.front() == GrammarSymbol::epsilon) {
 			continue;
 		}
 
-		if (ite->dpos >= (int)cond->symbols.size() || cond->symbols[ite->dpos] != symbol) {
+		if (ite->GetDpos() >= (int)cond->symbols.size() || cond->symbols[ite->GetDpos()] != symbol) {
 			continue;
 		}
 
-		LR1Item item(ite->cpos, ite->dpos + 1);
+		LR1Item item(ite->GetCpos(), ite->GetDpos() + 1);
 		answer.insert(item);
 	}
 
