@@ -45,6 +45,12 @@ std::string Debug::GetTime() {
 	return "";
 }
 
+std::string Debug::Now() {
+	time_t now = time(nullptr);
+	tm* ptr = localtime(&now);
+	return Utility::Format("%02d:%02d:%02d", ptr->tm_hour, ptr->tm_min, ptr->tm_sec);
+}
+
 void Debug::Break(const std::string& expression, const std::string& message, const char* file, int line) {
 	std::ostringstream oss;
 	oss << expression + ":\n" + message << "\n";
@@ -60,6 +66,8 @@ void Debug::EnableMemoryLeakCheck() {
 }
 
 void Debug::StartSample(const std::string& text) {
+	Debug::Log("\"" + text + "\" at " + Now() + ".");
+
 	clock_t now = clock();
 	samples_.push(text + "@" + std::to_string(now));
 }

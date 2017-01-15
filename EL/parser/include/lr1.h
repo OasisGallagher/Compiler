@@ -15,12 +15,11 @@ struct Forward {
 };
 
 class Forwards {
-	typedef std::vector<Forward> container_type;
-	IMPLEMENT_REFERENCE_COUNTABLE(Forwards, container_type);
 public:
 	Forwards();
 
 public:
+	typedef std::vector<Forward> container_type;
 	typedef container_type::iterator iterator;
 	typedef container_type::const_iterator const_iterator;
 	typedef container_type::const_reference const_reference;
@@ -29,16 +28,19 @@ public:
 	bool operator < (const Forwards& other) const;
 
 public:
-	const_reference at(int i) const { return ptr_->at(i); }
-	int size() const { return ptr_->size(); }
-	iterator begin() { return ptr_->begin(); }
-	iterator end() { return ptr_->end(); }
+	const_reference at(int i) const { return cont_.at(i); }
+	int size() const { return cont_.size(); }
+	iterator begin() { return cont_.begin(); }
+	iterator end() { return cont_.end(); }
 
-	const_iterator begin() const { return ptr_->begin(); }
-	const_iterator end() const { return ptr_->end(); }
+	const_iterator begin() const { return cont_.begin(); }
+	const_iterator end() const { return cont_.end(); }
 
 	void erase(const GrammarSymbol& symbol);
 	bool insert(const GrammarSymbol& symbol, bool spontaneous);
+
+private:
+	container_type cont_;
 };
 
 class LR1Item {
@@ -49,6 +51,7 @@ class LR1Item {
 	IMPLEMENT_REFERENCE_COUNTABLE(LR1Item, Impl);
 	
 public:
+	LR1Item();
 	LR1Item(int cpos, int dpos);
 	LR1Item(int cpos, int dpos, const Forwards& forwards);
 
@@ -130,7 +133,6 @@ private:
 
 class LR1ItemsetContainer : public std::set <LR1Itemset> {
 public:
-	LR1Item FindItem(int cpos, int dpos);
 	std::string ToString(const GrammarContainer& grammars) const;
 };
 

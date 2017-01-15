@@ -29,16 +29,18 @@ private:
 
 	void PropagateSymbols();
 	bool PropagateSymbolsOnePass();
-	bool PropagateFrom(const LR1Item &src);
+	bool PropagateFrom(const LR1Item& src);
+
+	LR1Item FindItem(int cpos, int dpos);
 
 	void CalculateForwardsAndPropagations(const GrammarSymbol& symbol);
-	void AddForwardsAndPropagations(LR1Item& item, const LR1Itemset& itemset);
+	void AddForwardsAndPropagations(LR1Item& item, const LR1Itemset& itemset, const GrammarSymbol& symbol);
 
 	bool CalculateLR1EdgeTarget(LR1Itemset& answer, const LR1Itemset& src, const GrammarSymbol& symbol);
 
 	void CalculateLR1Itemset(LR1Itemset& answer);
 	bool CalculateLR1ItemsetOnePass(LR1Itemset& answer);
-	void CalculateLR1Items(LR1Itemset& answer, const LR1Item& item);
+	void CalculateLR1Items(LR1Itemset& answer, const LR1Item& item, const Condinate* cond, const GrammarSymbol& lhs);
 
 	void AddLR1Items(LR1Itemset& answer, const GrammarSymbol& forward, Grammar* g, int gi);
 
@@ -47,7 +49,10 @@ private:
 private:
 	LRSetupParameter p_;
 
+	LR1Item tmp_;
 	LR1EdgeTable edges_;
 	Propagations propagations_;
+	LR1Itemset itemDict_;
+	LR1Itemset items_;
 	LR1ItemsetContainer itemsets_;
 };

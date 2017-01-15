@@ -7,7 +7,6 @@
 #include "grammar.h"
 
 Forwards::Forwards() {
-	ptr_ = new container_type;
 }
 
 bool Forwards::operator <(const Forwards& other) const {
@@ -33,7 +32,7 @@ void Forwards::erase(const GrammarSymbol& symbol) {
 		}
 	}
 
-	ptr_->erase(last, end());
+	cont_.erase(last, end());
 }
 
 bool Forwards::insert(const GrammarSymbol& symbol, bool spontaneous) {
@@ -44,8 +43,14 @@ bool Forwards::insert(const GrammarSymbol& symbol, bool spontaneous) {
 	}
 
 	Forward f = { spontaneous, symbol };
-	ptr_->push_back(f);
+	cont_.push_back(f);
 	return true;
+}
+
+LR1Item::LR1Item() {
+	ptr_ = new Impl;
+	ptr_->cpos = 0;
+	ptr_->dpos = 0;
 }
 
 LR1Item::LR1Item(int cpos, int dpos) {
@@ -184,6 +189,10 @@ std::string LR1Itemset::ToString(const GrammarContainer& grammars) const {
 
 	const char* seperator = "";
 	for (const_iterator ite = begin(); ite != end(); ++ite) {
+		if (!ite->IsCore()) {
+			continue;
+		}
+
 		oss << seperator;
 		seperator = ", ";
 		oss << "{ " << ite->ToString(grammars) << " }";
@@ -192,20 +201,6 @@ std::string LR1Itemset::ToString(const GrammarContainer& grammars) const {
 	oss << " }";
 
 	return oss.str();
-}
-
-LR1Item LR1ItemsetContainer::FindItem(int cpos, int dpos) {
-	LR1Item tmp(cpos, dpos);
-	for (iterator ite = begin(); ite != end(); ++ite) {
-		const LR1Itemset& itemset = *ite;
-		LR1Itemset::const_iterator pos = itemset.find(tmp);
-		if (pos != itemset.end()) {
-			return *pos;
-		}
-	}
-
-	Assert(false, "can not find item cpos = " + std::to_string(cpos) + ", dpos = " + std::to_string(dpos) + ".");
-	return nullptr;
 }
 
 std::string LR1ItemsetContainer::ToString(const GrammarContainer& grammars) const {
@@ -228,13 +223,13 @@ std::string Propagations::ToString(const GrammarContainer& grammars) const {
 	for (const_iterator ite = begin(); ite != end(); ++ite) {
 		oss << seperator;
 		seperator = "\n";
-		oss << ite->first.ToRawString() << " >> ( ";
+		oss << ite->first.ToString(grammars) << " >> ( ";
 		const char* seperator2 = "";
 		for (LR1Itemset::const_iterator ite2 = ite->second.begin();
 			ite2 != ite->second.end(); ++ite2) {
 			oss << seperator2;
 			seperator2 = ", ";
-			oss << ite2->ToRawString();
+			oss << ite2->ToString(grammars);
 		}
 
 		oss << " )";

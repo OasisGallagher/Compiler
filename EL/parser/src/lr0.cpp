@@ -14,7 +14,7 @@ void LR0::Setup(const LRSetupParameter& parameter) {
 	p_ = parameter; 
 }
 
-bool LR0::CreateLR0Itemsets(LR1ItemsetContainer& itemsets, LR1EdgeTable& edges) {
+bool LR0::CreateLR0Itemsets(LR1Itemset& items, LR1ItemsetContainer& itemsets, LR1EdgeTable& edges) {
 	LR1Itemset itemset;
 	AddLR1Items(itemset, p_.grammars->front()->GetLhs());
 	itemset.SetName("0");
@@ -26,12 +26,12 @@ bool LR0::CreateLR0Itemsets(LR1ItemsetContainer& itemsets, LR1EdgeTable& edges) 
 
 	for (LR1ItemsetContainer::iterator ite = itemsets_.begin(); ite != itemsets_.end(); ++ite) {
 		LR1Itemset& item = (LR1Itemset&)*ite;
-		//item.RemoveNoncoreItems();
 		Assert(item.size() > 0, "invalid itemset");
 		itemsets.insert(item);
 	}
 
 	edges = edges_;
+	items = items_;
 
 	return true;
 }
@@ -54,6 +54,20 @@ bool LR0::CreateLR1ItemsetsOnePass() {
 	return setChanged;
 }
 
+ LR1Item LR0::CreateLR0Item(int cpos, int dpos) {
+	tmp_.SetCpos(cpos);
+	tmp_.SetDpos(dpos);
+	LR1Itemset::iterator pos = items_.find(tmp_);
+	if (pos == items_.end()) {
+		LR1Item item = tmp_;
+		items_.insert(item);
+		tmp_ = LR1Item();
+		return item;
+	}
+
+	return *pos;
+}
+
 void LR0::AddLR1Items(LR1Itemset& answer, const GrammarSymbol& lhs) {
 	int index = 0, gi = 0;
 	Grammar* g = p_.grammars->FindGrammar(lhs, &gi);
@@ -65,7 +79,7 @@ void LR0::AddLR1Items(LR1Itemset& answer, const GrammarSymbol& lhs) {
 		int dpos = 0;
 
 		for (; ite != tc->symbols.end(); ++ite, ++dpos) {
-			LR1Item newItem(Utility::MakeDword(index, gi), dpos);
+			LR1Item newItem = CreateLR0Item(Utility::MakeDword(index, gi), dpos);
 			answer.insert(newItem);
 
 			if (*ite == GrammarSymbol::epsilon || !IsNullable(*ite)) {
@@ -74,7 +88,7 @@ void LR0::AddLR1Items(LR1Itemset& answer, const GrammarSymbol& lhs) {
 		}
 
 		if (ite == tc->symbols.end()) {
-			LR1Item newItem(Utility::MakeDword(index, gi), dpos);
+			LR1Item newItem = CreateLR0Item(Utility::MakeDword(index, gi), dpos);
 			answer.insert(newItem);
 		}
 	}
@@ -145,7 +159,7 @@ bool LR0::CalculateLR1EdgeTarget(LR1Itemset& answer, const LR1Itemset& src, cons
 			continue;
 		}
 
-		LR1Item item(ite->GetCpos(), ite->GetDpos() + 1);
+		LR1Item item = CreateLR0Item(ite->GetCpos(), ite->GetDpos() + 1);
 		answer.insert(item);
 	}
 

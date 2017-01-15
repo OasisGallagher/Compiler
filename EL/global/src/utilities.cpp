@@ -4,7 +4,9 @@
 #include "utilities.h"
 
 #define HEADING_LENGTH			48
-#define FORMAT_BUFFER_LENGTH	64
+#define FORMAT_BUFFER_LENGTH	512
+
+static char formatBuffer[FORMAT_BUFFER_LENGTH];
 
 std::string Utility::Heading(const std::string& text) {
 	Assert(HEADING_LENGTH >= (int)text.length(), "invalid parameter");
@@ -68,16 +70,14 @@ std::string Utility::Trim(const std::string& text) {
 }
 
 std::string Utility::Format(const char* format, ...) {
-	char buffer[FORMAT_BUFFER_LENGTH] = { 0 };
-
 	va_list ap;
 	va_start(ap, format);
-	int n = vsnprintf(buffer, FORMAT_BUFFER_LENGTH, format, ap);
+	int n = vsnprintf(formatBuffer, FORMAT_BUFFER_LENGTH, format, ap);
 	va_end(ap);
 
 	Assert(n >= 0 && n < FORMAT_BUFFER_LENGTH, "format error");
 
-	return buffer;
+	return formatBuffer;
 }
 
 void Utility::Split(std::vector<std::string>& answer, const std::string& str, char seperator) {

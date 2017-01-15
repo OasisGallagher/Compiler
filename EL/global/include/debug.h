@@ -11,6 +11,7 @@ public:
 	static void LogWarning(const std::string& text);
 	static void LogError(const std::string& text);
 
+	static std::string Now();
 	static void Break(const std::string& expression, const std::string& message, const char* file, int line);
 
 	static void EnableMemoryLeakCheck();
