@@ -39,7 +39,7 @@ private:
 	void CalculateLR1Itemset(LR1Itemset& answer);
 	bool CalculateLR1ItemsetOnePass(LR1Itemset& answer);
 
-	void AddLR1Itemsets(LR1Itemset &answer, const GrammarSymbol& lhs, const LR1Item &current);
+	void AddLR1Items(LR1Itemset &answer, const GrammarSymbol& lhs, const LR1Item &current);
 
 	bool ParseLRAction(LRActionTable & actionTable, const LR1Itemset& itemset, const LR1Item &item);
 

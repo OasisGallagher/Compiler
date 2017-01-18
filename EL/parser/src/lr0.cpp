@@ -24,11 +24,6 @@ bool LR0::CreateLR0Itemsets(LR1Itemset& items, LR1ItemsetContainer& itemsets, LR
 	for (; CreateLR1ItemsetsOnePass();) {
 	}
 
-// 	for (LR1ItemsetContainer::iterator ite = itemsets_.begin(); ite != itemsets_.end(); ++ite) {
-// 		LR1Itemset& item = (LR1Itemset&)*ite;
-// 		Assert(item.size() > 0, "invalid itemset");
-// 		itemsets.insert(item);
-// 
 	edges = edges_;
 	items = items_;
 	itemsets = itemsets_;
@@ -163,11 +158,11 @@ bool LR0::CalculateLR1EdgeTarget(LR1Itemset& answer, const LR1Itemset& src, cons
 		answer.insert(item);
 	}
 
-	CalculateClosure(answer);
-
 	if (answer.empty()) {
 		return false;
 	}
+
+	CalculateClosure(answer);
 
 	std::pair<LR1ItemsetContainer::iterator, bool> status = itemsets_.insert(answer);
 	if (answer.GetName().empty()) {

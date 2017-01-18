@@ -8,10 +8,12 @@
 #include "debug.h"
 #include "utilities.h"
 
+int Debug::length_ = 0;
 std::stack<std::string> Debug::samples_;
 
 const int red = 12;
 const int white = 7;
+const int green = 10;
 const int yellow = 14;
 
 std::ofstream output("main/debug/debug.txt");
@@ -41,10 +43,6 @@ void Debug::SetConsoleColor(int color) {
 	SetConsoleTextAttribute(handle, color);
 }
 
-std::string Debug::GetTime() {
-	return "";
-}
-
 std::string Debug::Now() {
 	time_t now = time(nullptr);
 	tm* ptr = localtime(&now);
@@ -63,6 +61,24 @@ void Debug::Break(const std::string& expression, const std::string& message, con
 
 void Debug::EnableMemoryLeakCheck() {
 	_CrtSetDbgFlag(_CrtSetDbgFlag(_CRTDBG_REPORT_FLAG) | _CRTDBG_LEAK_CHECK_DF);
+}
+
+void Debug::StartProgress() {
+	length_ = 0;
+	SetConsoleColor(green);
+}
+
+void Debug::LogProgress(const char* text, int current, int total) {
+	std::cout << std::string(length_, '\b');
+
+	std::string log = Utility::Format("%s (%d/%d).", text, current, total);
+	std::cout << log;
+	length_ = log.length();
+}
+
+void Debug::EndProgress() {
+	std::cout << std::string(length_, '\b');
+	SetConsoleColor(white);
 }
 
 void Debug::StartSample(const std::string& text) {

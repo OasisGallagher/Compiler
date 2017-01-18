@@ -139,7 +139,7 @@ bool LALR::CalculateLR1ItemsetOnePass(LR1Itemset& answer) {
 			continue;
 		}
 
-		AddLR1Itemsets(newItems, lhs, current);
+		AddLR1Items(newItems, lhs, current);
 	}
 
 	bool setChanged = false;
@@ -150,7 +150,7 @@ bool LALR::CalculateLR1ItemsetOnePass(LR1Itemset& answer) {
 	return setChanged;
 }
 
-void LALR::AddLR1Itemsets(LR1Itemset &answer, const GrammarSymbol& lhs, const LR1Item &current) {
+void LALR::AddLR1Items(LR1Itemset &answer, const GrammarSymbol& lhs, const LR1Item &current) {
 	int gi = 1;
 	GrammarSymbolSet firstSet;
 	
@@ -319,7 +319,10 @@ bool LALR::PropagateFrom(const LR1Item &src) {
 
 void LALR::CalculateForwardsAndPropagations() {
 	Debug::StartSample("add forwards and propagations");
-	for (LR1Itemset::iterator ite = items_.begin(); ite != items_.end(); ++ite) {
+	Debug::StartProgress();
+	int index = 1, total = (int)items_.size();
+	for (LR1Itemset::iterator ite = items_.begin(); ite != items_.end(); ++ite, ++index) {
+		Debug::LogProgress("...", index, total);
 
 		LR1Item item = *ite;
 		LR1Itemset target;
@@ -337,6 +340,8 @@ void LALR::CalculateForwardsAndPropagations() {
 			AddForwardsAndPropagations(item, target, si->second);
 		}
 	}
+
+	Debug::EndProgress();
 	Debug::EndSample();
 
 	Debug::StartSample("clean up");
