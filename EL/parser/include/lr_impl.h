@@ -44,6 +44,9 @@ struct LRSetupParameter {
 	GrammarSymbolSetTable* followSetContainer;
 };
 
+class Conflicts : public matrix <int, GrammarSymbol, LRAction> {
+};
+
 class LRImpl {
 public:
 	virtual ~LRImpl() { }
@@ -56,4 +59,7 @@ public:
 
 protected:
 	bool InsertActionTable(LRActionTable &actionTable, int src, const GrammarSymbol& symbol, const LRAction& action);
+
+private:
+	Conflicts conflicts_;
 };

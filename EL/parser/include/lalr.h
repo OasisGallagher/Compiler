@@ -33,16 +33,13 @@ private:
 
 	LR1Item FindItem(int cpos, int dpos);
 
-	void CalculateForwardsAndPropagations(const GrammarSymbol& symbol);
+	void CalculateForwardsAndPropagations();
 	void AddForwardsAndPropagations(LR1Item& item, const LR1Itemset& itemset, const GrammarSymbol& symbol);
-
-	bool CalculateLR1EdgeTarget(LR1Itemset& answer, const LR1Itemset& src, const GrammarSymbol& symbol);
 
 	void CalculateLR1Itemset(LR1Itemset& answer);
 	bool CalculateLR1ItemsetOnePass(LR1Itemset& answer);
-	void CalculateLR1Items(LR1Itemset& answer, const LR1Item& item, const Condinate* cond, const GrammarSymbol& lhs);
 
-	void AddLR1Items(LR1Itemset& answer, const GrammarSymbol& forward, Grammar* g, int gi);
+	void AddLR1Itemsets(LR1Itemset &answer, const GrammarSymbol& lhs, const LR1Item &current);
 
 	bool ParseLRAction(LRActionTable & actionTable, const LR1Itemset& itemset, const LR1Item &item);
 

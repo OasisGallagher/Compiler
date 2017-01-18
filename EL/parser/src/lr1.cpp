@@ -26,7 +26,7 @@ bool Forwards::operator <(const Forwards& other) const {
 
 void Forwards::erase(const GrammarSymbol& symbol) {
 	iterator last = begin();
-	for (iterator first = begin() + 1; first != end(); ++first) {
+	for (iterator first = begin(); first != end(); ++first) {
 		if (first->symbol != symbol) {
 			*last++ = *first;
 		}
@@ -155,7 +155,8 @@ bool LR1Itemset::insert(const LR1Item& item) {
 	bool result = false;
 
 	LR1Item& old = (LR1Item&)*state.first;
-	for (Forwards::const_iterator ite = item.GetForwards().begin(); ite != item.GetForwards().end(); ++ite) {
+	const Forwards& forwards = item.GetForwards();
+	for (Forwards::const_iterator ite = forwards.begin(); ite != forwards.end(); ++ite) {
 		result = old.GetForwards().insert(ite->symbol, ite->spontaneous) || result;
 	}
 
