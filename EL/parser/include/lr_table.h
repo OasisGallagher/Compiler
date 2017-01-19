@@ -1,6 +1,16 @@
 #pragma once
-
+#include "matrix.h"
 #include "lr_impl.h"
+
+class LRGotoTable : public matrix <int, GrammarSymbol, int> {
+public:
+	std::string ToString() const;
+};
+
+class LRActionTable : public matrix <int, GrammarSymbol, LRAction> {
+public:
+	std::string ToString() const;
+};
 
 class LRTable {
 public:
@@ -8,16 +18,16 @@ public:
 	~LRTable();
 
 public:
-	bool Create(const LRSetupParameter& parameter);
+	friend class Serializer;
+	friend class LRParser;
 
-	LRAction GetAction(int state, const GrammarSymbol& symbol);
-	int GetNextGotoState(int state, const GrammarSymbol& symbol);
-
+public:
+	int GetGoto(int current, const GrammarSymbol& symbol);
+	LRAction GetAction(int current, const GrammarSymbol& symbol);
+	
 	std::string ToString() const;
 
 private:
-	LRImpl* impl_;
-
 	LRGotoTable gotoTable_;
 	LRActionTable actionTable_;
 };

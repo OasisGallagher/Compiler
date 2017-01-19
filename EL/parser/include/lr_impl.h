@@ -1,13 +1,6 @@
 #pragma once
 #include "matrix.h"
 
-class FirstSetTable;
-
-class GrammarSymbol;
-class GrammarContainer;
-class GrammarSymbolSetTable;
-class GrammarSymbolContainer;
-
 enum LRActionType {
 	LRActionError,
 	LRActionShift,
@@ -25,26 +18,19 @@ struct LRAction {
 	std::string ToString() const;
 };
 
-class LRGotoTable : public matrix<int, GrammarSymbol, int> {
-public:
-	std::string ToString() const;
-};
+struct Environment;
 
-class LRActionTable : public matrix<int, GrammarSymbol, LRAction> {
-public:
-	std::string ToString() const;
-};
+class LRGotoTable;
+class LRActionTable;
 
-struct LRSetupParameter {
-	GrammarContainer* grammars;
-	GrammarSymbolContainer* terminalSymbols;
-	GrammarSymbolContainer* nonterminalSymbols;
+class FirstSetTable;
 
-	FirstSetTable* firstSetContainer;
-	GrammarSymbolSetTable* followSetContainer;
-};
+class GrammarSymbol;
+class GrammarContainer;
+class GrammarSymbolSetTable;
+class GrammarSymbolContainer;
 
-class Conflicts : public matrix <int, GrammarSymbol, LRAction> {
+class Conflicts : public matrix<int, GrammarSymbol, LRAction> {
 };
 
 class LRImpl {
@@ -54,8 +40,8 @@ public:
 public:
 	virtual std::string ToString() const = 0;
 
-	virtual bool Parse(LRGotoTable& gotoTable, LRActionTable& actionTable) = 0;
-	virtual void Setup(const LRSetupParameter& parameter) = 0;
+	virtual bool Parse(LRActionTable& actionTable, LRGotoTable& gotoTable) = 0;
+	virtual void Setup(Environment* env, FirstSetTable* firstSet) = 0;
 
 protected:
 	bool InsertActionTable(LRActionTable &actionTable, int src, const GrammarSymbol& symbol, const LRAction& action);

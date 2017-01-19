@@ -1,22 +1,34 @@
 #pragma once
 #include <string>
+#include "grammar_symbol.h"
 
-class Parser;
+class Syntaxer;
 class SyntaxTree;
+class TextScanner;
 
-struct LanguageParameter {
-	const char* productions;
-};
+struct Environment;
 
 class Language {
 public:
-	Language(LanguageParameter* parameter);
+	Language();
 	~Language();
+
+public:
+	void Load(const char* filePath);
+	void Setup(const char* productions);
 
 public:
 	bool Parse(SyntaxTree* tree, const std::string& file);
 	std::string ToString() const;
 
 private:
-	Parser* parser_;
+	bool SetupEnvironment(const char* productions);
+
+	GrammarSymbol CreateSymbol(const std::string& text);
+	bool ParseProductions(const char* productions);
+	bool ParseProduction(TextScanner* textScanner, SymbolVector& symbols);
+
+private:
+	Environment* env_;
+	Syntaxer* syntaxer_;
 };

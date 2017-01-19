@@ -5,27 +5,20 @@
 #include "grammar_symbol.h"
 
 LRTable::LRTable() {
-	impl_ = new LALR();
 }
 
 LRTable::~LRTable() {
-	delete impl_;
 }
 
-bool LRTable::Create(const LRSetupParameter& parameter) {
-	impl_->Setup(parameter);
-	return impl_->Parse(gotoTable_, actionTable_);
-}
-
-LRAction LRTable::GetAction(int state, const GrammarSymbol& symbol) {
+LRAction LRTable::GetAction(int current, const GrammarSymbol& symbol) {
 	LRAction action = { LRActionError };
-	actionTable_.get(state, symbol, action);
+	actionTable_.get(current, symbol, action);
 	return action;
 }
 
-int LRTable::GetNextGotoState(int state, const GrammarSymbol& symbol) {
+int LRTable::GetGoto(int current, const GrammarSymbol& symbol) {
 	int answer = -1;
-	gotoTable_.get(state, symbol, answer);
+	gotoTable_.get(current, symbol, answer);
 	return answer;
 }
 

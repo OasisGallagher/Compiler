@@ -1,15 +1,18 @@
 #pragma once
 #include "grammar.h"
 
+class Syntaxer;
 class SyntaxTree;
 class FileScanner;
 class TextScanner;
 
-class SymTable;
-class LiteralTable;
-class ConstantTable;
-
 struct ScannerToken;
+
+struct Environment {
+	GrammarContainer grammars;
+	GrammarSymbolContainer terminalSymbols;
+	GrammarSymbolContainer nonterminalSymbols;
+};
 
 class Parser {
 public:
@@ -17,18 +20,16 @@ public:
 	virtual ~Parser();
 
 public:
-	virtual bool ParseFile(SyntaxTree* tree, FileScanner* fileScanner) = 0;
 	virtual std::string ToString() const;
 
 public:
-	bool SetGrammars(const char* productions);
+	bool Setup(Syntaxer& syntaxer, Environment* env);
 
 protected:
-	virtual bool ParseGrammars() = 0;
+	virtual bool ParseGrammars(Syntaxer& syntaxer, Environment* env) = 0;
 	virtual void Clear();
 
 protected:
-	GrammarSymbol FindSymbol(const ScannerToken& token, void*& addr);
 	Grammar* FindGrammar(const GrammarSymbol& lhs, int* index = nullptr);
 	GrammarSymbol CreateSymbol(const std::string& text);
 	bool MergeNonEpsilonElements(GrammarSymbolSet& dest, const GrammarSymbolSet& src);
@@ -37,24 +38,13 @@ protected:
 	void CreateFollowSets();
 
 protected:
-	GrammarContainer grammars_;
-	GrammarSymbolContainer terminalSymbols_;
-	GrammarSymbolContainer nonterminalSymbols_;
+	Environment* env_;
 
 	// VnµÄfirst/follow¼¯ºÏ.
 	FirstSetTable firstSetContainer_;
 	GrammarSymbolSetTable followSetContainer_;
 
 private:
-	void InitializeTerminalSymbolContainer();
-	bool ParseProductions(TextScanner* textScanner, SymbolVector& symbols);
-	void DestroyGammars();
-
 	bool CreateFirstSetsOnePass();
 	bool CreateFollowSetsOnePass();
-
-private:
-	SymTable* symTable_;
-	LiteralTable* literalTable_;
-	ConstantTable* constantTable_;
 };

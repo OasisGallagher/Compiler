@@ -77,6 +77,19 @@ public:
 	GrammarSymbolType SymbolType() const { return ptr_->SymbolType(); }
 	std::string ToString() const { return (ptr_ != nullptr) ? ptr_->ToString() : "null"; }
 
+private:
+#pragma push_macro("new")
+#undef new
+	// GrammarSymbol不可以通过new分配.
+	void* operator new(size_t);
+#pragma pop_macro("new")
+};
+
+class NativeSymbols {
+public:
+	static bool IsNative(const GrammarSymbol& symbol);
+	static void Copy(GrammarSymbolContainer& terminalSymbols, GrammarSymbolContainer& nonterminalSymbols);
+	
 public:
 	static GrammarSymbol null;
 	static GrammarSymbol zero;
@@ -86,13 +99,6 @@ public:
 	static GrammarSymbol epsilon;
 	static GrammarSymbol program;
 	static GrammarSymbol identifier;
-
-private:
-#pragma push_macro("new")
-#undef new
-	// GrammarSymbol不可以通过new分配.
-	void* operator new(size_t);
-#pragma pop_macro("new")
 };
 
 typedef std::set<GrammarSymbol> GrammarSymbolSet;

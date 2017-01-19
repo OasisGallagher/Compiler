@@ -108,6 +108,12 @@
     <ClInclude Include="parser\include\lr0.h">
       <Filter>parser\include</Filter>
     </ClInclude>
+    <ClInclude Include="parser\include\syntaxer.h">
+      <Filter>parser\include</Filter>
+    </ClInclude>
+    <ClInclude Include="parser\include\serializer.h">
+      <Filter>parser\include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="global\src\debug.cpp">
@@ -168,6 +174,12 @@
       <Filter>parser\src</Filter>
     </ClCompile>
     <ClCompile Include="parser\src\lr0.cpp">
+      <Filter>parser\src</Filter>
+    </ClCompile>
+    <ClCompile Include="parser\src\serializer.cpp">
+      <Filter>parser\src</Filter>
+    </ClCompile>
+    <ClCompile Include="parser\src\syntaxer.cpp">
       <Filter>parser\src</Filter>
     </ClCompile>
   </ItemGroup>

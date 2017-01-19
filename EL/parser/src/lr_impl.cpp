@@ -2,6 +2,7 @@
 
 #include "debug.h"
 #include "lr_impl.h"
+#include "lr_table.h"
 #include "grammar_symbol.h"
 
 static const char* actionTexts[] = { "err", "s", "r", "acc" };

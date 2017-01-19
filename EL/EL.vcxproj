@@ -30,6 +30,8 @@
     <ClInclude Include="parser\include\lr_parser.h" />
     <ClInclude Include="parser\include\lr_table.h" />
     <ClInclude Include="parser\include\parser.h" />
+    <ClInclude Include="parser\include\serializer.h" />
+    <ClInclude Include="parser\include\syntaxer.h" />
     <ClInclude Include="parser\include\syntax_tree.h" />
     <ClInclude Include="parser\include\table.h" />
     <ClInclude Include="scanner\include\scanner.h" />
@@ -53,6 +55,8 @@
     <ClCompile Include="parser\src\lr_parser.cpp" />
     <ClCompile Include="parser\src\lr_table.cpp" />
     <ClCompile Include="parser\src\parser.cpp" />
+    <ClCompile Include="parser\src\serializer.cpp" />
+    <ClCompile Include="parser\src\syntaxer.cpp" />
     <ClCompile Include="parser\src\syntax_tree.cpp" />
     <ClCompile Include="parser\src\table.cpp" />
     <ClCompile Include="scanner\src\scanner.cpp" />

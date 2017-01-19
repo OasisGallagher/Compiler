@@ -4,14 +4,14 @@
 #include "language.h"
 #include "syntax_tree.h"
 
+static const char* productions = "main/config/lr_grammar.txt";
+
 int main() {
 	Debug::EnableMemoryLeakCheck();
 
 	Debug::StartSample("create parser");
-	LanguageParameter lp;
-	lp.productions = "main/config/lr_grammar.txt";
-
-	Language* lang = new Language(&lp);
+	Language* lang = new Language;
+	lang->Setup(productions);
 	Debug::EndSample();
 
 	Debug::Log(lang->ToString());

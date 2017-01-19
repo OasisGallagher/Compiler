@@ -4,15 +4,16 @@
 #include "grammar.h"
 #include "lr_impl.h"
 
-class LR0 { 
+struct Environment;
 
+class LR0 {
 public:
 	LR0();
 	~LR0();
 
 public:
 	std::string ToString() const;
-	void Setup(const LRSetupParameter& parameter);
+	void Setup(Environment* env, FirstSetTable* firstSets);
 	bool CreateLR0Itemsets(LR1Itemset& items, LR1ItemsetContainer& itemsets, LR1EdgeTable& edges);
 
 private:
@@ -26,14 +27,8 @@ private:
 	bool CreateLR1ItemsetsOnePass();
 
 private:
-	LRSetupParameter p_;
-
-	GrammarContainer* grammars_;
-	GrammarSymbolContainer* terminalSymbols_;
-	GrammarSymbolContainer* nonterminalSymbols_;
-
-	FirstSetTable* firstSetContainer_;
-	GrammarSymbolSetTable* followSetContainer_;
+	Environment* env_;
+	FirstSetTable* firstSets_;
 
 	LR1Item tmp_;
 	LR1Itemset items_;

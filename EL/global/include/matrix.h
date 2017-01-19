@@ -87,6 +87,10 @@ public:
 		cont_.clear();
 	}
 
+	int size() const {
+		return cont_.size();
+	}
+
 protected:
 	container_type cont_;
 };

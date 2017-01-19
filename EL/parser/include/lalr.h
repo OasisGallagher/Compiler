@@ -1,6 +1,7 @@
 #pragma once
 #include "lr1.h"
 #include "lr_impl.h"
+#include "parser.h"
 
 class LR0;
 class Grammar;
@@ -14,9 +15,9 @@ public:
 public:
 	virtual std::string ToString() const;
 
-	virtual bool Parse(LRGotoTable& gotoTable, LRActionTable& actionTable);
+	virtual bool Parse(LRActionTable& actionTable, LRGotoTable& gotoTable);
 
-	virtual void Setup(const LRSetupParameter& parameter);
+	virtual void Setup(Environment* env, FirstSetTable* firstSet);
 
 protected:
 	virtual bool CreateLRParsingTable(LRGotoTable& gotoTable, LRActionTable& actionTable);
@@ -44,7 +45,8 @@ private:
 	bool ParseLRAction(LRActionTable & actionTable, const LR1Itemset& itemset, const LR1Item &item);
 
 private:
-	LRSetupParameter p_;
+	Environment* env_;
+	FirstSetTable* firstSets_;
 
 	LR1Item tmp_;
 	LR1EdgeTable edges_;

@@ -1,6 +1,7 @@
 #pragma once
 #include "parser.h"
 
+class LRImpl;
 class LRTable;
 
 class LRParser : public Parser {
@@ -9,16 +10,17 @@ public:
 	~LRParser();
 
 public:
-	virtual bool ParseFile(SyntaxTree* tree, FileScanner* fileScanner);
 	virtual std::string ToString() const;
 
 protected:
-	virtual bool ParseGrammars();
+	virtual bool ParseGrammars(Syntaxer& syntaxer, Environment* env);
 	virtual void Clear();
 
 private:
-	GrammarSymbol ParseNextSymbol(TokenPosition& position, void*& addr, FileScanner* fileScanner);
-	
+	void CreateFirstSets();
+	void CreateFollowSets();
+
 private:
+	LRImpl* impl_;
 	LRTable* lrTable_;
 };
