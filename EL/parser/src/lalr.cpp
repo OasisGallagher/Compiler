@@ -72,6 +72,7 @@ bool LALR::ParseLRAction(LRActionTable & actionTable, const LR1Itemset& itemset,
 	Grammar* g = nullptr;
 	const Condinate* cond = env_->grammars.GetTargetCondinate(item.GetCpos(), &g);
 	int i = Utility::ParseInteger(itemset.GetName());
+	std::string log = itemset.ToString(env_->grammars);
 
 	if (g->GetLhs() == NativeSymbols::program && item.GetDpos() == 1) {
 		Assert(item.GetForwards().size() == 1 && item.GetForwards().begin()->symbol == NativeSymbols::zero, "invalid start state");
@@ -177,7 +178,7 @@ void LALR::AddLR1Items(LR1Itemset &answer, const GrammarSymbol& lhs, const LR1It
 				int dpos = 0;
 
 				for (; ite != tc->symbols.end(); ++ite, ++dpos) {
-					LR1Item newItem = FindItem(Utility::MakeDword(condinateIndex, gi), dpos);
+					LR1Item newItem/* = FindItem*/(Utility::MakeDword(condinateIndex, gi), dpos);
 					newItem.GetForwards().insert(*fsi, true);
 					answer.insert(newItem);
 
@@ -187,7 +188,7 @@ void LALR::AddLR1Items(LR1Itemset &answer, const GrammarSymbol& lhs, const LR1It
 				}
 
 				if (ite == tc->symbols.end()) {
-					LR1Item newItem = FindItem(Utility::MakeDword(condinateIndex, gi), dpos);
+					LR1Item newItem/* = FindItem*/(Utility::MakeDword(condinateIndex, gi), dpos);
 					newItem.GetForwards().insert(*fsi, true);
 					answer.insert(newItem);
 				}
@@ -324,7 +325,7 @@ void LALR::CalculateForwardsAndPropagations() {
 	Debug::StartProgress();
 	int index = 1, total = (int)items_.size();
 	for (LR1Itemset::iterator ite = items_.begin(); ite != items_.end(); ++ite, ++index) {
-		Debug::LogProgress("...", index, total);
+		Debug::LogProgress("progress", index, total);
 
 		LR1Item item = *ite;
 		LR1Itemset target;
@@ -370,7 +371,7 @@ void LALR::AddForwardsAndPropagations(LR1Item& src, const LR1Itemset& itemset, c
 			continue;
 		}
 
-		LR1Item target = FindItem(ite->GetCpos(), ite->GetDpos() + 1);
+		LR1Item target/* = FindItem*/(ite->GetCpos(), ite->GetDpos() + 1, ite->GetForwards());
 
 		for (Forwards::const_iterator ite2 = ite->GetForwards().begin(); ite2 != ite->GetForwards().end(); ++ite2) {
 			if (ite2->symbol == NativeSymbols::unknown) {

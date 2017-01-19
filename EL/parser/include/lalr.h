@@ -40,6 +40,8 @@ private:
 	void CalculateLR1Itemset(LR1Itemset& answer);
 	bool CalculateLR1ItemsetOnePass(LR1Itemset& answer);
 
+	bool CalculateLR1EdgeTarget(LR1Itemset& answer, const LR1Itemset& src, const GrammarSymbol& symbol);
+
 	void AddLR1Items(LR1Itemset &answer, const GrammarSymbol& lhs, const LR1Item &current);
 
 	bool ParseLRAction(LRActionTable & actionTable, const LR1Itemset& itemset, const LR1Item &item);

@@ -60,7 +60,7 @@ bool Action::SplitParameters(int* parameters, int& count, TextScanner& scanner) 
 }
 
 std::string ActionConstant::ToString() const {
-	return std::string("constant($") + std::to_string(argument_.parameters.front()) + ")";
+	return std::string("$$ = constant($") + std::to_string(argument_.parameters.front()) + ")";
 }
 
 SyntaxNode* ActionConstant::Invoke(const std::vector<void*>& container) {
@@ -71,7 +71,7 @@ SyntaxNode* ActionConstant::Invoke(const std::vector<void*>& container) {
 }
 
 std::string ActionLiteral::ToString() const {
-	return std::string("literal($") + std::to_string(argument_.parameters.front()) + ")";
+	return std::string("$$ = literal($") + std::to_string(argument_.parameters.front()) + ")";
 }
 
 SyntaxNode* ActionLiteral::Invoke(const std::vector<void*>& container) {
@@ -82,7 +82,7 @@ SyntaxNode* ActionLiteral::Invoke(const std::vector<void*>& container) {
 }
 
 std::string ActionSymbol::ToString() const {
-	return std::string("symbol($") + std::to_string(argument_.parameters.front()) + ")";
+	return std::string("$$ = symbol($") + std::to_string(argument_.parameters.front()) + ")";
 }
 
 SyntaxNode* ActionSymbol::Invoke(const std::vector<void*>& container) {
@@ -93,7 +93,7 @@ SyntaxNode* ActionSymbol::Invoke(const std::vector<void*>& container) {
 }
 
 std::string ActionIndex::ToString() const {
-	return std::string("$") + std::to_string(argument_.parameters.front());
+	return std::string("$$ = $") + std::to_string(argument_.parameters.front());
 }
 
 SyntaxNode* ActionIndex::Invoke(const std::vector<void*>& container) {
@@ -104,7 +104,7 @@ std::string ActionMake::ToString() const {
 	const char* sep = "";
 	std::ostringstream oss;
 	
-	oss << "make(";
+	oss << "$$ = make(";
 
 	for (std::vector<int>::const_iterator ite = argument_.parameters.begin();
 		ite != argument_.parameters.end(); ++ite) {

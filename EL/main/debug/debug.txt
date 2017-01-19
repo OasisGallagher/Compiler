@@ -1,38 +1,31 @@
-"create parser" at 18:03:43.
-"create LR0 itemsets" at 18:03:46.
-"create LR0 itemsets" costs 0.05 seconds.
-"remove noncore items" at 18:03:46.
+"create parser" at 22:40:17.
+"create LR0 itemsets" at 22:40:17.
+"create LR0 itemsets" costs 0.04 seconds.
+"remove noncore items" at 22:40:17.
 "remove noncore items" costs 0.00 seconds.
-"calculate forwards and propagations" at 18:03:46.
-"add forwards and propagations" at 18:03:46.
-"add forwards and propagations" costs 0.06 seconds.
-"clean up" at 18:03:46.
+"calculate forwards and propagations" at 22:40:17.
+"add forwards and propagations" at 22:40:17.
+"add forwards and propagations" costs 0.03 seconds.
+"clean up" at 22:40:17.
 "clean up" costs 0.00 seconds.
-"calculate forwards and propagations" costs 0.06 seconds.
-"propagate forwards" at 18:03:46.
+"calculate forwards and propagations" costs 0.04 seconds.
+"propagate forwards" at 22:40:17.
 "propagate forwards" costs 0.00 seconds.
-"create parsing table" at 18:03:46.
-[W] CONFLICT: (3, =) => ((s6), (r196608))
-"create parsing table" costs 0.54 seconds.
-"create parser" costs 23.09 seconds.
+"create parsing table" at 22:40:17.
+[E] item.GetForwards().size() == 1 && item.GetForwards().begin()->symbol == NativeSymbols::zero:
+invalid start state
+at e:\github\el\el\parser\src\lalr.cpp:78
+"create parsing table" costs 14.39 seconds.
+"create parser" costs 14.52 seconds.
 ================= Action Table =================
 (0, *) => (s1)
 (0, id) => (s2)
 (1, *) => (s1)
 (1, id) => (s2)
-(2, zero) => (r131073)
-(2, =) => (r131073)
-(3, zero) => (r196608)
 (3, =) => (s6)
-(4, zero) => (r65537)
 (5, zero) => (acc)
 (6, *) => (s1)
 (6, id) => (s2)
-(7, zero) => (r196608)
-(7, =) => (r196608)
-(8, zero) => (r131072)
-(8, =) => (r131072)
-(9, zero) => (r65536)
 
 ================== Goto Table ==================
 (0, S) => 5

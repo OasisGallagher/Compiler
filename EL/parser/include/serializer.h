@@ -26,7 +26,7 @@ private:
 	static bool SaveLRGotoTable(std::ofstream& file, const LRGotoTable &gotos);
 	static bool SaveLRActionTable(std::ofstream& file, const LRActionTable &actionTable);
 
-	static bool LoadLRGotoTable(std::ifstream& file, GrammarSymbolContainer& terminalSymbols, LRTable &table);
+	static bool LoadLRGotoTable(std::ifstream& file, GrammarSymbolContainer& nonterminalSymbols, LRTable &table);
 	static bool LoadLRActionTable(std::ifstream& file, GrammarSymbolContainer& terminalSymbols, LRTable &table);
 
 private:

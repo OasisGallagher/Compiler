@@ -12,6 +12,8 @@ struct Environment {
 	GrammarContainer grammars;
 	GrammarSymbolContainer terminalSymbols;
 	GrammarSymbolContainer nonterminalSymbols;
+
+	~Environment();
 };
 
 class Parser {

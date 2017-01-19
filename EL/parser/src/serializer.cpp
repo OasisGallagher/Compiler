@@ -182,7 +182,7 @@ bool Serializer::LoadLRTable(std::ifstream& file, GrammarSymbolContainer& termin
 		return false;
 	}
 
-	return LoadLRGotoTable(file, terminalSymbols, table);
+	return LoadLRGotoTable(file, nonterminalSymbols, table);
 }
 
 bool Serializer::LoadCondinates(GrammarSymbolContainer& terminalSymbols, GrammarSymbolContainer& nonterminalSymbols, std::ifstream& file, Grammar* grammar) {
@@ -304,7 +304,7 @@ bool Serializer::LoadLRActionTable(std::ifstream& file, GrammarSymbolContainer& 
 	return true;
 }
 
-bool Serializer::LoadLRGotoTable(std::ifstream& file, GrammarSymbolContainer& terminalSymbols, LRTable &table) {
+bool Serializer::LoadLRGotoTable(std::ifstream& file, GrammarSymbolContainer& nonterminalSymbols, LRTable &table) {
 	int count = 0;
 	if (!ReadInteger(file, count)) {
 		return false;
@@ -321,7 +321,7 @@ bool Serializer::LoadLRGotoTable(std::ifstream& file, GrammarSymbolContainer& te
 			return false;
 		}
 
-		GrammarSymbol symbol = terminalSymbols[stext];
+		GrammarSymbol symbol = nonterminalSymbols[stext];
 		Assert(symbol != NativeSymbols::null, "invalid terminal symbol " + stext);
 
 		if (!ReadInteger(file, to)) {

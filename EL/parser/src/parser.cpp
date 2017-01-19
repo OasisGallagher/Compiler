@@ -7,6 +7,12 @@
 #include "action.h"
 #include "scanner.h"
 
+Environment::~Environment() {
+	for (GrammarContainer::iterator ite = grammars.begin(); ite != grammars.end(); ++ite) {
+		delete *ite;
+	}
+}
+
 Parser::Parser() {
 }
 

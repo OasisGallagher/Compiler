@@ -24,6 +24,7 @@ void Language::Setup(const char* productions) {
 	LRParser parser;
 	parser.Setup(*syntaxer_, env_);
 	syntaxer_->Save(output);
+	syntaxer_->Load(output);
 }
 
 bool Language::Parse(SyntaxTree* tree, const std::string& file) {
