@@ -2,14 +2,21 @@
 #include <fstream>
 
 class LRTable;
+class LRGotoTable;
+class LRActionTable;
 class GrammarContainer;
 class GrammarSymbolContainer;
+
+struct Environment;
 struct SyntaxerSetupParameter;
 
 class Serializer {
 public:
-	static bool LoadSyntaxer(const char* filePath, SyntaxerSetupParameter& p);
-	static bool SaveSyntaxer(const char* filePath, const SyntaxerSetupParameter& p);
+	static bool LoadEnvironment(std::ifstream& file, Environment* env);
+	static bool SaveEnvironment(std::ofstream& file, Environment* env);
+
+	static bool LoadSyntaxer(std::ifstream& file, SyntaxerSetupParameter& p);
+	static bool SaveSyntaxer(std::ofstream& file, const SyntaxerSetupParameter& p);
 
 private:
 	static bool SaveLRTable(std::ofstream& file, const LRTable& table);

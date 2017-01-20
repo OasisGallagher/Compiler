@@ -26,12 +26,12 @@ void Syntaxer::Setup(const SyntaxerSetupParameter& p) {
 	p_ = p;
 }
 
-bool Syntaxer::Load(const char* filePath) {
-	return Serializer::LoadSyntaxer(filePath, p_);
+bool Syntaxer::Load(std::ifstream& file) {
+	return Serializer::LoadSyntaxer(file, p_);
 }
 
-bool Syntaxer::Save(const char* filePath) {
-	return Serializer::SaveSyntaxer(filePath, p_);
+bool Syntaxer::Save(std::ofstream& file) {
+	return Serializer::SaveSyntaxer(file, p_);
 }
 
 bool Syntaxer::ParseSyntax(SyntaxTree* tree, FileScanner* fileScanner) {
@@ -100,7 +100,7 @@ SyntaxNode* Syntaxer::CreateSyntaxTree(FileScanner* fileScanner) {
 
 			if (nextState < 0) {
 				Debug::LogError("empty goto item(" + std::to_string(stateStack.back()) + ", " + g->GetLhs().ToString() + ")");
-				return false;
+				return nullptr;
 			}
 
 			stateStack.push_back(nextState);

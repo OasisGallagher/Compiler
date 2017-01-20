@@ -14,7 +14,7 @@ int main() {
 	lang->Setup(productions);
 	Debug::EndSample();
 
-	Debug::Log(lang->ToString());
+	//Debug::Log(lang->ToString());
 
 	SyntaxTree tree;
 

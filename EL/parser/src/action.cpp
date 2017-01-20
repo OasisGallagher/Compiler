@@ -101,16 +101,14 @@ SyntaxNode* ActionIndex::Invoke(const std::vector<void*>& container) {
 }
 
 std::string ActionMake::ToString() const {
-	const char* sep = "";
 	std::ostringstream oss;
 	
-	oss << "$$ = make(";
+	oss << "$$ = make(\"" + argument_.text + "\"";
 
 	for (std::vector<int>::const_iterator ite = argument_.parameters.begin();
 		ite != argument_.parameters.end(); ++ite) {
-		oss << sep;
+		oss << ", ";
 		oss << '$' << std::to_string(*ite);
-		sep = ", ";
 	}
 
 	oss << ")";

@@ -16,7 +16,7 @@ void LR0::Setup(Environment* env, FirstSetTable* firstSets) {
 	firstSets_ = firstSets;
 }
 
-bool LR0::CreateLR0Itemsets(LR1Itemset& items, LR1ItemsetContainer& itemsets, LR1EdgeTable& edges) {
+bool LR0::CreateLR0Itemsets(LR1ItemsetContainer& itemsets, LR1EdgeTable& edges) {
 	LR1Itemset itemset;
 	AddLR1Items(itemset, env_->grammars.front()->GetLhs());
 	itemset.SetName("0");
@@ -27,7 +27,6 @@ bool LR0::CreateLR0Itemsets(LR1Itemset& items, LR1ItemsetContainer& itemsets, LR
 	}
 
 	edges = edges_;
-	items = items_;
 	itemsets = itemsets_;
 
 	return true;
@@ -43,26 +42,16 @@ bool LR0::CreateLR1ItemsetsOnePass() {
 		}
 
 		for (GrammarSymbolContainer::iterator ite2 = env_->nonterminalSymbols.begin(); ite2 != env_->nonterminalSymbols.end(); ++ite2) {
+			if (ite2->second == NativeSymbols::program) {
+				continue;
+			}
+
 			LR1Itemset itemset;
 			setChanged = GetLR1EdgeTarget(itemset, *ite, ite2->second) || setChanged;
 		}
 	}
 
 	return setChanged;
-}
-
- LR1Item LR0::CreateLR0Item(int cpos, int dpos) {
-	tmp_.SetCpos(cpos);
-	tmp_.SetDpos(dpos);
-	LR1Itemset::iterator pos = items_.find(tmp_);
-	if (pos == items_.end()) {
-		LR1Item item = tmp_;
-		items_.insert(item);
-		tmp_ = LR1Item();
-		return item;
-	}
-
-	return *pos;
 }
 
 void LR0::AddLR1Items(LR1Itemset& answer, const GrammarSymbol& lhs) {
@@ -76,7 +65,7 @@ void LR0::AddLR1Items(LR1Itemset& answer, const GrammarSymbol& lhs) {
 		int dpos = 0;
 
 		for (; ite != tc->symbols.end(); ++ite, ++dpos) {
-			LR1Item newItem = CreateLR0Item(Utility::MakeDword(index, gi), dpos);
+			LR1Item newItem(Utility::MakeDword(index, gi), dpos);
 			answer.insert(newItem);
 
 			if (*ite == NativeSymbols::epsilon || !IsNullable(*ite)) {
@@ -85,7 +74,7 @@ void LR0::AddLR1Items(LR1Itemset& answer, const GrammarSymbol& lhs) {
 		}
 
 		if (ite == tc->symbols.end()) {
-			LR1Item newItem = CreateLR0Item(Utility::MakeDword(index, gi), dpos);
+			LR1Item newItem(Utility::MakeDword(index, gi), dpos);
 			answer.insert(newItem);
 		}
 	}
@@ -156,7 +145,7 @@ bool LR0::CalculateLR1EdgeTarget(LR1Itemset& answer, const LR1Itemset& src, cons
 			continue;
 		}
 
-		LR1Item item = CreateLR0Item(ite->GetCpos(), ite->GetDpos() + 1);
+		LR1Item item(ite->GetCpos(), ite->GetDpos() + 1);
 		answer.insert(item);
 	}
 

@@ -21,10 +21,15 @@ Language::~Language() {
 void Language::Setup(const char* productions) {
 	SetupEnvironment(productions);
 
-	LRParser parser;
+	/*LRParser parser;
 	parser.Setup(*syntaxer_, env_);
-	syntaxer_->Save(output);
-	syntaxer_->Load(output);
+	syntaxer_->Save(output);*/
+	std::ifstream file(output, std::ios::binary);
+	env_->Load(file);
+
+	SyntaxerSetupParameter p = { env_ };
+	syntaxer_->Setup(p);
+	syntaxer_->Load(file);
 }
 
 bool Language::Parse(SyntaxTree* tree, const std::string& file) {

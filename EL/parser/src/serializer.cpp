@@ -8,26 +8,52 @@
 #include "serializer.h"
 #include "grammar_symbol.h"
 
-static char intBuffer[sizeof(int)];
-static char strBuffer[MAX_TOKEN_CHARACTERS];
+#define MAX_SERIALIZABLE_CHARACTERS		256
 
-bool Serializer::SaveSyntaxer(const char* filePath, const SyntaxerSetupParameter& p) {
-	std::ofstream file(filePath, std::ios::binary);
-	if (!SaveSymbols(file, p.env->terminalSymbols)) {
+static char intBuffer[sizeof(int)];
+static char strBuffer[MAX_SERIALIZABLE_CHARACTERS];
+
+bool Serializer::SaveEnvironment(std::ofstream& file, Environment* env) {
+	if (!SaveSymbols(file, env->terminalSymbols)) {
 		Debug::LogError("failed to save terminal symbols.");
 		return false;
 	}
 
-	if (!SaveSymbols(file, p.env->nonterminalSymbols)) {
+	if (!SaveSymbols(file, env->nonterminalSymbols)) {
 		Debug::LogError("failed to save non-terminal symbols.");
 		return false;
 	}
 
-	if (!SaveGrammars(file, p.env->grammars)) {
+	if (!SaveGrammars(file, env->grammars)) {
 		Debug::LogError("failed to save grammars.");
 		return false;
 	}
 
+	return true;
+}
+
+bool Serializer::LoadEnvironment(std::ifstream& file, Environment* env) {
+	if (!LoadSymbols(file, env->terminalSymbols)) {
+		Debug::LogError("failed to save terminal symbols.");
+		return false;
+	}
+
+	if (!LoadSymbols(file, env->nonterminalSymbols)) {
+		Debug::LogError("failed to save non-terminal symbols.");
+		return false;
+	}
+
+	NativeSymbols::Copy(env->terminalSymbols, env->nonterminalSymbols);
+
+	if (!LoadGrammars(file, env->terminalSymbols, env->nonterminalSymbols, env->grammars)) {
+		Debug::LogError("failed to save grammars.");
+		return false;
+	}
+
+	return true;
+}
+
+bool Serializer::SaveSyntaxer(std::ofstream& file, const SyntaxerSetupParameter& p) {
 	if (!SaveLRTable(file, p.lrTable)) {
 		Debug::LogError("failed to save lr-table.");
 		return false;
@@ -36,25 +62,7 @@ bool Serializer::SaveSyntaxer(const char* filePath, const SyntaxerSetupParameter
 	return true;
 }
 
-bool Serializer::LoadSyntaxer(const char* filePath, SyntaxerSetupParameter& p) {
-	std::ifstream file(filePath, std::ios::binary);
-	if (!LoadSymbols(file, p.env->terminalSymbols)) {
-		Debug::LogError("failed to save terminal symbols.");
-		return false;
-	}
-
-	if (!LoadSymbols(file, p.env->nonterminalSymbols)) {
-		Debug::LogError("failed to save non-terminal symbols.");
-		return false;
-	}
-
-	NativeSymbols::Copy(p.env->terminalSymbols, p.env->nonterminalSymbols);
-
-	if (!LoadGrammars(file, p.env->terminalSymbols, p.env->nonterminalSymbols, p.env->grammars)) {
-		Debug::LogError("failed to save grammars.");
-		return false;
-	}
-
+bool Serializer::LoadSyntaxer(std::ifstream& file, SyntaxerSetupParameter& p) {
 	if (!LoadLRTable(file, p.env->terminalSymbols, p.env->nonterminalSymbols, p.lrTable)) {
 		Debug::LogError("failed to save lr-table.");
 		return false;
@@ -339,6 +347,7 @@ bool Serializer::WriteInteger(std::ofstream& file, int x) {
 }
 
 bool Serializer::WriteString(std::ofstream& file, const std::string& str) {
+	Assert(str.length() < MAX_SERIALIZABLE_CHARACTERS, "string length exceed.");
 	int count = (int)str.length();
 	return file.write((char*)&count, sizeof(count)) && file.write(str.c_str(), count);
 }
@@ -358,7 +367,7 @@ bool Serializer::ReadString(std::ifstream& file, std::string& str) {
 		return false;
 	}
 
-	Assert(length < MAX_TOKEN_CHARACTERS, "token length exceed");
+	Assert(length < MAX_SERIALIZABLE_CHARACTERS, "token length exceed.");
 
 	if (!file.read(strBuffer, length)) {
 		return false;

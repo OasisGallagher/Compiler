@@ -13,6 +13,9 @@ struct Environment {
 	GrammarSymbolContainer terminalSymbols;
 	GrammarSymbolContainer nonterminalSymbols;
 
+	bool Load(std::ifstream& file);
+	bool Save(std::ofstream& file);
+
 	~Environment();
 };
 

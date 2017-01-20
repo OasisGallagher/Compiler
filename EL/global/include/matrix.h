@@ -2,6 +2,8 @@
 #include <map>
 #include <functional>
 
+#include "debug.h"
+
 template <class key_type>
 struct matrix_comparer : public std::binary_function <key_type, key_type, bool> {
 	bool operator () (const key_type& lhs, const key_type& rhs) const {
@@ -36,7 +38,9 @@ public:
 
 public:
 	value_type& at(const first_key_type& k1, const second_key_type& k2) {
-		return cont_[std::make_pair(k1, k2)];
+		iterator ite = find(k1, k2);
+		Assert(ite != end(), "key does not exist.");
+		return ite->second;
 	}
 
 	bool get(const first_key_type& k1, const second_key_type& k2, value_type& answer) {

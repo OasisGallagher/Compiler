@@ -1,39 +1,34 @@
-"create parser" at 22:40:17.
-"create LR0 itemsets" at 22:40:17.
-"create LR0 itemsets" costs 0.04 seconds.
-"remove noncore items" at 22:40:17.
-"remove noncore items" costs 0.00 seconds.
-"calculate forwards and propagations" at 22:40:17.
-"add forwards and propagations" at 22:40:17.
-"add forwards and propagations" costs 0.03 seconds.
-"clean up" at 22:40:17.
-"clean up" costs 0.00 seconds.
-"calculate forwards and propagations" costs 0.04 seconds.
-"propagate forwards" at 22:40:17.
-"propagate forwards" costs 0.00 seconds.
-"create parsing table" at 22:40:17.
-[E] item.GetForwards().size() == 1 && item.GetForwards().begin()->symbol == NativeSymbols::zero:
-invalid start state
-at e:\github\el\el\parser\src\lalr.cpp:78
-"create parsing table" costs 14.39 seconds.
-"create parser" costs 14.52 seconds.
-================= Action Table =================
-(0, *) => (s1)
-(0, id) => (s2)
-(1, *) => (s1)
-(1, id) => (s2)
-(3, =) => (s6)
-(5, zero) => (acc)
-(6, *) => (s1)
-(6, id) => (s2)
-
-================== Goto Table ==================
-(0, S) => 5
-(0, L) => 3
-(0, R) => 4
-(1, L) => 7
-(1, R) => 8
-(6, L) => 7
-(6, R) => 9
->> Shift	`id`. Goto state 2.
-[E] unexpected symbol identifier at 1:3
+"create parser" at 17:38:46.
+"create parser" costs 0.20 seconds.
+>> Shift	`function`. Goto state 14.
+>> Shift	`identifier`. Goto state 15.
+>> Reduce	`identifier` to `Identifier`. Goto state 117.
+>> Reduce	`Identifier` to `FormalParameter`. Goto state 114.
+>> Reduce	`FormalParameter` to `FormalParametersPrefix`. Goto state 116.
+>> Reduce	`FormalParametersPrefix` to `FormalParametersAndBody`. Goto state 115.
+>> Reduce	`function FormalParametersAndBody` to `AnonymousFunction`. Goto state 30.
+>> Reduce	`AnonymousFunction` to `FunctionExpression`. Goto state 46.
+>> Reduce	`FunctionExpression` to `PrimaryExpression`. Goto state 57.
+>> Reduce	`PrimaryExpression` to `CallExpression`. Goto state 36.
+>> Shift	`(`. Goto state 147.
+>> Shift	`identifier`. Goto state 15.
+>> Reduce	`identifier` to `Identifier`. Goto state 47.
+>> Reduce	`Identifier` to `SimpleExpression`. Goto state 62.
+>> Reduce	`SimpleExpression` to `PrimaryExpression`. Goto state 57.
+>> Reduce	`PrimaryExpression` to `CallExpression`. Goto state 36.
+>> Reduce	`CallExpression` to `LeftSideExpression`. Goto state 49.
+>> Reduce	`LeftSideExpression` to `PostfixExpression`. Goto state 56.
+>> Reduce	`PostfixExpression` to `UnaryExpression`. Goto state 68.
+>> Reduce	`UnaryExpression` to `MultiplicativeExpression`. Goto state 51.
+>> Reduce	`MultiplicativeExpression` to `AdditiveExpression`. Goto state 29.
+>> Reduce	`AdditiveExpression` to `ShiftExpression`. Goto state 60.
+>> Reduce	`ShiftExpression` to `RelationalExpression`. Goto state 58.
+>> Reduce	`RelationalExpression` to `EqualityExpression`. Goto state 40.
+>> Reduce	`EqualityExpression` to `BitwiseAndExpression`. Goto state 33.
+>> Reduce	`BitwiseAndExpression` to `LogicalOrExpression`. Goto state 50.
+>> Reduce	`LogicalOrExpression` to `ConditionalExpression`. Goto state 37.
+>> Reduce	`ConditionalExpression` to `AssignmentExpression`. Goto state 169.
+>> Reduce	`AssignmentExpression` to `ArgumentList`. Goto state 168.
+>> Shift	`,`. Goto state 209.
+>> Shift	`identifier`. Goto state 15.
+[E] unexpected symbol ) at 1:18

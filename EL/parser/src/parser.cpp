@@ -6,6 +6,15 @@
 #include "parser.h"
 #include "action.h"
 #include "scanner.h"
+#include "serializer.h"
+
+bool Environment::Load(std::ifstream& file) {
+	return Serializer::LoadEnvironment(file, this);
+}
+
+bool Environment::Save(std::ofstream& file) {
+	return Serializer::SaveEnvironment(file, this);
+}
 
 Environment::~Environment() {
 	for (GrammarContainer::iterator ite = grammars.begin(); ite != grammars.end(); ++ite) {

@@ -23,8 +23,8 @@ public:
 	~Syntaxer();
 
 public:
-	bool Load(const char* filePath);
-	bool Save(const char* filePath);
+	bool Load(std::ifstream& file);
+	bool Save(std::ofstream& file);
 
 public:
 	void Setup(const SyntaxerSetupParameter& p);
