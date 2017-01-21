@@ -13,6 +13,9 @@
   <ItemGroup>
     <ClInclude Include="global\include\define.h" />
     <ClInclude Include="global\include\debug.h" />
+    <ClInclude Include="global\include\os.h" />
+    <ClInclude Include="global\include\os_linux.h" />
+    <ClInclude Include="global\include\os_windows.h" />
     <ClInclude Include="global\include\reader.h" />
     <ClInclude Include="global\include\matrix.h" />
     <ClInclude Include="global\include\reference_countable.h" />
@@ -39,6 +42,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="global\src\debug.cpp" />
+    <ClCompile Include="global\src\os_linux.cpp" />
+    <ClCompile Include="global\src\os_windows.cpp" />
     <ClCompile Include="global\src\reader.cpp" />
     <ClCompile Include="global\src\reference_countable.cpp" />
     <ClCompile Include="global\src\table_printer.cpp" />
@@ -102,7 +107,7 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions);_SCL_SECURE_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions);_SCL_SECURE_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;PLATFORM_WINDOWS</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>global/include;scanner/include;parser/include;main/include</AdditionalIncludeDirectories>
       <TreatWarningAsError>true</TreatWarningAsError>

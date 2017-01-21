@@ -6,8 +6,6 @@
 #include "syntaxer.h"
 #include "lr_parser.h"
 
-static const char* output = "main/config/output.bin";
-
 Language::Language() {
 	env_ = new Environment;
 	syntaxer_ = new Syntaxer;
@@ -18,18 +16,20 @@ Language::~Language() {
 	delete syntaxer_;
 }
 
-void Language::Setup(const char* productions) {
-	SetupEnvironment(productions);
-
-	/*LRParser parser;
-	parser.Setup(*syntaxer_, env_);
-	syntaxer_->Save(output);*/
-	std::ifstream file(output, std::ios::binary);
-	env_->Load(file);
-
-	SyntaxerSetupParameter p = { env_ };
-	syntaxer_->Setup(p);
-	syntaxer_->Load(file);
+void Language::Setup(const char* productions, const char* output) {
+	time_t tp = OS::GetFileLastWriteTime(productions);
+	time_t to = OS::GetFileLastWriteTime(output);
+	if (tp > to) {
+		Debug::StartSample("build parser");
+		BuildSyntaxer(productions);
+		SaveSyntaxer(output);
+		Debug::EndSample();
+	}
+	else {
+		Debug::StartSample("load parser");
+		LoadSyntaxer(output);
+		Debug::EndSample();
+	}
 }
 
 bool Language::Parse(SyntaxTree* tree, const std::string& file) {
@@ -111,6 +111,26 @@ bool Language::ParseProductions(const char* productions) {
 	}
 
 	return true;
+}
+
+void Language::BuildSyntaxer(const char* productions) {
+	SetupEnvironment(productions);
+	LRParser parser;
+	parser.Setup(*syntaxer_, env_);
+}
+
+void Language::LoadSyntaxer(const char* output) {
+	std::ifstream file(output, std::ios::binary);
+	env_->Load(file);
+	SyntaxerSetupParameter p = { env_ };
+	syntaxer_->Setup(p);
+	syntaxer_->Load(file);
+}
+
+void Language::SaveSyntaxer(const char* output) {
+	std::ofstream file(output, std::ios::binary);
+	env_->Save(file);
+	syntaxer_->Save(file);
 }
 
 std::string Language::ToString() const {

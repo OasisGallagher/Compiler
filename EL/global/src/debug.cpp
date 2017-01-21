@@ -3,7 +3,6 @@
 #include <iostream>
 #include <sstream>
 #include <fstream>
-#include <Windows.h>
 
 #include "debug.h"
 #include "utilities.h"
@@ -11,36 +10,26 @@
 int Debug::length_ = 0;
 std::stack<std::string> Debug::samples_;
 
-const int red = 12;
-const int white = 7;
-const int green = 10;
-const int yellow = 14;
-
 std::ofstream output("main/debug/debug.txt");
 
 void Debug::Log(const std::string& text) {
-	SetConsoleColor(white);
+	OS::SetConsoleColor(White);
 	std::cout << text << "\n";
 	output << text << "\n";
 }
 
 void Debug::LogWarning(const std::string& text) {
-	SetConsoleColor(yellow);
+	OS::SetConsoleColor(Yellow);
 	std::cout << "[W] " << text << "\n";
 	output << "[W] " << text << "\n";
-	SetConsoleColor(white);
+	OS::SetConsoleColor(White);
 }
 
 void Debug::LogError(const std::string& text) {
-	SetConsoleColor(red);
+	OS::SetConsoleColor(Red);
 	std::cout << "[E] " << text << "\n";
 	output << "[E] " << text << "\n";
-	SetConsoleColor(white);
-}
-
-void Debug::SetConsoleColor(int color) {
-	HANDLE handle = GetStdHandle(STD_OUTPUT_HANDLE);
-	SetConsoleTextAttribute(handle, color);
+	OS::SetConsoleColor(White);
 }
 
 std::string Debug::Now() {
@@ -55,8 +44,7 @@ void Debug::Break(const std::string& expression, const std::string& message, con
 	oss << "at " << file << ":" << line;
 	Debug::LogError(oss.str());
 
-	MessageBox(NULL, message.c_str(), "Assertion Failed", MB_OK | MB_ICONERROR);
-	__asm int 3
+	OS::Break(oss.str().c_str());
 }
 
 void Debug::EnableMemoryLeakCheck() {
@@ -65,7 +53,7 @@ void Debug::EnableMemoryLeakCheck() {
 
 void Debug::StartProgress() {
 	length_ = 0;
-	SetConsoleColor(green);
+	OS::SetConsoleColor(Green);
 }
 
 void Debug::LogProgress(const char* text, int current, int total) {
@@ -78,7 +66,7 @@ void Debug::LogProgress(const char* text, int current, int total) {
 
 void Debug::EndProgress() {
 	std::cout << std::string(length_, '\b');
-	SetConsoleColor(white);
+	OS::SetConsoleColor(White);
 }
 
 void Debug::StartSample(const std::string& text) {

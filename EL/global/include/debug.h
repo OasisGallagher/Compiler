@@ -1,9 +1,8 @@
 #pragma once
 #include <stack>
 #include <string>
-#include <crtdbg.h>
 
-#define new new(_NORMAL_BLOCK, __FILE__, __LINE__)
+#include "os.h"
 
 class Debug {
 public:
@@ -25,7 +24,6 @@ public:
 
 private:
 	Debug();
-	static void SetConsoleColor(int color);
 
 private:
 	static int length_;

@@ -1,34 +1,55 @@
-"create parser" at 17:38:46.
-"create parser" costs 0.20 seconds.
->> Shift	`function`. Goto state 14.
->> Shift	`identifier`. Goto state 15.
->> Reduce	`identifier` to `Identifier`. Goto state 117.
->> Reduce	`Identifier` to `FormalParameter`. Goto state 114.
->> Reduce	`FormalParameter` to `FormalParametersPrefix`. Goto state 116.
->> Reduce	`FormalParametersPrefix` to `FormalParametersAndBody`. Goto state 115.
->> Reduce	`function FormalParametersAndBody` to `AnonymousFunction`. Goto state 30.
->> Reduce	`AnonymousFunction` to `FunctionExpression`. Goto state 46.
->> Reduce	`FunctionExpression` to `PrimaryExpression`. Goto state 57.
->> Reduce	`PrimaryExpression` to `CallExpression`. Goto state 36.
->> Shift	`(`. Goto state 147.
->> Shift	`identifier`. Goto state 15.
->> Reduce	`identifier` to `Identifier`. Goto state 47.
->> Reduce	`Identifier` to `SimpleExpression`. Goto state 62.
->> Reduce	`SimpleExpression` to `PrimaryExpression`. Goto state 57.
->> Reduce	`PrimaryExpression` to `CallExpression`. Goto state 36.
->> Reduce	`CallExpression` to `LeftSideExpression`. Goto state 49.
->> Reduce	`LeftSideExpression` to `PostfixExpression`. Goto state 56.
->> Reduce	`PostfixExpression` to `UnaryExpression`. Goto state 68.
->> Reduce	`UnaryExpression` to `MultiplicativeExpression`. Goto state 51.
->> Reduce	`MultiplicativeExpression` to `AdditiveExpression`. Goto state 29.
->> Reduce	`AdditiveExpression` to `ShiftExpression`. Goto state 60.
->> Reduce	`ShiftExpression` to `RelationalExpression`. Goto state 58.
->> Reduce	`RelationalExpression` to `EqualityExpression`. Goto state 40.
->> Reduce	`EqualityExpression` to `BitwiseAndExpression`. Goto state 33.
->> Reduce	`BitwiseAndExpression` to `LogicalOrExpression`. Goto state 50.
->> Reduce	`LogicalOrExpression` to `ConditionalExpression`. Goto state 37.
->> Reduce	`ConditionalExpression` to `AssignmentExpression`. Goto state 169.
->> Reduce	`AssignmentExpression` to `ArgumentList`. Goto state 168.
->> Shift	`,`. Goto state 209.
->> Shift	`identifier`. Goto state 15.
-[E] unexpected symbol ) at 1:18
+"load parser" at 12:10:09.
+"load parser" costs 0.01 seconds.
+================= Action Table =================
+(0, string) => (s6)
+(0, number) => (s5)
+(0, false) => (s2)
+(0, this) => (s7)
+(0, identifier) => (s3)
+(0, () => (s1)
+(0, true) => (s8)
+(0, null) => (s4)
+(1, string) => (s6)
+(1, number) => (s5)
+(1, false) => (s2)
+(1, this) => (s7)
+(1, identifier) => (s3)
+(1, () => (s1)
+(1, true) => (s8)
+(1, null) => (s4)
+(2, ;) => (r262147)
+(3, ;) => (r327680)
+(4, ;) => (r262145)
+(5, ;) => (r393216)
+(6, ;) => (r458752)
+(7, ;) => (r262144)
+(8, ;) => (r262146)
+(9, ;) => (s16)
+(10, ;) => (r262150)
+(11, ;) => (r262148)
+(12, ;) => (r196608)
+(13, zero) => (r65537)
+(14, ;) => (r262149)
+(15, zero) => (acc)
+(16, zero) => (r131072)
+(17, )) => (s18)
+(18, ;) => (r196609)
+
+================== Goto Table ==================
+(0, String) => 14
+(0, Statement) => 13
+(0, TopStatements) => 15
+(0, Identifier) => 10
+(0, Number) => 11
+(0, Expression) => 9
+(0, SimpleExpression) => 12
+(1, String) => 14
+(1, Identifier) => 10
+(1, Number) => 11
+(1, Expression) => 17
+(1, SimpleExpression) => 12
+>> Shift	`(`. Goto state 1.
+>> Shift	`this`. Goto state 7.
+>> Reduce	`this` to `SimpleExpression`. Goto state 12.
+>> Reduce	`SimpleExpression` to `Expression`. Goto state 17.
+[E] unexpected symbol ; at 13:6

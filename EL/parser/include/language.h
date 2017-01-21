@@ -15,15 +15,18 @@ public:
 
 public:
 	void Load(const char* filePath);
-	void Setup(const char* productions);
+	void Setup(const char* productions, const char* output);
 
 public:
 	bool Parse(SyntaxTree* tree, const std::string& file);
 	std::string ToString() const;
 
 private:
-	bool SetupEnvironment(const char* productions);
+	void SaveSyntaxer(const char* output);
+	void LoadSyntaxer(const char* output);
+	void BuildSyntaxer(const char* productions);
 
+	bool SetupEnvironment(const char* productions);
 	GrammarSymbol CreateSymbol(const std::string& text);
 	bool ParseProductions(const char* productions);
 	bool ParseProduction(TextScanner* textScanner, SymbolVector& symbols);

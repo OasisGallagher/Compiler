@@ -114,6 +114,15 @@
     <ClInclude Include="parser\include\serializer.h">
       <Filter>parser\include</Filter>
     </ClInclude>
+    <ClInclude Include="global\include\os.h">
+      <Filter>global\include</Filter>
+    </ClInclude>
+    <ClInclude Include="global\include\os_windows.h">
+      <Filter>global\include</Filter>
+    </ClInclude>
+    <ClInclude Include="global\include\os_linux.h">
+      <Filter>global\include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="global\src\debug.cpp">
@@ -181,6 +190,12 @@
     </ClCompile>
     <ClCompile Include="parser\src\syntaxer.cpp">
       <Filter>parser\src</Filter>
+    </ClCompile>
+    <ClCompile Include="global\src\os_windows.cpp">
+      <Filter>global\src</Filter>
+    </ClCompile>
+    <ClCompile Include="global\src\os_linux.cpp">
+      <Filter>global\src</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
