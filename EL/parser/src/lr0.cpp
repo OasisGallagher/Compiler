@@ -161,7 +161,7 @@ bool LR0::CalculateLR1EdgeTarget(LR1Itemset& answer, const LR1Itemset& src, cons
 			answer.SetName(std::to_string(itemsets_.size() - 1));
 		}
 		else {
-			answer.SetName(status.first->GetName());
+			answer = *status.first;
 		}
 	}
 

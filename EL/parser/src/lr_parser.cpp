@@ -40,9 +40,11 @@ std::string LRParser::ToString() const {
 	//oss << Parser::ToString();
 	//oss << "\n\n";
 
+	//oss << impl_->ToString();
+
 	//oss << firstSetContainer_.ToString();
 	//oss << "\n\n";
-	oss << lrTable_->ToString();
+	//oss << lrTable_->ToString();
 
 	return oss.str();
 }

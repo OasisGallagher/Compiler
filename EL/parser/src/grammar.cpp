@@ -16,7 +16,7 @@ std::string Condinate::ToString() const {
 	}
 
 	if (action != nullptr) {
-		oss << "\t=>\t$$ = " << action->ToString();
+		oss << "\t=>\t" << action->ToString();
 	}
 
 	return oss.str();

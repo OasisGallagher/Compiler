@@ -78,10 +78,6 @@ bool LR1Item::operator ==(const LR1Item& other) const {
 	return ptr_->cpos == other.ptr_->cpos && ptr_->dpos == other.ptr_->dpos;
 }
 
-bool LR1Item::IsCore() const {
-	return ptr_->dpos != 0 || ptr_->cpos == 0;
-}
-
 std::string LR1Item::ToRawString() const {
 	return Utility::Format("(%d, %d, %d)", Utility::Highword(ptr_->cpos), Utility::Loword(ptr_->cpos), ptr_->dpos);
 }
@@ -169,17 +165,6 @@ const std::string& LR1Itemset::GetName() const {
 
 void LR1Itemset::SetName(const std::string& name) {
 	ptr_->name_ = name;
-}
-
-void LR1Itemset::RemoveNoncoreItems() {
-	for (iterator ite = ptr_->begin(); ite != ptr_->end();) {
-		if (!ite->IsCore()) {
-			ptr_->erase(ite++);
-		}
-		else {
-			ite++;
-		}
-	}
 }
 
 std::string LR1Itemset::ToString(const GrammarContainer& grammars) const {

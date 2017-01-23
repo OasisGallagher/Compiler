@@ -67,7 +67,7 @@ public:
 	Forwards& GetForwards() { return ptr_->forwards; }
 	const Forwards& GetForwards() const { return ptr_->forwards; }
 
-	bool IsCore() const;
+	bool IsCore() const { return ptr_->dpos != 0 || ptr_->cpos == 0; }
 
 	std::string ToRawString() const;
 	std::string ToString(const GrammarContainer& grammars) const;
@@ -116,8 +116,6 @@ public:
 	bool operator == (const LR1Itemset& other) const;
 
 public:
-	void RemoveNoncoreItems();
-
 	const std::string& GetName() const;
 	void SetName(const std::string& name);
 

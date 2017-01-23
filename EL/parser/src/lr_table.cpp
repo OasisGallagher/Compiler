@@ -24,8 +24,7 @@ int LRTable::GetGoto(int current, const GrammarSymbol& symbol) {
 
 std::string LRTable::ToString() const {
 	std::ostringstream oss;
-	//oss << impl_->ToString();
-
+	
 	oss << Utility::Heading(" Action Table ") << "\n";
 	oss << actionTable_.ToString();
 

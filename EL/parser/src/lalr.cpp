@@ -287,12 +287,7 @@ bool LALR::PropagateSymbolsOnePass() {
 
 	for (LR1ItemsetContainer::iterator ite = itemsets_.begin(); ite != itemsets_.end(); ++ite) {
 		for (LR1Itemset::iterator ii = ite->begin(); ii != ite->end(); ++ii) {
-			const LR1Item& src = *ii;
-			if (!src.IsCore()) {
-				continue;
-			}
-
-			propagated = PropagateFrom(src) || propagated;
+			propagated = PropagateFrom(*ii) || propagated;
 		}
 	}
 
@@ -326,6 +321,7 @@ void LALR::CalculateForwardsAndPropagations() {
 	LR1Itemset target = nullptr;
 	for (LR1ItemsetContainer::iterator ite = itemsets_.begin(); ite != itemsets_.end(); ++ite) {
 		LR1Itemset& dict = (LR1Itemset&)*ite;
+		
 		for (LR1Itemset::iterator ii = dict.begin(); ii != dict.end(); ++ii) {
 			LR1Item item = *ii;
 			if (!item.IsCore()) {
@@ -388,7 +384,6 @@ void LALR::AddForwardsAndPropagations(LR1Item& src, const LR1Itemset& itemset, L
 		}
 
 		LR1Item target = FindItem(ite->GetCpos(), ite->GetDpos() + 1, dict);
-
 		const Forwards& forwards = ite->GetForwards();
 		for (Forwards::const_iterator ite2 = forwards.begin(); ite2 != forwards.end(); ++ite2) {
 			if (ite2->symbol == NativeSymbols::unknown) {

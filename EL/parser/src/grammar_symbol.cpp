@@ -37,11 +37,11 @@ std::string GrammarSymbolSetTable::ToString() const {
 		oss << newline;
 		newline = "\n";
 
-		oss.width(22);
+		oss.width(32);
 		oss.setf(std::ios::left);
 
 		oss << ite->first.ToString();
-		oss << "{";
+		oss << "{ ";
 
 		const char* seperator = "";
 		for (GrammarSymbolSet::const_iterator ite2 = ite->second.begin(); ite2 != ite->second.end(); ++ite2) {
@@ -50,7 +50,7 @@ std::string GrammarSymbolSetTable::ToString() const {
 			oss << ite2->ToString();
 		}
 
-		oss << "}";
+		oss << " }";
 	}
 
 	return oss.str();

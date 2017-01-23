@@ -48,7 +48,7 @@ void Debug::Break(const std::string& expression, const std::string& message, con
 }
 
 void Debug::EnableMemoryLeakCheck() {
-	_CrtSetDbgFlag(_CrtSetDbgFlag(_CRTDBG_REPORT_FLAG) | _CRTDBG_LEAK_CHECK_DF);
+	OS::EnableMemoryLeakCheck();
 }
 
 void Debug::StartProgress() {
