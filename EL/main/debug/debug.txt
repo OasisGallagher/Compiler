@@ -1,27 +1,274 @@
-"build parser" at 18:11:12.
-"create LR0 itemsets" at 18:11:12.
-"create LR0 itemsets" costs 0.00 seconds.
-(0) { { Program : ¡¤ TopStatements, (  ) }, { Program : TopStatements ¡¤, (  ) }, { TopStatements : ¡¤ epsilon, (  ) } }
-(1) { { Program : TopStatements ¡¤, (  ) } }
-"calculate forwards and propagations" at 18:11:12.
-"add forwards and propagations" at 18:11:12.
-"add forwards and propagations" costs 0.01 seconds.
-"clean up" at 18:11:12.
-"clean up" costs 0.00 seconds.
-(0) { { Program : ¡¤ TopStatements, (  ) }, { Program : TopStatements ¡¤, (  ) }, { TopStatements : ¡¤ epsilon, (  ) } }
-(1) { { Program : TopStatements ¡¤, (  ) } }
-Program : ¡¤ TopStatements, (  ) >> ( Program : TopStatements ¡¤, (  ) )
-"calculate forwards and propagations" costs 0.04 seconds.
-"propagate forwards" at 18:11:12.
-"propagate forwards" costs 0.00 seconds.
-(0) { { Program : ¡¤ TopStatements, ( zero ) }, { Program : TopStatements ¡¤, (  ) }, { TopStatements : ¡¤ epsilon, (  ) } }
-(1) { { Program : TopStatements ¡¤, ( zero ) } }
-"create parsing table" at 18:11:12.
-"create parsing table" costs 0.00 seconds.
-"build parser" costs 0.12 seconds.
-================= Action Table =================
-(1, zero) => (acc)
+"load parser" at 18:51:50.
+"load parser" costs 0.27 seconds.
+>> Shift	`var`. Goto state 24.
+>> Shift	`identifier`. Goto state 15.
+>> Reduce	`identifier` to `Identifier`. Goto state 86.
+>> Shift	`=`. Goto state 155.
+>> Shift	`function`. Goto state 14.
+>> Shift	`(`. Goto state 114.
+>> Reduce	`` to `FormalParameters`. Goto state 186.
+>> Shift	`)`. Goto state 206.
+>> Shift	`{`. Goto state 217.
+>> Reduce	`` to `TopStatements`. Goto state 219.
+>> Shift	`}`. Goto state 222.
+>> Reduce	`( FormalParameters ) { TopStatements }` to `FormalParametersAndBody`. Goto state 115.
+>> Reduce	`function FormalParametersAndBody` to `AnonymousFunction`. Goto state 30.
+>> Reduce	`AnonymousFunction` to `FunctionExpression`. Goto state 46.
+>> Reduce	`FunctionExpression` to `PrimaryExpression`. Goto state 57.
+>> Reduce	`PrimaryExpression` to `CallExpression`. Goto state 36.
+>> Reduce	`CallExpression` to `LeftSideExpression`. Goto state 49.
+>> Reduce	`LeftSideExpression` to `PostfixExpression`. Goto state 56.
+>> Reduce	`PostfixExpression` to `UnaryExpression`. Goto state 68.
+>> Reduce	`UnaryExpression` to `MultiplicativeExpression`. Goto state 51.
+>> Reduce	`MultiplicativeExpression` to `AdditiveExpression`. Goto state 29.
+>> Reduce	`AdditiveExpression` to `ShiftExpression`. Goto state 60.
+>> Reduce	`ShiftExpression` to `RelationalExpression`. Goto state 58.
+>> Reduce	`RelationalExpression` to `EqualityExpression`. Goto state 40.
+>> Reduce	`EqualityExpression` to `BitwiseAndExpression`. Goto state 33.
+>> Reduce	`BitwiseAndExpression` to `LogicalOrExpression`. Goto state 50.
+>> Reduce	`LogicalOrExpression` to `ConditionalExpression`. Goto state 37.
+>> Reduce	`ConditionalExpression` to `AssignmentExpression`. Goto state 201.
+>> Reduce	`= AssignmentExpression` to `VariableInitializer`. Goto state 156.
+>> Reduce	`Identifier VariableInitializer` to `VariableDeclaration`. Goto state 87.
+>> Reduce	`VariableDeclaration` to `VariableDeclarationList`. Goto state 88.
+>> Reduce	`var VariableDeclarationList` to `VariableDefination`. Goto state 69.
+>> Shift	`;`. Goto state 81.
+>> Reduce	`VariableDefination ;` to `Statement`. Goto state 63.
+>> Reduce	`Statement` to `TopStatement`. Goto state 65.
+>> Reduce	`TopStatement` to `TopStatementsPrefix`. Goto state 67.
+>> Shift	`for`. Goto state 13.
+>> Shift	`(`. Goto state 91.
+>> Shift	`var`. Goto state 158.
+>> Shift	`identifier`. Goto state 15.
+>> Reduce	`identifier` to `Identifier`. Goto state 86.
+>> Shift	`=`. Goto state 155.
+>> Shift	`number`. Goto state 19.
+>> Reduce	`number` to `Number`. Goto state 53.
+>> Reduce	`Number` to `SimpleExpression`. Goto state 62.
+>> Reduce	`SimpleExpression` to `PrimaryExpression`. Goto state 57.
+>> Reduce	`PrimaryExpression` to `CallExpression`. Goto state 36.
+>> Reduce	`CallExpression` to `LeftSideExpression`. Goto state 49.
+>> Reduce	`LeftSideExpression` to `PostfixExpression`. Goto state 56.
+>> Reduce	`PostfixExpression` to `UnaryExpression`. Goto state 68.
+>> Reduce	`UnaryExpression` to `MultiplicativeExpression`. Goto state 51.
+>> Reduce	`MultiplicativeExpression` to `AdditiveExpression`. Goto state 29.
+>> Reduce	`AdditiveExpression` to `ShiftExpression`. Goto state 60.
+>> Reduce	`ShiftExpression` to `RelationalExpression`. Goto state 58.
+>> Reduce	`RelationalExpression` to `EqualityExpression`. Goto state 40.
+>> Reduce	`EqualityExpression` to `BitwiseAndExpression`. Goto state 33.
+>> Reduce	`BitwiseAndExpression` to `LogicalOrExpression`. Goto state 50.
+>> Reduce	`LogicalOrExpression` to `ConditionalExpression`. Goto state 37.
+>> Reduce	`ConditionalExpression` to `AssignmentExpression`. Goto state 201.
+>> Reduce	`= AssignmentExpression` to `VariableInitializer`. Goto state 156.
+>> Reduce	`Identifier VariableInitializer` to `VariableDeclaration`. Goto state 87.
+>> Reduce	`VariableDeclaration` to `VariableDeclarationList`. Goto state 200.
+>> Reduce	`var VariableDeclarationList` to `ForInitializer`. Goto state 160.
+>> Shift	`;`. Goto state 203.
+>> Shift	`identifier`. Goto state 15.
+>> Reduce	`identifier` to `Identifier`. Goto state 47.
+>> Reduce	`Identifier` to `SimpleExpression`. Goto state 62.
+>> Reduce	`SimpleExpression` to `PrimaryExpression`. Goto state 57.
+>> Reduce	`PrimaryExpression` to `CallExpression`. Goto state 36.
+>> Reduce	`CallExpression` to `LeftSideExpression`. Goto state 49.
+>> Reduce	`LeftSideExpression` to `PostfixExpression`. Goto state 56.
+>> Reduce	`PostfixExpression` to `UnaryExpression`. Goto state 68.
+>> Reduce	`UnaryExpression` to `MultiplicativeExpression`. Goto state 51.
+>> Reduce	`MultiplicativeExpression` to `AdditiveExpression`. Goto state 29.
+>> Reduce	`AdditiveExpression` to `ShiftExpression`. Goto state 60.
+>> Reduce	`ShiftExpression` to `RelationalExpression`. Goto state 58.
+>> Shift	`<`. Goto state 135.
+>> Shift	`number`. Goto state 19.
+>> Reduce	`number` to `Number`. Goto state 53.
+>> Reduce	`Number` to `SimpleExpression`. Goto state 62.
+>> Reduce	`SimpleExpression` to `PrimaryExpression`. Goto state 57.
+>> Reduce	`PrimaryExpression` to `CallExpression`. Goto state 36.
+>> Reduce	`CallExpression` to `LeftSideExpression`. Goto state 100.
+>> Reduce	`LeftSideExpression` to `PostfixExpression`. Goto state 56.
+>> Reduce	`PostfixExpression` to `UnaryExpression`. Goto state 68.
+>> Reduce	`UnaryExpression` to `MultiplicativeExpression`. Goto state 51.
+>> Reduce	`MultiplicativeExpression` to `AdditiveExpression`. Goto state 29.
+>> Reduce	`AdditiveExpression` to `ShiftExpression`. Goto state 173.
+>> Reduce	`RelationalExpression < ShiftExpression` to `RelationalExpression`. Goto state 58.
+>> Reduce	`RelationalExpression` to `EqualityExpression`. Goto state 40.
+>> Reduce	`EqualityExpression` to `BitwiseAndExpression`. Goto state 33.
+>> Reduce	`BitwiseAndExpression` to `LogicalOrExpression`. Goto state 50.
+>> Reduce	`LogicalOrExpression` to `ConditionalExpression`. Goto state 37.
+>> Reduce	`ConditionalExpression` to `AssignmentExpression`. Goto state 32.
+>> Reduce	`AssignmentExpression` to `Expression`. Goto state 93.
+>> Reduce	`Expression` to `OptionalExpession`. Goto state 214.
+>> Shift	`;`. Goto state 220.
+>> Shift	`++`. Goto state 4.
+>> Shift	`identifier`. Goto state 15.
+>> Reduce	`identifier` to `Identifier`. Goto state 47.
+>> Reduce	`Identifier` to `SimpleExpression`. Goto state 62.
+>> Reduce	`SimpleExpression` to `PrimaryExpression`. Goto state 57.
+>> Reduce	`PrimaryExpression` to `CallExpression`. Goto state 36.
+>> Reduce	`CallExpression` to `LeftSideExpression`. Goto state 107.
+>> Reduce	`++ LeftSideExpression` to `UnaryExpression`. Goto state 68.
+>> Reduce	`UnaryExpression` to `MultiplicativeExpression`. Goto state 51.
+>> Reduce	`MultiplicativeExpression` to `AdditiveExpression`. Goto state 29.
+>> Reduce	`AdditiveExpression` to `ShiftExpression`. Goto state 60.
+>> Reduce	`ShiftExpression` to `RelationalExpression`. Goto state 58.
+>> Reduce	`RelationalExpression` to `EqualityExpression`. Goto state 40.
+>> Reduce	`EqualityExpression` to `BitwiseAndExpression`. Goto state 33.
+>> Reduce	`BitwiseAndExpression` to `LogicalOrExpression`. Goto state 50.
+>> Reduce	`LogicalOrExpression` to `ConditionalExpression`. Goto state 37.
+>> Reduce	`ConditionalExpression` to `AssignmentExpression`. Goto state 32.
+>> Reduce	`AssignmentExpression` to `Expression`. Goto state 93.
+>> Reduce	`Expression` to `OptionalExpession`. Goto state 221.
+>> Shift	`)`. Goto state 223.
+>> Shift	`{`. Goto state 27.
+>> Reduce	`` to `BlockStatements`. Goto state 73.
+>> Shift	`}`. Goto state 157.
+>> Reduce	`{ BlockStatements }` to `Block`. Goto state 34.
+>> Reduce	`Block` to `Statement`. Goto state 224.
+>> Reduce	`for ( ForInitializer ; OptionalExpession ; OptionalExpession ) Statement` to `ForStatement`. Goto state 43.
+>> Reduce	`ForStatement` to `Statement`. Goto state 63.
+>> Reduce	`Statement` to `TopStatement`. Goto state 71.
+>> Reduce	`TopStatementsPrefix TopStatement` to `TopStatementsPrefix`. Goto state 67.
+>> Shift	`var`. Goto state 24.
+>> Shift	`identifier`. Goto state 15.
+>> Reduce	`identifier` to `Identifier`. Goto state 86.
+>> Shift	`=`. Goto state 155.
+>> Shift	`number`. Goto state 19.
+>> Reduce	`number` to `Number`. Goto state 53.
+>> Reduce	`Number` to `SimpleExpression`. Goto state 62.
+>> Reduce	`SimpleExpression` to `PrimaryExpression`. Goto state 57.
+>> Reduce	`PrimaryExpression` to `CallExpression`. Goto state 36.
+>> Reduce	`CallExpression` to `LeftSideExpression`. Goto state 49.
+>> Reduce	`LeftSideExpression` to `PostfixExpression`. Goto state 56.
+>> Reduce	`PostfixExpression` to `UnaryExpression`. Goto state 68.
+>> Reduce	`UnaryExpression` to `MultiplicativeExpression`. Goto state 51.
+>> Reduce	`MultiplicativeExpression` to `AdditiveExpression`. Goto state 29.
+>> Reduce	`AdditiveExpression` to `ShiftExpression`. Goto state 60.
+>> Reduce	`ShiftExpression` to `RelationalExpression`. Goto state 58.
+>> Reduce	`RelationalExpression` to `EqualityExpression`. Goto state 40.
+>> Reduce	`EqualityExpression` to `BitwiseAndExpression`. Goto state 33.
+>> Reduce	`BitwiseAndExpression` to `LogicalOrExpression`. Goto state 50.
+>> Reduce	`LogicalOrExpression` to `ConditionalExpression`. Goto state 37.
+>> Reduce	`ConditionalExpression` to `AssignmentExpression`. Goto state 201.
+>> Reduce	`= AssignmentExpression` to `VariableInitializer`. Goto state 156.
+>> Reduce	`Identifier VariableInitializer` to `VariableDeclaration`. Goto state 87.
+>> Reduce	`VariableDeclaration` to `VariableDeclarationList`. Goto state 88.
+>> Reduce	`var VariableDeclarationList` to `VariableDefination`. Goto state 69.
+>> Shift	`;`. Goto state 81.
+>> Reduce	`VariableDefination ;` to `Statement`. Goto state 63.
+>> Reduce	`Statement` to `TopStatement`. Goto state 71.
+>> Reduce	`TopStatementsPrefix TopStatement` to `TopStatementsPrefix`. Goto state 67.
+>> Shift	`while`. Goto state 26.
+>> Shift	`(`. Goto state 2.
+>> Shift	`identifier`. Goto state 15.
+>> Reduce	`identifier` to `Identifier`. Goto state 47.
+>> Reduce	`Identifier` to `SimpleExpression`. Goto state 62.
+>> Reduce	`SimpleExpression` to `PrimaryExpression`. Goto state 57.
+>> Reduce	`PrimaryExpression` to `CallExpression`. Goto state 36.
+>> Reduce	`CallExpression` to `LeftSideExpression`. Goto state 49.
+>> Reduce	`LeftSideExpression` to `PostfixExpression`. Goto state 56.
+>> Reduce	`PostfixExpression` to `UnaryExpression`. Goto state 68.
+>> Reduce	`UnaryExpression` to `MultiplicativeExpression`. Goto state 51.
+>> Reduce	`MultiplicativeExpression` to `AdditiveExpression`. Goto state 29.
+>> Reduce	`AdditiveExpression` to `ShiftExpression`. Goto state 60.
+>> Reduce	`ShiftExpression` to `RelationalExpression`. Goto state 58.
+>> Shift	`<`. Goto state 135.
+>> Shift	`number`. Goto state 19.
+>> Reduce	`number` to `Number`. Goto state 53.
+>> Reduce	`Number` to `SimpleExpression`. Goto state 62.
+>> Reduce	`SimpleExpression` to `PrimaryExpression`. Goto state 57.
+>> Reduce	`PrimaryExpression` to `CallExpression`. Goto state 36.
+>> Reduce	`CallExpression` to `LeftSideExpression`. Goto state 100.
+>> Reduce	`LeftSideExpression` to `PostfixExpression`. Goto state 56.
+>> Reduce	`PostfixExpression` to `UnaryExpression`. Goto state 68.
+>> Reduce	`UnaryExpression` to `MultiplicativeExpression`. Goto state 51.
+>> Reduce	`MultiplicativeExpression` to `AdditiveExpression`. Goto state 29.
+>> Reduce	`AdditiveExpression` to `ShiftExpression`. Goto state 173.
+>> Reduce	`RelationalExpression < ShiftExpression` to `RelationalExpression`. Goto state 58.
+>> Reduce	`RelationalExpression` to `EqualityExpression`. Goto state 40.
+>> Reduce	`EqualityExpression` to `BitwiseAndExpression`. Goto state 33.
+>> Reduce	`BitwiseAndExpression` to `LogicalOrExpression`. Goto state 50.
+>> Reduce	`LogicalOrExpression` to `ConditionalExpression`. Goto state 37.
+>> Reduce	`ConditionalExpression` to `AssignmentExpression`. Goto state 32.
+>> Reduce	`AssignmentExpression` to `Expression`. Goto state 95.
+>> Shift	`)`. Goto state 189.
+>> Reduce	`( Expression )` to `ParenthesizedExpression`. Goto state 90.
+>> Shift	`{`. Goto state 27.
+>> Shift	`identifier`. Goto state 15.
+>> Reduce	`identifier` to `Identifier`. Goto state 76.
+>> Reduce	`Identifier` to `SimpleExpression`. Goto state 62.
+>> Reduce	`SimpleExpression` to `PrimaryExpression`. Goto state 57.
+>> Reduce	`PrimaryExpression` to `CallExpression`. Goto state 36.
+>> Reduce	`CallExpression` to `LeftSideExpression`. Goto state 49.
+>> Shift	`+=`. Goto state 121.
+>> Reduce	`+=` to `CompoundAssignment`. Goto state 129.
+>> Shift	`number`. Goto state 19.
+>> Reduce	`number` to `Number`. Goto state 53.
+>> Reduce	`Number` to `SimpleExpression`. Goto state 62.
+>> Reduce	`SimpleExpression` to `PrimaryExpression`. Goto state 57.
+>> Reduce	`PrimaryExpression` to `CallExpression`. Goto state 36.
+>> Reduce	`CallExpression` to `LeftSideExpression`. Goto state 49.
+>> Reduce	`LeftSideExpression` to `PostfixExpression`. Goto state 56.
+>> Reduce	`PostfixExpression` to `UnaryExpression`. Goto state 68.
+>> Reduce	`UnaryExpression` to `MultiplicativeExpression`. Goto state 51.
+>> Reduce	`MultiplicativeExpression` to `AdditiveExpression`. Goto state 29.
+>> Reduce	`AdditiveExpression` to `ShiftExpression`. Goto state 60.
+>> Reduce	`ShiftExpression` to `RelationalExpression`. Goto state 58.
+>> Reduce	`RelationalExpression` to `EqualityExpression`. Goto state 40.
+>> Reduce	`EqualityExpression` to `BitwiseAndExpression`. Goto state 33.
+>> Reduce	`BitwiseAndExpression` to `LogicalOrExpression`. Goto state 50.
+>> Reduce	`LogicalOrExpression` to `ConditionalExpression`. Goto state 37.
+>> Reduce	`ConditionalExpression` to `AssignmentExpression`. Goto state 164.
+>> Reduce	`LeftSideExpression CompoundAssignment AssignmentExpression` to `AssignmentExpression`. Goto state 32.
+>> Reduce	`AssignmentExpression` to `Expression`. Goto state 41.
+>> Reduce	`Expression` to `ExpressionStatement`. Goto state 42.
+>> Shift	`;`. Goto state 80.
+>> Reduce	`ExpressionStatement ;` to `Statement`. Goto state 79.
+>> Reduce	`Statement` to `BlockStatementsPrefix`. Goto state 74.
+>> Reduce	`BlockStatementsPrefix` to `BlockStatements`. Goto state 73.
+>> Shift	`}`. Goto state 157.
+>> Reduce	`{ BlockStatements }` to `Block`. Goto state 34.
+>> Reduce	`Block` to `Statement`. Goto state 153.
+>> Reduce	`while ParenthesizedExpression Statement` to `WhileStatement`. Goto state 70.
+>> Reduce	`WhileStatement` to `Statement`. Goto state 63.
+>> Reduce	`Statement` to `TopStatement`. Goto state 71.
+>> Reduce	`TopStatementsPrefix TopStatement` to `TopStatementsPrefix`. Goto state 67.
+>> Reduce	`TopStatementsPrefix` to `TopStatements`. Goto state 66.
 
-================== Goto Table ==================
-(0, TopStatements) => 1
-[E] unexpected symbol zero at 0:-1
+=====================Accept=====================
+
+================== SyntaxTree ==================
+©¸©¤©¤©¤ statememts
+     ©À©¤©¤©¤ statememts
+     ©¦    ©À©¤©¤©¤ statememts
+     ©¦    ©¦    ©À©¤©¤©¤ var-def
+     ©¦    ©¦    ©¦    ©¸©¤©¤©¤ var-decl
+     ©¦    ©¦    ©¦         ©À©¤©¤©¤ x
+     ©¦    ©¦    ©¦         ©¸©¤©¤©¤ var-initializer
+     ©¦    ©¦    ©¦              ©¸©¤©¤©¤ anonymous-function
+     ©¦    ©¦    ©¦                   ©¸©¤©¤©¤ function-parameters-and-body
+     ©¦    ©¦    ©¦                        ©À©¤©¤©¤ null
+     ©¦    ©¦    ©¦                        ©¸©¤©¤©¤ null
+     ©¦    ©¦    ©¸©¤©¤©¤ for
+     ©¦    ©¦         ©À©¤©¤©¤ for-initializer
+     ©¦    ©¦         ©¦    ©¸©¤©¤©¤ var-decl
+     ©¦    ©¦         ©¦         ©À©¤©¤©¤ i
+     ©¦    ©¦         ©¦         ©¸©¤©¤©¤ var-initializer
+     ©¦    ©¦         ©¦              ©¸©¤©¤©¤ 0
+     ©¦    ©¦         ©À©¤©¤©¤ <
+     ©¦    ©¦         ©¦    ©À©¤©¤©¤ i
+     ©¦    ©¦         ©¦    ©¸©¤©¤©¤ 10
+     ©¦    ©¦         ©À©¤©¤©¤ ++
+     ©¦    ©¦         ©¦    ©¸©¤©¤©¤ i
+     ©¦    ©¦         ©¸©¤©¤©¤ null
+     ©¦    ©¸©¤©¤©¤ var-def
+     ©¦         ©¸©¤©¤©¤ var-decl
+     ©¦              ©À©¤©¤©¤ j
+     ©¦              ©¸©¤©¤©¤ var-initializer
+     ©¦                   ©¸©¤©¤©¤ 0
+     ©¸©¤©¤©¤ while
+          ©À©¤©¤©¤ <
+          ©¦    ©À©¤©¤©¤ j
+          ©¦    ©¸©¤©¤©¤ 10
+          ©¸©¤©¤©¤ compound-assignment-expression
+               ©À©¤©¤©¤ j
+               ©À©¤©¤©¤ +=
+               ©¸©¤©¤©¤ 2
+

@@ -34,7 +34,7 @@ public:
 	std::string ToString() const;
 
 private:
-	SyntaxNode* CreateSyntaxTree(FileScanner* fileScanner);
+	bool CreateSyntaxTree(SyntaxNode*& root, FileScanner* fileScanner);
 
 	GrammarSymbol FindSymbol(const ScannerToken& token, void*& addr);
 	GrammarSymbol ParseNextSymbol(TokenPosition& position, void*& addr, FileScanner* fileScanner);

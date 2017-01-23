@@ -97,6 +97,11 @@ std::string ActionIndex::ToString() const {
 }
 
 SyntaxNode* ActionIndex::Invoke(const std::vector<void*>& container) {
+	int index = argument_.parameters.front();
+	if (index == 0) {
+		return nullptr;
+	}
+
 	return (SyntaxNode*)container[container.size() - argument_.parameters.front()];
 }
 

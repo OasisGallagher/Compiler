@@ -32,22 +32,16 @@ bool LALR::Parse(LRActionTable& actionTable, LRGotoTable& gotoTable) {
 		coreItemsCount_ += std::count_if(ite->begin(), ite->end(), std::mem_fun_ref(&LR1Item::IsCore));
 	}
 
-	Debug::Log(itemsets_.ToString(env_->grammars));
+	LR1Item init = *itemsets_.begin()->begin();
+	init.GetForwards().insert(NativeSymbols::zero, true);
 
 	Debug::StartSample("calculate forwards and propagations");
 	CalculateForwardsAndPropagations();
-	Debug::Log(itemsets_.ToString(env_->grammars));
-	Debug::Log(propagations_.ToString(env_->grammars));
 	Debug::EndSample();
-
-	LR1Item init = *itemsets_.begin()->begin();
-	init.GetForwards().insert(NativeSymbols::zero, true);
 
 	Debug::StartSample("propagate forwards");
 	PropagateSymbols();
 	Debug::EndSample();
-
-	Debug::Log(itemsets_.ToString(env_->grammars));
 
 	Debug::StartSample("create parsing table");
 	bool status = CreateLRParsingTable(gotoTable, actionTable);
@@ -83,7 +77,7 @@ bool LALR::ParseLRAction(LRActionTable & actionTable, const LR1Itemset& itemset,
 		return InsertActionTable(actionTable, i, NativeSymbols::zero, action);
 	}
 
-	if (item.GetDpos() >= (int)cond->symbols.size()) {
+	if (item.GetDpos() >= (int)cond->symbols.size() || cond->symbols.front() == NativeSymbols::epsilon) {
 		bool status = true;
 
 		if (g->GetLhs() != NativeSymbols::program) {

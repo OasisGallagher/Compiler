@@ -35,21 +35,22 @@ bool Syntaxer::Save(std::ofstream& file) {
 }
 
 bool Syntaxer::ParseSyntax(SyntaxTree* tree, FileScanner* fileScanner) {
-	SyntaxNode* root = CreateSyntaxTree(fileScanner);
-	if (root != nullptr) {
-		tree->SetRoot(root);
-		Debug::Log("\n" + Utility::Heading("Accept"));
-		return true;
+	SyntaxNode* root = nullptr;
+	if (!CreateSyntaxTree(root, fileScanner)) {
+		return false;
 	}
 
-	return false;
+	tree->SetRoot(root);
+	Debug::Log("\n" + Utility::Heading("Accept"));
+	return true;
+
 }
 
 std::string Syntaxer::ToString() const {
 	return p_.lrTable.ToString();
 }
 
-SyntaxNode* Syntaxer::CreateSyntaxTree(FileScanner* fileScanner) {
+bool Syntaxer::CreateSyntaxTree(SyntaxNode*& root, FileScanner* fileScanner) {
 	TokenPosition position = { 0 };
 	GrammarSymbol a = nullptr;
 
@@ -63,14 +64,14 @@ SyntaxNode* Syntaxer::CreateSyntaxTree(FileScanner* fileScanner) {
 
 	do {
 		if (action.actionType == LRActionShift && !(a = ParseNextSymbol(position, addr, fileScanner))) {
-			return nullptr;
+			return false;
 		}
 
 		action = p_.lrTable.GetAction(stateStack.back(), a);
 
 		if (action.actionType == LRActionError) {
 			Debug::LogError("unexpected symbol " + a.ToString() + " at " + position.ToString());
-			return nullptr;
+			return false;
 		}
 
 		if (action.actionType == LRActionShift) {
@@ -100,7 +101,7 @@ SyntaxNode* Syntaxer::CreateSyntaxTree(FileScanner* fileScanner) {
 
 			if (nextState < 0) {
 				Debug::LogError("empty goto item(" + std::to_string(stateStack.back()) + ", " + g->GetLhs().ToString() + ")");
-				return nullptr;
+				return false;
 			}
 
 			stateStack.push_back(nextState);
@@ -110,7 +111,8 @@ SyntaxNode* Syntaxer::CreateSyntaxTree(FileScanner* fileScanner) {
 
 	} while (action.actionType != LRActionAccept);
 
-	return (SyntaxNode*)valueStack.back();
+	root = (SyntaxNode*)valueStack.back();
+	return true;
 }
 
 GrammarSymbol Syntaxer::FindSymbol(const ScannerToken& token, void*& addr) {
