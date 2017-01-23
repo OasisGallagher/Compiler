@@ -32,8 +32,12 @@ bool LALR::Parse(LRActionTable& actionTable, LRGotoTable& gotoTable) {
 		coreItemsCount_ += std::count_if(ite->begin(), ite->end(), std::mem_fun_ref(&LR1Item::IsCore));
 	}
 
+	Debug::Log(itemsets_.ToString(env_->grammars));
+
 	Debug::StartSample("calculate forwards and propagations");
 	CalculateForwardsAndPropagations();
+	Debug::Log(itemsets_.ToString(env_->grammars));
+	Debug::Log(propagations_.ToString(env_->grammars));
 	Debug::EndSample();
 
 	LR1Item init = *itemsets_.begin()->begin();
@@ -42,6 +46,8 @@ bool LALR::Parse(LRActionTable& actionTable, LRGotoTable& gotoTable) {
 	Debug::StartSample("propagate forwards");
 	PropagateSymbols();
 	Debug::EndSample();
+
+	Debug::Log(itemsets_.ToString(env_->grammars));
 
 	Debug::StartSample("create parsing table");
 	bool status = CreateLRParsingTable(gotoTable, actionTable);
