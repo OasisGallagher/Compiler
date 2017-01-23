@@ -1,25 +1,34 @@
 #include "debug.h"
-#include "table.h"
 #include "parser.h"
 #include "action.h"
-#include "grammar.h"
 #include "scanner.h"
-#include "lr_impl.h"
 #include "syntaxer.h"
 #include "lr_table.h"
 #include "serializer.h"
 #include "syntax_tree.h"
 
+struct SyntaxerStack {
+	std::vector<int> states;
+	std::vector<void*> values;
+	std::vector<GrammarSymbol> symbols;
+
+	void push(int state, void* value, const GrammarSymbol& symbol);
+	void pop(int count);
+	void clear();
+};
+
 Syntaxer::Syntaxer() {
-	symTable_ = new SymTable();
-	literalTable_ = new LiteralTable();
-	constantTable_ = new ConstantTable();
+	symTable_ = new SymTable;
+	literalTable_ = new LiteralTable;
+	constantTable_ = new ConstantTable;
+	stack_ = new SyntaxerStack;
 }
 
 Syntaxer::~Syntaxer() {
 	delete symTable_;
 	delete literalTable_;
 	delete constantTable_;
+	delete stack_;
 }
 
 void Syntaxer::Setup(const SyntaxerSetupParameter& p) {
@@ -50,69 +59,77 @@ std::string Syntaxer::ToString() const {
 	return p_.lrTable.ToString();
 }
 
+int Syntaxer::Reduce(int cpos) {
+	Grammar* g = nullptr;
+	const Condinate* cond = p_.env->grammars.GetTargetCondinate(cpos, &g);
+
+	int length = cond->symbols.front() == NativeSymbols::epsilon ? 0 : cond->symbols.size();
+
+	std::string log = ">> [R] `" + Utility::Concat(stack_->symbols.end() - length, stack_->symbols.end()) + "` to `" + g->GetLhs().ToString() + "`. ";
+
+	void* newValue = (cond->action != nullptr) ? cond->action->Invoke(stack_->values) : nullptr;
+
+	stack_->pop(length);
+
+	int nextState = p_.lrTable.GetGoto(stack_->states.back(), g->GetLhs());
+	Debug::Log(log + "Goto state " + std::to_string(nextState) + ".");
+
+	if (nextState < 0) {
+		Debug::LogError("empty goto item(" + std::to_string(stack_->states.back()) + ", " + g->GetLhs().ToString() + ")");
+		return nextState;
+	}
+
+	stack_->push(nextState, newValue, g->GetLhs());
+	return nextState;
+}
+
+bool Syntaxer::Error(const GrammarSymbol& symbol, const TokenPosition& position) {
+	Debug::LogError("unexpected symbol " + symbol.ToString() + " at " + position.ToString());
+	return false;
+}
+
+void Syntaxer::Shift(int state, void* addr, const GrammarSymbol& symbol) {
+	Debug::Log(">> [S] `" + symbol.ToString() + "`. Goto state " + std::to_string(state) + ".");
+	stack_->push(state, addr, symbol);
+}
+
 bool Syntaxer::CreateSyntaxTree(SyntaxNode*& root, FileScanner* fileScanner) {
 	TokenPosition position = { 0 };
-	GrammarSymbol a = nullptr;
 
-	std::vector<int> stateStack(1, 0);
-	std::vector<void*> valueStack(1, nullptr);
-	std::vector<GrammarSymbol> symbolStack(1, NativeSymbols::zero);
-
+	stack_->push(0, nullptr, NativeSymbols::zero);
 	LRAction action = { LRActionShift };
-	int nextState = 0;
+
 	void* addr = nullptr;
+	GrammarSymbol symbol = nullptr;
 
 	do {
-		if (action.actionType == LRActionShift && !(a = ParseNextSymbol(position, addr, fileScanner))) {
-			return false;
+		if (action.actionType == LRActionShift && !(symbol = ParseNextSymbol(position, addr, fileScanner))) {
+			break;
 		}
 
-		action = p_.lrTable.GetAction(stateStack.back(), a);
+		action = p_.lrTable.GetAction(stack_->states.back(), symbol);
 
-		if (action.actionType == LRActionError) {
-			Debug::LogError("unexpected symbol " + a.ToString() + " at " + position.ToString());
-			return false;
+		if (action.actionType == LRActionError && !Error(symbol, position)) {
+			break;
 		}
 
 		if (action.actionType == LRActionShift) {
-			nextState = action.actionParameter;
-			Debug::Log(">> Shift\t`" + a.ToString() + "`. Goto state " + std::to_string(nextState) + ".");
-
-			stateStack.push_back(nextState);
-			symbolStack.push_back(a);
-			valueStack.push_back(addr);
+			Shift(action.actionParameter, addr, symbol);
 		}
 		else if (action.actionType == LRActionReduce) {
-			Grammar* g = nullptr;
-			const Condinate* cond = p_.env->grammars.GetTargetCondinate(action.actionParameter, &g);
-
-			int length = cond->symbols.front() == NativeSymbols::epsilon ? 0 : cond->symbols.size();
-
-			std::string log = ">> Reduce\t`" + Utility::Concat(symbolStack.end() - length, symbolStack.end()) + "` to `" + g->GetLhs().ToString() + "`. ";
-
-			void* newValue = (cond->action != nullptr) ? cond->action->Invoke(valueStack) : nullptr;
-
-			stateStack.erase(stateStack.end() - length, stateStack.end());
-			symbolStack.erase(symbolStack.end() - length, symbolStack.end());
-			valueStack.erase(valueStack.end() - length, valueStack.end());
-
-			nextState = p_.lrTable.GetGoto(stateStack.back(), g->GetLhs());
-			Debug::Log(log + "Goto state " + std::to_string(nextState) + ".");
-
-			if (nextState < 0) {
-				Debug::LogError("empty goto item(" + std::to_string(stateStack.back()) + ", " + g->GetLhs().ToString() + ")");
-				return false;
+			if (!Reduce(action.actionParameter)) {
+				break;
 			}
-
-			stateStack.push_back(nextState);
-			symbolStack.push_back(g->GetLhs());
-			valueStack.push_back(newValue);
 		}
 
 	} while (action.actionType != LRActionAccept);
 
-	root = (SyntaxNode*)valueStack.back();
-	return true;
+	if (action.actionType == LRActionAccept) {
+		root = (SyntaxNode*)stack_->values.back();
+	}
+
+	stack_->clear();
+	return action.actionType == LRActionAccept;
 }
 
 GrammarSymbol Syntaxer::FindSymbol(const ScannerToken& token, void*& addr) {
@@ -130,7 +147,7 @@ GrammarSymbol Syntaxer::FindSymbol(const ScannerToken& token, void*& addr) {
 		answer = NativeSymbols::string;
 		addr = literalTable_->Add(token.text);
 	}
-	else if (Utility::IsTerminal(token.text)) {
+	else {
 		GrammarSymbolContainer::const_iterator pos = p_.env->terminalSymbols.find(token.text);
 		if (pos != p_.env->terminalSymbols.end()) {
 			answer = pos->second;
@@ -138,12 +155,6 @@ GrammarSymbol Syntaxer::FindSymbol(const ScannerToken& token, void*& addr) {
 		else {
 			answer = NativeSymbols::identifier;
 			addr = symTable_->Add(token.text);
-		}
-	}
-	else {
-		GrammarSymbolContainer::const_iterator ite = p_.env->nonterminalSymbols.find(token.text);
-		if (ite != p_.env->nonterminalSymbols.end()) {
-			answer = ite->second;
 		}
 	}
 
@@ -165,4 +176,23 @@ GrammarSymbol Syntaxer::ParseNextSymbol(TokenPosition& position, void*& addr, Fi
 	}
 
 	return answer;
+}
+
+
+void SyntaxerStack::push(int state, void* value, const GrammarSymbol& symbol) {
+	states.push_back(state);
+	values.push_back(value);
+	symbols.push_back(symbol);
+}
+
+void SyntaxerStack::pop(int count) {
+	states.erase(states.end() - count, states.end());
+	values.erase(values.end() - count, values.end());
+	symbols.erase(symbols.end() - count, symbols.end());
+}
+
+void SyntaxerStack::clear() {
+	states.clear();
+	values.clear();
+	symbols.clear();
 }

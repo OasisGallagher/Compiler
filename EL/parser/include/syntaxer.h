@@ -11,6 +11,7 @@ class FileScanner;
 
 struct Environment;
 struct TokenPosition;
+struct SyntaxerStack;
 
 struct SyntaxerSetupParameter {
 	Environment* env;
@@ -34,12 +35,17 @@ public:
 	std::string ToString() const;
 
 private:
+	int Reduce(int cpos);
+	void Shift(int state, void* addr, const GrammarSymbol& symbol);
+	bool Error(const GrammarSymbol& symbol, const TokenPosition& position);
+
 	bool CreateSyntaxTree(SyntaxNode*& root, FileScanner* fileScanner);
 
 	GrammarSymbol FindSymbol(const ScannerToken& token, void*& addr);
 	GrammarSymbol ParseNextSymbol(TokenPosition& position, void*& addr, FileScanner* fileScanner);
 
 private:
+	SyntaxerStack* stack_;
 	SyntaxerSetupParameter p_;
 
 private:

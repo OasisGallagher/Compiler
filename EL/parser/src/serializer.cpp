@@ -1,6 +1,5 @@
 #include "debug.h"
 #include "action.h"
-#include "define.h"
 #include "parser.h"
 #include "grammar.h"
 #include "lr_table.h"
