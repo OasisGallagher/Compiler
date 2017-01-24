@@ -1,6 +1,13 @@
 #pragma once
 #include "matrix.h"
 
+struct Environment;
+
+class LRGotoTable;
+class LRActionTable;
+class FirstSetTable;
+class GrammarContainer;
+
 enum LRActionType {
 	LRActionError,
 	LRActionShift,
@@ -15,22 +22,7 @@ struct LRAction {
 	bool operator == (const LRAction& other) const;
 	bool operator != (const LRAction& other) const;
 
-	std::string ToString() const;
-};
-
-struct Environment;
-
-class LRGotoTable;
-class LRActionTable;
-
-class FirstSetTable;
-
-class GrammarSymbol;
-class GrammarContainer;
-class GrammarSymbolSetTable;
-class GrammarSymbolContainer;
-
-class Conflicts : public matrix<int, GrammarSymbol, LRAction> {
+	std::string ToString(const GrammarContainer& grammars) const;
 };
 
 class LRImpl {
@@ -42,10 +34,4 @@ public:
 
 	virtual bool Parse(LRActionTable& actionTable, LRGotoTable& gotoTable) = 0;
 	virtual void Setup(Environment* env, FirstSetTable* firstSet) = 0;
-
-protected:
-	bool InsertActionTable(LRActionTable &actionTable, int src, const GrammarSymbol& symbol, const LRAction& action);
-
-private:
-	Conflicts conflicts_;
 };

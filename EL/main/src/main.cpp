@@ -14,7 +14,7 @@ int main(int argc, char** argv) {
 	Language* lang = new Language;
 	lang->Setup(productions, output);
 
-	//Debug::Log(lang->ToString());
+	Debug::Log(lang->ToString());
 
 	SyntaxTree tree;
 

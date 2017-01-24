@@ -1,0 +1,27 @@
+(27) 	Shift/Reduce
+{
+  { Block : { · BlockStatements }, ( zero/number/string/identifier/;/var/{/if/while/for/(/continue/break/return/function/+/-/delete/void/++/--/~/!/new/[/this/null/true/false/}/else ) }, 
+  { ObjectLiteral : { · }, ( =/*=//=/%=/+=/-=/<<=/>>=/&=/|=/^=/[/./(/;/,/?/||/&/==/!=/</>/<=/>=/<</>>/+/-/*///%/++/-- ) }, 
+  { ObjectLiteral : { · FieldList }, ( =/*=//=/%=/+=/-=/<<=/>>=/&=/|=/^=/[/./(/;/,/?/||/&/==/!=/</>/<=/>=/<</>>/+/-/*///%/++/-- ) }, 
+}
+
+
+(88) 	Shift/Reduce	-> Shift
+{ 
+	{ VariableDefination : var VariableDeclarationList ·, ( ;/, ) }, 
+	{ VariableDeclarationList : VariableDeclarationList · , VariableDefination, ( ;/, ) } 
+}
+
+
+(153) 	Shift/Reduce	-> Shift
+{
+	{ IfStatement : if ParenthesizedExpression Statement ·, ( zero/number/string/identifier/;/var/{/if/while/for/(/continue/break/return/function/+/-/delete/void/++/--/~/!/new/[/this/null/true/false/}/else ) }, 
+	{ IfStatement : if ParenthesizedExpression Statement · else Statement, ( zero/number/string/identifier/;/var/{/if/while/for/(/continue/break/return/function/+/-/delete/void/++/--/~/!/new/[/this/null/true/false/}/else ) } 
+}
+
+
+(52)	Reduce/Reduce
+{
+	{ FunctionDefinition : NamedFunction ·, ( zero/number/string/identifier/;/var/{/if/while/for/(/continue/break/return/function/+/-/delete/void/++/--/~/!/new/[/this/null/true/false/} ) }, 
+	{ FunctionExpression : NamedFunction ·, ( =/*=//=/%=/+=/-=/<<=/>>=/&=/|=/^=/[/./(/;/,/?/||/&/==/!=/</>/<=/>=/<</>>/+/-/*///%/++/-- ) } 
+}

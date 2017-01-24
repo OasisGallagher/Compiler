@@ -9,10 +9,31 @@
 #include "lr_table.h"
 #include "table_printer.h"
 
+struct Conflict {
+	int state;
+	GrammarSymbol symbol;
+	LRAction first;
+	LRAction second;
+
+	bool operator == (const Conflict& other) const;
+};
+
+class ConflictContainer {
+	typedef std::vector<Conflict> container_type;
+public:
+	void clear();
+	bool insert(const Conflict& conf);
+
+private:
+	container_type container_;
+};
+
 LALR::LALR() :coreItemsCount_(0){
+	conflicts_ = new ConflictContainer;
 }
 
 LALR::~LALR() {
+	delete conflicts_;
 }
 
 void LALR::Setup(Environment* env, FirstSetTable* firstSets) {
@@ -51,7 +72,12 @@ bool LALR::Parse(LRActionTable& actionTable, LRGotoTable& gotoTable) {
 }
 
 bool LALR::CreateLRParsingTable(LRGotoTable& gotoTable, LRActionTable& actionTable) {
-	return CreateActionTable(actionTable) && CreateGotoTable(gotoTable);
+	conflicts_->clear();
+	if (!CreateGotoTable(gotoTable)) {
+		return false;
+	}
+
+	return CreateActionTable(actionTable);
 }
 
 bool LALR::CreateActionTable(LRActionTable &actionTable) {
@@ -66,15 +92,37 @@ bool LALR::CreateActionTable(LRActionTable &actionTable) {
 	return true;
 }
 
+bool LALR::InsertActionTable(LRActionTable& actionTable, const LR1Itemset& src, const GrammarSymbol& symbol, const LRAction& action) {
+	int state = Utility::ParseInteger(src.GetName());
+	LRActionTable::insert_status status = actionTable.insert(state, symbol, action);
+	if (!status.second && status.first->second != action) {
+		Conflict conf = { state, symbol, status.first->second, action };
+		if (conflicts_->insert(conf)) {
+			std::ostringstream oss;
+			oss << "CONFLICT: (";
+			oss << state << ", " << symbol.ToString();
+			oss << ")";
+			oss << " => (";
+			oss << "\n\t" << status.first->second.ToString(env_->grammars);
+			oss << "\n\t" << action.ToString(env_->grammars);
+			oss << ")";
+			Debug::LogWarning(oss.str());
+			
+			return false;
+		}
+	}
+
+	return true;
+}
+
 bool LALR::ParseLRAction(LRActionTable & actionTable, const LR1Itemset& itemset, const LR1Item &item) {
 	Grammar* g = nullptr;
 	const Condinate* cond = env_->grammars.GetTargetCondinate(item.GetCpos(), &g);
-	int i = Utility::ParseInteger(itemset.GetName());
 
 	if (g->GetLhs() == NativeSymbols::program && item.GetDpos() == 1 
 		&& item.GetForwards().size() == 1 && item.GetForwards().begin()->symbol == NativeSymbols::zero) {
 		LRAction action = { LRActionAccept };
-		return InsertActionTable(actionTable, i, NativeSymbols::zero, action);
+		return InsertActionTable(actionTable, itemset, NativeSymbols::zero, action);
 	}
 
 	if (item.GetDpos() >= (int)cond->symbols.size() || cond->symbols.front() == NativeSymbols::epsilon) {
@@ -83,7 +131,7 @@ bool LALR::ParseLRAction(LRActionTable & actionTable, const LR1Itemset& itemset,
 		if (g->GetLhs() != NativeSymbols::program) {
 			LRAction action = { LRActionReduce, item.GetCpos() };
 			for (Forwards::const_iterator fi = item.GetForwards().begin(); fi != item.GetForwards().end(); ++fi) {
-				status = InsertActionTable(actionTable, i, fi->symbol, action) || status;
+				status = InsertActionTable(actionTable, itemset, fi->symbol, action) || status;
 			}
 		}
 
@@ -96,7 +144,7 @@ bool LALR::ParseLRAction(LRActionTable & actionTable, const LR1Itemset& itemset,
 		if (edges_.get(itemset, symbol, target)) {
 			int j = Utility::ParseInteger(target.GetName());
 			LRAction action = { LRActionShift, j };
-			return InsertActionTable(actionTable, i, symbol, action);
+			return InsertActionTable(actionTable, itemset, symbol, action);
 		}
 	}
 
@@ -394,4 +442,26 @@ void LALR::AddForwardsAndPropagations(LR1Item& src, const LR1Itemset& itemset, L
 			}
 		}
 	}
+}
+
+bool Conflict::operator==(const Conflict& other) const {
+	if (state != other.state || symbol != other.symbol) {
+		return false;
+	}
+
+	return (first == other.first && second == other.second) 
+		|| (first == other.second && second == other.first);
+}
+
+bool ConflictContainer::insert(const Conflict& conf) {
+	if (std::find(container_.begin(), container_.end(), conf) == container_.end()) {
+		container_.push_back(conf);
+		return true;
+	}
+
+	return false;
+}
+
+void ConflictContainer::clear() {
+	container_.clear();
 }

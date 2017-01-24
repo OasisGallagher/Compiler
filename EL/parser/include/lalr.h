@@ -3,9 +3,11 @@
 #include "lr_impl.h"
 #include "parser.h"
 
+struct Condinate;
+
 class LR0;
 class Grammar;
-struct Condinate;
+class ConflictContainer;
 
 class LALR : public LRImpl {
 public:
@@ -24,6 +26,7 @@ protected:
 
 	bool CreateGotoTable(LRGotoTable &gotoTable);
 	bool CreateActionTable(LRActionTable &actionTable);
+	bool InsertActionTable(LRActionTable &actionTable, const LR1Itemset& src, const GrammarSymbol& symbol, const LRAction& action);
 
 private:
 	bool IsNullable(const GrammarSymbol& symbol);
@@ -49,6 +52,7 @@ private:
 private:
 	Environment* env_;
 	FirstSetTable* firstSets_;
+	ConflictContainer* conflicts_;
 
 	LR1Item tmp_;
 	LR1EdgeTable edges_;

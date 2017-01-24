@@ -9,7 +9,7 @@ public:
 
 class LRActionTable : public matrix <int, GrammarSymbol, LRAction> {
 public:
-	std::string ToString() const;
+	std::string ToString(const GrammarContainer& grammars) const;
 };
 
 class LRTable {
@@ -25,7 +25,7 @@ public:
 	int GetGoto(int current, const GrammarSymbol& symbol);
 	LRAction GetAction(int current, const GrammarSymbol& symbol);
 	
-	std::string ToString() const;
+	std::string ToString(const GrammarContainer& grammars) const;
 
 private:
 	LRGotoTable gotoTable_;

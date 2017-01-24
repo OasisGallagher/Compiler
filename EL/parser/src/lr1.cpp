@@ -176,7 +176,7 @@ std::string LR1Itemset::ToString(const GrammarContainer& grammars) const {
 	const char* seperator = "";
 	for (const_iterator ite = begin(); ite != end(); ++ite) {
 		if (!ite->IsCore()) {
-			//continue;
+			continue;
 		}
 
 		oss << seperator;

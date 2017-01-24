@@ -46,7 +46,11 @@ const GrammarTextContainer& GrammarReader::GetGrammars() const {
 }
 
 const char* GrammarReader::SplitGrammar(char*& text) {
-	text += strspn(text, ":|\t\n ");
+	text += strspn(text, ":\t\n ");
+	if (*text == '|') {
+		++text;
+	}
+
 	return std::find(text, text + strlen(text), '\t');
 }
 

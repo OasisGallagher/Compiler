@@ -19,16 +19,16 @@ struct SyntaxerStack {
 
 Syntaxer::Syntaxer() {
 	symTable_ = new SymTable;
+	stack_ = new SyntaxerStack;
 	literalTable_ = new LiteralTable;
 	constantTable_ = new ConstantTable;
-	stack_ = new SyntaxerStack;
 }
 
 Syntaxer::~Syntaxer() {
+	delete stack_;
 	delete symTable_;
 	delete literalTable_;
 	delete constantTable_;
-	delete stack_;
 }
 
 void Syntaxer::Setup(const SyntaxerSetupParameter& p) {
@@ -56,7 +56,7 @@ bool Syntaxer::ParseSyntax(SyntaxTree* tree, FileScanner* fileScanner) {
 }
 
 std::string Syntaxer::ToString() const {
-	return p_.lrTable.ToString();
+	return p_.lrTable.ToString(p_.env->grammars);
 }
 
 int Syntaxer::Reduce(int cpos) {
@@ -177,7 +177,6 @@ GrammarSymbol Syntaxer::ParseNextSymbol(TokenPosition& position, void*& addr, Fi
 
 	return answer;
 }
-
 
 void SyntaxerStack::push(int state, void* value, const GrammarSymbol& symbol) {
 	states.push_back(state);

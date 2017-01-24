@@ -1,6 +1,7 @@
 #include <sstream>
 
 #include "debug.h"
+#include "grammar.h"
 #include "lr_impl.h"
 #include "lr_table.h"
 #include "grammar_symbol.h"
@@ -15,13 +16,18 @@ bool LRAction::operator != (const LRAction& other) const {
 	return actionType != other.actionType || actionParameter != other.actionParameter;
 }
 
-std::string LRAction::ToString() const {
+std::string LRAction::ToString(const GrammarContainer& grammars) const {
 	std::ostringstream oss;
 	oss << "(";
 	oss << actionTexts[actionType];
 
-	if (actionType == LRActionReduce || actionType == LRActionShift) {
+	if (actionType == LRActionShift) {
 		oss << actionParameter;
+	}
+	else if (actionType == LRActionReduce) {
+		Grammar* g = nullptr;
+		const Condinate* cond = grammars.GetTargetCondinate(actionParameter, &g);
+		oss << g->GetLhs().ToString() + " : " + cond->ToString();
 	}
 
 	oss << ")";
@@ -47,7 +53,7 @@ std::string LRGotoTable::ToString() const {
 	return oss.str();
 }
 
-std::string LRActionTable::ToString() const {
+std::string LRActionTable::ToString(const GrammarContainer& grammars) const {
 	const char* seperator = "";
 	std::ostringstream oss;
 	for (const_iterator ite = begin(); ite != end(); ++ite) {
@@ -59,25 +65,8 @@ std::string LRActionTable::ToString() const {
 		oss << ite->first.second.ToString();
 		oss << ")";
 		oss << " => ";
-		oss << ite->second.ToString();
+		oss << ite->second.ToString(grammars);
 	}
 
 	return oss.str();
-}
-
-bool LRImpl::InsertActionTable(LRActionTable &actionTable, int src, const GrammarSymbol& symbol, const LRAction& action) {
-	LRActionTable::insert_status status = actionTable.insert(src, symbol, action);
-	if (!status.second && status.first->second != action) {
-		std::ostringstream oss;
-		oss << "CONFLICT: (";
-		oss << src << ", " << symbol.ToString();
-		oss << ")";
-		oss << " => ";
-		oss << "(";
-		oss << status.first->second.ToString() << ", " << action.ToString();
-		oss << ")";
-		Debug::LogWarning(oss.str());
-	}
-
-	return status.second;
 }

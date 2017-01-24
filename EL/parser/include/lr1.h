@@ -134,6 +134,7 @@ public:
 	std::string ToString(const GrammarContainer& grammars) const;
 };
 
+// TODO: or std::map<std::pair<std::string, LR1Item>, LR1Itemset> ?
 class Propagations : public std::map <LR1Item, LR1Itemset> {
 public:
 	std::string ToString(const GrammarContainer& grammars) const;
