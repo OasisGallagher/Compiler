@@ -1,0 +1,31 @@
+"load parser" at 17:11:14.
+"load parser" costs 0.14 seconds.
+>> [S] `function`. Goto state 13.
+>> [S] `identifier`. Goto state 14.
+>> [R] `identifier` to `Identifier`. Goto state 117.
+>> [S] `(`. Goto state 115.
+>> [S] `identifier`. Goto state 14.
+>> [R] `identifier` to `Identifier`. Goto state 196.
+>> [R] `Identifier` to `FormalParameter`. Goto state 193.
+>> [R] `FormalParameter` to `FormalParametersPrefix`. Goto state 195.
+>> [R] `FormalParametersPrefix` to `FormalParameters`. Goto state 194.
+>> [S] `)`. Goto state 214.
+>> [S] `{`. Goto state 225.
+>> [R] `` to `TopStatements`. Goto state 227.
+>> [S] `}`. Goto state 230.
+>> [R] `( FormalParameters ) { TopStatements }` to `FormalParametersAndBody`. Goto state 192.
+>> [R] `function Identifier FormalParametersAndBody` to `NamedFunction`. Goto state 53.
+>> [R] `NamedFunction` to `FunctionDefinition`. Goto state 45.
+>> [R] `FunctionDefinition` to `TopStatement`. Goto state 66.
+>> [R] `TopStatement` to `TopStatementsPrefix`. Goto state 68.
+>> [R] `TopStatementsPrefix` to `TopStatements`. Goto state 67.
+
+=====================Accept=====================
+
+================== SyntaxTree ==================
+©¸©¤©¤©¤ named-function
+     ©À©¤©¤©¤ identify
+     ©¸©¤©¤©¤ function-parameters-and-body
+          ©À©¤©¤©¤ x
+          ©¸©¤©¤©¤ null
+

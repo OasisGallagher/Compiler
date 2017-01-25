@@ -25,9 +25,14 @@ std::string LRAction::ToString(const GrammarContainer& grammars) const {
 		oss << actionParameter;
 	}
 	else if (actionType == LRActionReduce) {
+		oss << actionParameter;
+		/*
+		oss << "(";
 		Grammar* g = nullptr;
 		const Condinate* cond = grammars.GetTargetCondinate(actionParameter, &g);
 		oss << g->GetLhs().ToString() + " : " + cond->ToString();
+		oss << ")";
+		*/
 	}
 
 	oss << ")";

@@ -56,4 +56,8 @@ time_t OS::GetFileLastWriteTime(const char* filePath) {
 	return mktime(&temptm);
 }
 
+bool OS::Prompt(const char* message) {
+	return MessageBox(NULL, message, "", MB_YESNO | MB_ICONQUESTION) == IDYES;
+}
+
 #endif

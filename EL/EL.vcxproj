@@ -38,7 +38,8 @@
     <ClInclude Include="parser\include\syntax_tree.h" />
     <ClInclude Include="parser\include\table.h" />
     <ClInclude Include="scanner\include\scanner.h" />
-    <ClInclude Include="scanner\include\token.h" />
+    <ClInclude Include="scanner\include\tokens.h" />
+    <ClInclude Include="scanner\include\token_define.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="global\src\debug.cpp" />
@@ -65,6 +66,7 @@
     <ClCompile Include="parser\src\syntax_tree.cpp" />
     <ClCompile Include="parser\src\table.cpp" />
     <ClCompile Include="scanner\src\scanner.cpp" />
+    <ClCompile Include="scanner\src\tokens.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{1AD72401-EA15-485A-9CBB-9574AC936ED6}</ProjectGuid>

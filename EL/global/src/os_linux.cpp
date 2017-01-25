@@ -15,4 +15,8 @@ time_t OS::GetFileLastWriteTime(const char* filePath) {
 	return 0;
 }
 
+bool OS::Prompt(const char* message) {
+	return true;
+}
+
 #endif

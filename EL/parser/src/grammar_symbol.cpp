@@ -1,7 +1,7 @@
 #include <sstream>
 
 #include "debug.h"
-#include "token.h"
+#include "token_define.h"
 #include "grammar_symbol.h"
 
 GrammarSymbol NativeSymbols::null = nullptr;

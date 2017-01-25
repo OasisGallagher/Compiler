@@ -5,30 +5,19 @@
 
 class GrammarContainer;
 
-struct Forward {
-	bool spontaneous;
-	GrammarSymbol symbol;
-
-	std::string ToString() const {
-		return symbol.ToString();
-	}
-};
-
 class Forwards {
 public:
 	Forwards();
 
 public:
-	typedef std::vector<Forward> container_type;
+	typedef std::set<GrammarSymbol> container_type;
 	typedef container_type::iterator iterator;
 	typedef container_type::const_iterator const_iterator;
-	typedef container_type::const_reference const_reference;
 
 public:
 	bool operator < (const Forwards& other) const;
 
 public:
-	const_reference at(int i) const { return cont_.at(i); }
 	int size() const { return cont_.size(); }
 	iterator begin() { return cont_.begin(); }
 	iterator end() { return cont_.end(); }
@@ -37,7 +26,7 @@ public:
 	const_iterator end() const { return cont_.end(); }
 
 	void erase(const GrammarSymbol& symbol);
-	bool insert(const GrammarSymbol& symbol, bool spontaneous);
+	bool insert(const GrammarSymbol& symbol);
 
 private:
 	container_type cont_;

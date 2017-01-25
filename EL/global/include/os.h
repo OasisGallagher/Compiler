@@ -20,6 +20,7 @@ public:
 	static void SetConsoleColor(Color color);
 	static void EnableMemoryLeakCheck();
 	static time_t GetFileLastWriteTime(const char* filePath);
+	static bool Prompt(const char* message);
 
 private:
 	OS();

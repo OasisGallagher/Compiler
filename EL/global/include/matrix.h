@@ -28,7 +28,7 @@ public:
 	typedef typename container_type::iterator iterator;
 	typedef typename container_type::const_iterator const_iterator;
 
-	typedef std::pair<iterator, bool> insert_status;
+	typedef std::pair<iterator, bool> ib_pair;
 
 public:
 	matrix& operator = (const matrix& other) {
@@ -67,7 +67,7 @@ public:
 		cont_.insert(first, last);
 	}
 
-	insert_status insert(const first_key_type& k1, const second_key_type& k2, const value_type& val) {
+	ib_pair insert(const first_key_type& k1, const second_key_type& k2, const value_type& val) {
 		return cont_.insert(std::make_pair(std::make_pair(k1, k2), val));
 	}
 

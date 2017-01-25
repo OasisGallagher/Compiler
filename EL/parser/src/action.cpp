@@ -1,11 +1,11 @@
 #include "debug.h"
-#include "token.h"
 #include "table.h"
 #include "action.h"
 #include "define.h"
 #include "scanner.h"
 #include "utilities.h"
 #include "syntax_tree.h"
+#include "token_define.h"
 
 void Action::SetArgument(const Argument& argument) {
 	argument_ = argument;

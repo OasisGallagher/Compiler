@@ -137,8 +137,8 @@ LogicalAndExpression
 	| LogicalAndExpression && BitwiseOrExpression	$$ = make("&&", $3, $1)
 	
 LogicalOrExpression
-	: BitwiseAndExpression							$$ = $1
-	| LogicalOrExpression || BitwiseAndExpression	$$ = make("||", $3, $1)
+	: LogicalAndExpression							$$ = $1
+	| LogicalOrExpression || LogicalAndExpression	$$ = make("||", $3, $1)
 	
 BitwiseAndExpression
 	: EqualityExpression							$$ = $1
@@ -203,8 +203,8 @@ LeftSideExpression
 CallExpression
 	: PrimaryExpression					$$ = $1
 	| FullNewExpression					$$ = $1
-	| CallExpression MemberOperator		$$ = make("callm", $1)
-	| CallExpression Arguments			$$ = make("calla", $1)
+	| CallExpression MemberOperator		$$ = make("callm", $2, $1)
+	| CallExpression Arguments			$$ = make("calla", $2, $1)
 	
 FullNewExpression
 	: new FullNewSubexpression Arguments	$$ = make("newf", $2, $1)
@@ -257,7 +257,6 @@ LiteralField
 	
 FunctionExpression
 	: AnonymousFunction			$$ = $1
-	| NamedFunction				$$ = $1
 	
 PrimaryExpression
 	: SimpleExpression		$$ = $1
@@ -286,4 +285,3 @@ Number
 
 String
 	: string		$$ = literal($1)
-

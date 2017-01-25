@@ -1,86 +1,20 @@
 #include <cassert>
 #include <sstream>
 #include <algorithm>
+
 #include "debug.h"
+#include "tokens.h"
+#include "reader.h"
 #include "define.h"
 #include "scanner.h"
 #include "utilities.h"
-#include "reader.h"
 
 #define STATE_START			-1
 #define STATE_DONE			0
 #define STATE_NUMBER		1
 #define STATE_STRING		2
-#define STATE_IDENTIFIER	3
-
-struct Compound {
-	const char* text;
-	ScannerTokenType type;
-
-	bool operator < (const Compound& other) const {
-		return strcmp(text, other.text) < 0;
-	}
-};
-
-static Compound compounds[] = {
-	"+", ScannerTokenPlus,
-	"-", ScannerTokenMinus,
-	"*", ScannerTokenMultiply,
-	"/", ScannerTokenDivide,
-	"%", ScannerTokenMod,
-
-	"+=", ScannerTokenPlusEqual,
-	"-=", ScannerTokenMinusEqual,
-	"*=", ScannerTokenMultiplyEqual,
-	"/=", ScannerTokenDivideEqual,
-	"%=", ScannerTokenModEqual,
-
-	"++", ScannerTokenSelfIncrement,
-	"--", ScannerTokenSelfDecrement,
-
-	"<<", ScannerTokenShiftLeft,
-	">>", ScannerTokenShiftRight,
-
-	"<<=", ScannerTokenShiftLeftEqual,
-	">>=", ScannerTokenShiftRightEqual,
-
-	"&", ScannerTokenBitwiseAnd,
-	"|", ScannerTokenBitwiseOr,
-	"^", ScannerTokenBitwiseXor,
-	"~", ScannerTokenBitwiseNot,
-
-	"&=", ScannerTokenBitwiseAndEqual,
-	"|=", ScannerTokenBitwiseOrEqual,
-	"^=", ScannerTokenBitwiseXorEqual,
-
-	"<", ScannerTokenLess,
-	">", ScannerTokenGreater,
-	"=", ScannerTokenAssign,
-
-	"||", ScannerTokenOr,
-	"&&", ScannerTokenAnd,
-
-	"<=", ScannerTokenLessEqual,
-	">=", ScannerTokenGreaterEqual,
-	"==", ScannerTokenEqual,
-	"!=", ScannerTokenNotEqual,
-
-	"{", ScannerTokenLeftBrace,
-	"}", ScannerTokenRightBrace,
-
-	"(", ScannerTokenLeftParenthesis,
-	")", ScannerTokenRightParenthesis,
-	
-	"[", ScannerTokenLeftSquareBracket,
-	"]", ScannerTokenRightSquareBracket,
-	
-	"?", ScannerTokenQuestionmark,
-	"!", ScannerTokenExclamation,
-	";", ScannerTokenSemicolon,
-	":", ScannerTokenColon,
-	",", ScannerTokenComma,
-	".", ScannerTokenDot,
-};
+#define STATE_STRING2		3
+#define STATE_IDENTIFIER	4
 
 std::string TokenPosition::ToString() const {
 	std::ostringstream oss;
@@ -132,18 +66,7 @@ ScannerTokenType TextScanner::GetToken(char* token, int* pos) {
 	return GetNextToken(token, pos);
 }
 
-void Narrow(int& low, int& high, int count, int ci, int ch) {
-	for (; low < count && compounds[low].text[ci] != ch; ++low) {
-	}
-
-	for (high = low + 1; high < count && compounds[high].text[ci] == ch; ++high) {
-	}
-}
-
 ScannerTokenType TextScanner::GetNextToken(char* token, int* pos) {
-	int count = sizeof(compounds) / sizeof(compounds[0]);
-	std::sort(compounds, compounds + count);
-
 	int ci = 0, bi = 0, ch = 0, state = STATE_START;
 	bool savech = true, unget = false;
 
@@ -163,10 +86,6 @@ ScannerTokenType TextScanner::GetNextToken(char* token, int* pos) {
 
 		switch (state) {
 		case STATE_START:
-			if (ch == '#') {
-				return ScannerTokenEndOfFile;
-			}
-
 			if (ch == ' ' || ch == '\t' || ch == 0) {
 				savech = false;
 			}
@@ -176,8 +95,12 @@ ScannerTokenType TextScanner::GetNextToken(char* token, int* pos) {
 			else if (Utility::IsLetter(ch)) {
 				state = STATE_IDENTIFIER;
 			}
-			else if (ch == '"') {
+			else if (ch == '\'') {
 				state = STATE_STRING;
+				savech = false;
+			}
+			else if (ch == '"') {
+				state = STATE_STRING2;
 				savech = false;
 			}
 			else if (ch == '\n') {
@@ -187,18 +110,18 @@ ScannerTokenType TextScanner::GetNextToken(char* token, int* pos) {
 			else {
 				int low = 0, high = 0;
 
-				for (; low < count && compounds[low].text[ci] != ch; ++low) {
+				for (; low < Tokens::Size() && Tokens::Text(low)[ci] != ch; ++low) {
 				}
 
-				for (high = low + 1; high < count && compounds[high].text[ci] == ch; ++high) {
+				for (high = low + 1; high < Tokens::Size() && Tokens::Text(high)[ci] == ch; ++high) {
 				}
 
-				Assert(high <= count, std::string("can not find item leading with ") + (char)ch + ".");
+				Assert(high <= Tokens::Size(), std::string("can not find item leading with ") + (char)ch + ".");
 
 				++ci;
-				if (high - low == 1 && strlen(compounds[low].text) == ci) {
+				if (high - low == 1 && strlen(Tokens::Text(low)) == ci) {
 					state = STATE_DONE;
-					tokenType = compounds[low].type;
+					tokenType = Tokens::Type(low);
 				}
 				else {
 					state = Utility::MakeDword(low, high);
@@ -209,6 +132,14 @@ ScannerTokenType TextScanner::GetNextToken(char* token, int* pos) {
 			break;
 
 		case STATE_STRING:
+			if (ch == '\'') {
+				tokenType = ScannerTokenString;
+				savech = false;
+				state = STATE_DONE;
+			}
+			break;
+
+		case STATE_STRING2:
 			if (ch == '"') {
 				tokenType = ScannerTokenString;
 				savech = false;
@@ -239,13 +170,13 @@ ScannerTokenType TextScanner::GetNextToken(char* token, int* pos) {
 			
 			savech = false;
 			if (ch == 0) {
-				Assert(strlen(compounds[low].text) == ci, "invalid symbol");
+				Assert(strlen(Tokens::Text(low)) == ci, "invalid symbol");
 				state = STATE_DONE;
-				tokenType = compounds[low].type;
+				tokenType = Tokens::Type(low);
 			}
 			else {
 				int nl = low;
-				for (; nl < high && compounds[nl].text[ci] != ch; ++nl) {
+				for (; nl < high && Tokens::Text(nl)[ci] != ch; ++nl) {
 				}
 
 				if (nl < high) {
@@ -253,20 +184,20 @@ ScannerTokenType TextScanner::GetNextToken(char* token, int* pos) {
 				}
 
 				int nh = low + 1;
-				for (; nh < high && compounds[nh].text[ci] == ch; ++nh) {
+				for (; nh < high && Tokens::Text(nh)[ci] == ch; ++nh) {
 				}
 				high = nh;
 
-				savech = (compounds[low].text[ci] == ch);
+				savech = (Tokens::Text(low)[ci] == ch);
 				unget = !savech;
 
 				if (savech) {
 					++ci;
 				}
 
-				if (high - low == 1 && strlen(compounds[low].text) == ci) {
+				if (high - low == 1 && strlen(Tokens::Text(low)) == ci) {
 					state = STATE_DONE;
-					tokenType = compounds[low].type;
+					tokenType = Tokens::Type(low);
 				}
 				else {
 					state = Utility::MakeDword(low, high);

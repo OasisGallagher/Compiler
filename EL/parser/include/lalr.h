@@ -7,7 +7,7 @@ struct Condinate;
 
 class LR0;
 class Grammar;
-class ConflictContainer;
+class Ambiguities;
 
 class LALR : public LRImpl {
 public:
@@ -51,8 +51,8 @@ private:
 
 private:
 	Environment* env_;
+	Ambiguities* ambiguities_;
 	FirstSetTable* firstSets_;
-	ConflictContainer* conflicts_;
 
 	LR1Item tmp_;
 	LR1EdgeTable edges_;

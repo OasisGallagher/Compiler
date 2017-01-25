@@ -9,31 +9,31 @@
 #include "lr_table.h"
 #include "table_printer.h"
 
-struct Conflict {
+struct Ambiguity {
 	int state;
 	GrammarSymbol symbol;
 	LRAction first;
 	LRAction second;
 
-	bool operator == (const Conflict& other) const;
+	bool operator == (const Ambiguity& other) const;
 };
 
-class ConflictContainer {
-	typedef std::vector<Conflict> container_type;
+class Ambiguities {
+	typedef std::vector<Ambiguity> container_type;
 public:
 	void clear();
-	bool insert(const Conflict& conf);
+	bool insert(const Ambiguity& ambiguity);
 
 private:
 	container_type container_;
 };
 
 LALR::LALR() :coreItemsCount_(0){
-	conflicts_ = new ConflictContainer;
+	ambiguities_ = new Ambiguities;
 }
 
 LALR::~LALR() {
-	delete conflicts_;
+	delete ambiguities_;
 }
 
 void LALR::Setup(Environment* env, FirstSetTable* firstSets) {
@@ -54,7 +54,7 @@ bool LALR::Parse(LRActionTable& actionTable, LRGotoTable& gotoTable) {
 	}
 
 	LR1Item init = *itemsets_.begin()->begin();
-	init.GetForwards().insert(NativeSymbols::zero, true);
+	init.GetForwards().insert(NativeSymbols::zero);
 
 	Debug::StartSample("calculate forwards and propagations");
 	CalculateForwardsAndPropagations();
@@ -72,7 +72,7 @@ bool LALR::Parse(LRActionTable& actionTable, LRGotoTable& gotoTable) {
 }
 
 bool LALR::CreateLRParsingTable(LRGotoTable& gotoTable, LRActionTable& actionTable) {
-	conflicts_->clear();
+	ambiguities_->clear();
 	if (!CreateGotoTable(gotoTable)) {
 		return false;
 	}
@@ -94,19 +94,18 @@ bool LALR::CreateActionTable(LRActionTable &actionTable) {
 
 bool LALR::InsertActionTable(LRActionTable& actionTable, const LR1Itemset& src, const GrammarSymbol& symbol, const LRAction& action) {
 	int state = Utility::ParseInteger(src.GetName());
-	LRActionTable::insert_status status = actionTable.insert(state, symbol, action);
+	LRActionTable::ib_pair status = actionTable.insert(state, symbol, action);
 	if (!status.second && status.first->second != action) {
-		Conflict conf = { state, symbol, status.first->second, action };
-		if (conflicts_->insert(conf)) {
-			std::ostringstream oss;
-			oss << "CONFLICT: (";
-			oss << state << ", " << symbol.ToString();
-			oss << ")";
-			oss << " => (";
-			oss << "\n\t" << status.first->second.ToString(env_->grammars);
-			oss << "\n\t" << action.ToString(env_->grammars);
-			oss << ")";
-			Debug::LogWarning(oss.str());
+		Ambiguity ambiguity = { state, symbol, status.first->second, action };
+		if (ambiguities_->insert(ambiguity)) {
+			std::string prompt = Utility::Format("CONFLICT at (%d, %s). Replace %s with %s ?", 
+				state, symbol.ToString().c_str(), 
+				status.first->second.ToString(env_->grammars).c_str(), 
+				action.ToString(env_->grammars).c_str());
+			
+			if (OS::Prompt(prompt.c_str())) {
+				status.first->second = action;
+			}
 			
 			return false;
 		}
@@ -120,7 +119,7 @@ bool LALR::ParseLRAction(LRActionTable & actionTable, const LR1Itemset& itemset,
 	const Condinate* cond = env_->grammars.GetTargetCondinate(item.GetCpos(), &g);
 
 	if (g->GetLhs() == NativeSymbols::program && item.GetDpos() == 1 
-		&& item.GetForwards().size() == 1 && item.GetForwards().begin()->symbol == NativeSymbols::zero) {
+		&& item.GetForwards().size() == 1 && *item.GetForwards().begin() == NativeSymbols::zero) {
 		LRAction action = { LRActionAccept };
 		return InsertActionTable(actionTable, itemset, NativeSymbols::zero, action);
 	}
@@ -131,7 +130,7 @@ bool LALR::ParseLRAction(LRActionTable & actionTable, const LR1Itemset& itemset,
 		if (g->GetLhs() != NativeSymbols::program) {
 			LRAction action = { LRActionReduce, item.GetCpos() };
 			for (Forwards::const_iterator fi = item.GetForwards().begin(); fi != item.GetForwards().end(); ++fi) {
-				status = InsertActionTable(actionTable, itemset, fi->symbol, action) || status;
+				status = InsertActionTable(actionTable, itemset, *fi, action) || status;
 			}
 		}
 
@@ -215,7 +214,7 @@ void LALR::AddLR1Items(LR1Itemset &answer, const GrammarSymbol& lhs, const LR1It
 		const Condinate* tc = *ci;
 		Forwards forwards = current.GetForwards();
 		for (Forwards::const_iterator fi = forwards.begin(); fi != forwards.end(); ++fi) {
-			beta.back() = fi->symbol;
+			beta.back() = *fi;
 			firstSets_->GetFirstSet(firstSet, beta.begin(), beta.end());
 
 			for (GrammarSymbolSet::const_iterator fsi = firstSet.begin(); fsi != firstSet.end(); ++fsi) {
@@ -224,7 +223,7 @@ void LALR::AddLR1Items(LR1Itemset &answer, const GrammarSymbol& lhs, const LR1It
 
 				for (; ite != tc->symbols.end(); ++ite, ++dpos) {
 					LR1Item newItem = FindItem(Utility::MakeDword(condinateIndex, gi), dpos, itemset);
-					newItem.GetForwards().insert(*fsi, true);
+					newItem.GetForwards().insert(*fsi);
 					answer.insert(newItem);
 
 					if (*ite == NativeSymbols::epsilon || !IsNullable(*ite)) {
@@ -234,7 +233,7 @@ void LALR::AddLR1Items(LR1Itemset &answer, const GrammarSymbol& lhs, const LR1It
 
 				if (ite == tc->symbols.end()) {
 					LR1Item newItem = FindItem(Utility::MakeDword(condinateIndex, gi), dpos, itemset);
-					newItem.GetForwards().insert(*fsi, true);
+					newItem.GetForwards().insert(*fsi);
 					answer.insert(newItem);
 				}
 			}
@@ -355,7 +354,7 @@ bool LALR::PropagateFrom(const LR1Item &src) {
 	for (LR1Itemset::iterator is = itemset.begin(); is != itemset.end(); ++is) {
 		LR1Item& target = (LR1Item&)*is;
 		for (Forwards::const_iterator fi = forwards.begin(); fi != forwards.end(); ++fi) {
-			propagated = target.GetForwards().insert(fi->symbol, false) || propagated;
+			propagated = target.GetForwards().insert(*fi) || propagated;
 		}
 	}
 
@@ -379,7 +378,7 @@ void LALR::CalculateForwardsAndPropagations() {
 			Debug::LogProgress("progress", index, coreItemsCount_);
 			LR1Itemset itemset;
 
-			item.GetForwards().insert(NativeSymbols::unknown, true);
+			item.GetForwards().insert(NativeSymbols::unknown);
 			itemset.insert(item);
 
 			CalculateLR1Itemset(itemset, dict);
@@ -434,17 +433,17 @@ void LALR::AddForwardsAndPropagations(LR1Item& src, const LR1Itemset& itemset, L
 		LR1Item target = FindItem(ite->GetCpos(), ite->GetDpos() + 1, dict);
 		const Forwards& forwards = ite->GetForwards();
 		for (Forwards::const_iterator ite2 = forwards.begin(); ite2 != forwards.end(); ++ite2) {
-			if (ite2->symbol == NativeSymbols::unknown) {
+			if (*ite2 == NativeSymbols::unknown) {
 				propagations_[src].insert(target);
 			}
 			else {
-				target.GetForwards().insert(ite2->symbol, true);
+				target.GetForwards().insert(*ite2);
 			}
 		}
 	}
 }
 
-bool Conflict::operator==(const Conflict& other) const {
+bool Ambiguity::operator==(const Ambiguity& other) const {
 	if (state != other.state || symbol != other.symbol) {
 		return false;
 	}
@@ -453,15 +452,15 @@ bool Conflict::operator==(const Conflict& other) const {
 		|| (first == other.second && second == other.first);
 }
 
-bool ConflictContainer::insert(const Conflict& conf) {
-	if (std::find(container_.begin(), container_.end(), conf) == container_.end()) {
-		container_.push_back(conf);
+bool Ambiguities::insert(const Ambiguity& ambiguity) {
+	if (std::find(container_.begin(), container_.end(), ambiguity) == container_.end()) {
+		container_.push_back(ambiguity);
 		return true;
 	}
 
 	return false;
 }
 
-void ConflictContainer::clear() {
+void Ambiguities::clear() {
 	container_.clear();
 }

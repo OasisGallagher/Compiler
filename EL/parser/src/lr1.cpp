@@ -12,8 +12,8 @@ Forwards::Forwards() {
 bool Forwards::operator <(const Forwards& other) const {
 	const_iterator first1 = begin(), first2 = other.begin();
 	for (; first1 != end() && first2 != other.end(); ++first1, ++first2) {
-		if (first1->symbol != first2->symbol) {
-			return first1->symbol < first2->symbol;
+		if (*first1 != *first2) {
+			return *first1 < *first2;
 		}
 	}
 
@@ -25,26 +25,14 @@ bool Forwards::operator <(const Forwards& other) const {
 }
 
 void Forwards::erase(const GrammarSymbol& symbol) {
-	iterator last = begin();
-	for (iterator first = begin(); first != end(); ++first) {
-		if (first->symbol != symbol) {
-			*last++ = *first;
-		}
+	iterator pos = cont_.find(symbol);
+	if (pos != cont_.end()) {
+		cont_.erase(pos);
 	}
-
-	cont_.erase(last, end());
 }
 
-bool Forwards::insert(const GrammarSymbol& symbol, bool spontaneous) {
-	for (iterator ite = begin(); ite != end(); ++ite) {
-		if (ite->symbol == symbol) {
-			return false;
-		}
-	}
-
-	Forward f = { spontaneous, symbol };
-	cont_.push_back(f);
-	return true;
+bool Forwards::insert(const GrammarSymbol& symbol) {
+	return cont_.insert(symbol).second;
 }
 
 LR1Item::LR1Item() {
@@ -153,7 +141,7 @@ bool LR1Itemset::insert(const LR1Item& item) {
 	LR1Item& old = (LR1Item&)*state.first;
 	const Forwards& forwards = item.GetForwards();
 	for (Forwards::const_iterator ite = forwards.begin(); ite != forwards.end(); ++ite) {
-		result = old.GetForwards().insert(ite->symbol, ite->spontaneous) || result;
+		result = old.GetForwards().insert(*ite) || result;
 	}
 
 	return result;
