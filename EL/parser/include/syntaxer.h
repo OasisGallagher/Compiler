@@ -13,6 +13,10 @@ struct Environment;
 struct TokenPosition;
 struct SyntaxerStack;
 
+class SymTable;
+class LiteralTable;
+class ConstantTable;
+
 struct SyntaxerSetupParameter {
 	Environment* env;
 	LRTable lrTable;
@@ -40,6 +44,8 @@ private:
 	bool Error(const GrammarSymbol& symbol, const TokenPosition& position);
 
 	bool CreateSyntaxTree(SyntaxNode*& root, FileScanner* fileScanner);
+
+	void CleanupOnFailure();
 
 	GrammarSymbol FindSymbol(const ScannerToken& token, void*& addr);
 	GrammarSymbol ParseNextSymbol(TokenPosition& position, void*& addr, FileScanner* fileScanner);

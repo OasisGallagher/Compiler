@@ -1,5 +1,5 @@
-"load parser" at 17:46:37.
-"load parser" costs 0.14 seconds.
+"load parser" at 19:44:35.
+"load parser" costs 0.22 seconds.
 >> [S] `function`. Goto state 14.
 >> [S] `identifier`. Goto state 15.
 >> [R] `identifier` to `Identifier`. Goto state 119.

@@ -9,23 +9,23 @@
 static const char* actionTexts[] = { "err", "s", "r", "acc" };
 
 bool LRAction::operator == (const LRAction& other) const {
-	return actionType == other.actionType && actionParameter == other.actionParameter;
+	return type == other.type && parameter == other.parameter;
 }
 
 bool LRAction::operator != (const LRAction& other) const {
-	return actionType != other.actionType || actionParameter != other.actionParameter;
+	return type != other.type || parameter != other.parameter;
 }
 
 std::string LRAction::ToString(const GrammarContainer& grammars) const {
 	std::ostringstream oss;
 	oss << "(";
-	oss << actionTexts[actionType];
+	oss << actionTexts[type];
 
-	if (actionType == LRActionShift) {
-		oss << actionParameter;
+	if (type == LRActionShift) {
+		oss << parameter;
 	}
-	else if (actionType == LRActionReduce) {
-		oss << actionParameter;
+	else if (type == LRActionReduce) {
+		oss << parameter;
 		/*
 		oss << "(";
 		Grammar* g = nullptr;

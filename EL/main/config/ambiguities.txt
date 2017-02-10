@@ -1,4 +1,4 @@
-(27) 	Shift/Reduce
+﻿(27) 	Shift/Reduce
 {
   { Block : { · BlockStatements }, ( zero/number/string/identifier/;/var/{/if/while/for/(/continue/break/return/function/+/-/delete/void/++/--/~/!/new/[/this/null/true/false/}/else ) }, 
   { ObjectLiteral : { · }, ( =/*=//=/%=/+=/-=/<<=/>>=/&=/|=/^=/[/./(/;/,/?/||/&/==/!=/</>/<=/>=/<</>>/+/-/*///%/++/-- ) }, 
@@ -21,9 +21,3 @@
 	{ IfStatement : if ParenthesizedExpression Statement · else Statement, ( zero/number/string/identifier/;/var/{/if/while/for/(/continue/break/return/function/+/-/delete/void/++/--/~/!/new/[/this/null/true/false/}/else ) } 
 }
 悬挂else问题.
-
-(52)	Reduce/Reduce
-{
-	{ FunctionDefinition : NamedFunction ·, ( zero/number/string/identifier/;/var/{/if/while/for/(/continue/break/return/function/+/-/delete/void/++/--/~/!/new/[/this/null/true/false/} ) }, 
-	{ FunctionExpression : NamedFunction ·, ( =/*=//=/%=/+=/-=/<<=/>>=/&=/|=/^=/[/./(/;/,/?/||/&/==/!=/</>/<=/>=/<</>>/+/-/*///%/++/-- ) } 
-}

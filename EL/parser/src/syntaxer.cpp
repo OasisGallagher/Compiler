@@ -7,6 +7,39 @@
 #include "serializer.h"
 #include "syntax_tree.h"
 
+class SymTable : public Table<Sym> { };
+
+class ConstantTable : public Table<Constant> { };
+
+class LiteralTable : public Table<Literal> { };
+
+Sym::Sym(const std::string& text) {
+	value_ = text;
+}
+
+std::string Sym::ToString() const {
+	return value_;
+}
+
+Constant::Constant(const std::string& text) {
+	int integer = 0;
+	bool valid = Utility::ParseInteger(text.c_str(), &integer);
+	Assert(valid, "invalid integer " + text);
+	value_ = integer;
+}
+
+std::string Constant::ToString() const {
+	return std::to_string(value_);
+}
+
+Literal::Literal(const std::string& text) {
+	value_ = text;
+}
+
+std::string Literal::ToString() const {
+	return value_;
+}
+
 struct SyntaxerStack {
 	std::vector<int> states;
 	std::vector<void*> values;
@@ -18,8 +51,8 @@ struct SyntaxerStack {
 };
 
 Syntaxer::Syntaxer() {
-	symTable_ = new SymTable;
 	stack_ = new SyntaxerStack;
+	symTable_ = new SymTable;
 	literalTable_ = new LiteralTable;
 	constantTable_ = new ConstantTable;
 }
@@ -52,7 +85,6 @@ bool Syntaxer::ParseSyntax(SyntaxTree* tree, FileScanner* fileScanner) {
 	tree->SetRoot(root);
 	Debug::Log("\n" + Utility::Heading("Accept"));
 	return true;
-
 }
 
 std::string Syntaxer::ToString() const {
@@ -103,33 +135,36 @@ bool Syntaxer::CreateSyntaxTree(SyntaxNode*& root, FileScanner* fileScanner) {
 	GrammarSymbol symbol = nullptr;
 
 	do {
-		if (action.actionType == LRActionShift && !(symbol = ParseNextSymbol(position, addr, fileScanner))) {
+		if (action.type == LRActionShift && !(symbol = ParseNextSymbol(position, addr, fileScanner))) {
 			break;
 		}
 
 		action = p_.lrTable.GetAction(stack_->states.back(), symbol);
 
-		if (action.actionType == LRActionError && !Error(symbol, position)) {
+		if (action.type == LRActionError && !Error(symbol, position)) {
 			break;
 		}
 
-		if (action.actionType == LRActionShift) {
-			Shift(action.actionParameter, addr, symbol);
+		if (action.type == LRActionShift) {
+			Shift(action.parameter, addr, symbol);
 		}
-		else if (action.actionType == LRActionReduce) {
-			if (!Reduce(action.actionParameter)) {
+		else if (action.type == LRActionReduce) {
+			if (!Reduce(action.parameter)) {
 				break;
 			}
 		}
 
-	} while (action.actionType != LRActionAccept);
+	} while (action.type != LRActionAccept);
 
-	if (action.actionType == LRActionAccept) {
+	if (action.type == LRActionAccept) {
 		root = (SyntaxNode*)stack_->values.back();
+		stack_->clear();
+	}
+	else {
+		CleanupOnFailure();
 	}
 
-	stack_->clear();
-	return action.actionType == LRActionAccept;
+	return action.type == LRActionAccept;
 }
 
 GrammarSymbol Syntaxer::FindSymbol(const ScannerToken& token, void*& addr) {
@@ -176,6 +211,18 @@ GrammarSymbol Syntaxer::ParseNextSymbol(TokenPosition& position, void*& addr, Fi
 	}
 
 	return answer;
+}
+
+void Syntaxer::CleanupOnFailure() {
+	SyntaxTree tree;
+	for (int i = 0; i < (int)stack_->symbols.size(); ++i) {
+		if (stack_->symbols[i].SymbolType() == GrammarSymbolNonterminal) {
+			tree.SetRoot((SyntaxNode*)stack_->values[i]);
+			tree.Destroy();
+		}
+	}
+
+	stack_->clear();
 }
 
 void SyntaxerStack::push(int state, void* value, const GrammarSymbol& symbol) {

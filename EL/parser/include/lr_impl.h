@@ -16,8 +16,8 @@ enum LRActionType {
 };
 
 struct LRAction {
-	LRActionType actionType;
-	int actionParameter;
+	LRActionType type;
+	int parameter;
 
 	bool operator == (const LRAction& other) const;
 	bool operator != (const LRAction& other) const;

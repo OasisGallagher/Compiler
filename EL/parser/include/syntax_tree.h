@@ -11,9 +11,38 @@ enum SyntaxNodeType {
 	SyntaxNodeOperation,
 };
 
-class Sym;
-class Literal;
-class Constant;
+class Sym {
+public:
+	Sym(const std::string& text);
+
+public:
+	std::string ToString() const;
+
+private:
+	std::string value_;
+};
+
+class Literal {
+public:
+	Literal(const std::string& text);
+
+public:
+	std::string ToString() const;
+
+private:
+	std::string value_;
+};
+
+class Constant {
+public:
+	Constant(const std::string& text);
+
+public:
+	std::string ToString() const;
+
+private:
+	int value_;
+};
 
 class SyntaxNode {
 public:
@@ -61,6 +90,7 @@ public:
 
 public:
 	void SetRoot(SyntaxNode* root);
+	void Destroy();
 
 public:
 	std::string ToString() const;

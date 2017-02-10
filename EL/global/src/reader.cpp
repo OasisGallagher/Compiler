@@ -6,8 +6,8 @@
 #include "reader.h"
 #include "utilities.h"
 
-FileReader::FileReader(const char* path, bool skipBlankline, bool appendNewline)
-	: ifs_(path), lineNumber_(0), skipBlankline_(skipBlankline), appendNewline_(appendNewline) {
+FileReader::FileReader(const char* fileName, bool skipBlankline, bool appendNewline)
+	: ifs_(fileName), lineNumber_(0), skipBlankline_(skipBlankline), appendNewline_(appendNewline) {
 
 }
 

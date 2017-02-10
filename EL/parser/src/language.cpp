@@ -16,18 +16,18 @@ Language::~Language() {
 	delete syntaxer_;
 }
 
-void Language::Setup(const char* productions, const char* output) {
+void Language::Setup(const char* productions, const char* fileName) {
 	time_t tp = OS::GetFileLastWriteTime(productions);
-	time_t to = OS::GetFileLastWriteTime(output);
+	time_t to = OS::GetFileLastWriteTime(fileName);
 	if (tp > to) {
 		Debug::StartSample("build parser");
 		BuildSyntaxer(productions);
-		SaveSyntaxer(output);
+		SaveSyntaxer(fileName);
 		Debug::EndSample();
 	}
 	else {
 		Debug::StartSample("load parser");
-		LoadSyntaxer(output);
+		LoadSyntaxer(fileName);
 		Debug::EndSample();
 	}
 }
@@ -119,16 +119,16 @@ void Language::BuildSyntaxer(const char* productions) {
 	parser.Setup(*syntaxer_, env_);
 }
 
-void Language::LoadSyntaxer(const char* output) {
-	std::ifstream file(output, std::ios::binary);
+void Language::LoadSyntaxer(const char* fileName) {
+	std::ifstream file(fileName, std::ios::binary);
 	env_->Load(file);
 	SyntaxerSetupParameter p = { env_ };
 	syntaxer_->Setup(p);
 	syntaxer_->Load(file);
 }
 
-void Language::SaveSyntaxer(const char* output) {
-	std::ofstream file(output, std::ios::binary);
+void Language::SaveSyntaxer(const char* fileName) {
+	std::ofstream file(fileName, std::ios::binary);
 	env_->Save(file);
 	syntaxer_->Save(file);
 }

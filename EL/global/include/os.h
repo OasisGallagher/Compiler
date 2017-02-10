@@ -19,9 +19,8 @@ public:
 	static void Break(const char* message);
 	static void SetConsoleColor(Color color);
 	static void EnableMemoryLeakCheck();
-	static time_t GetFileLastWriteTime(const char* filePath);
+	static time_t GetFileLastWriteTime(const char* fileName);
 	static bool Prompt(const char* message);
-
 private:
 	OS();
 };

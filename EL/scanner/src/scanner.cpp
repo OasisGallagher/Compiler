@@ -227,8 +227,8 @@ ScannerTokenType TextScanner::GetNextToken(char* token, int* pos) {
 	return tokenType;
 }
 
-FileScanner::FileScanner(const char* path) 
-	: reader_(new FileReader(path, true, false)), lineno_(0) {
+FileScanner::FileScanner(const char* fileName)
+	: reader_(new FileReader(fileName, true, false)), lineno_(0) {
 }
 
 FileScanner::~FileScanner() {

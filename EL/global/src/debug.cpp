@@ -10,25 +10,25 @@
 int Debug::length_ = 0;
 std::stack<std::string> Debug::samples_;
 
-std::ofstream output("main/debug/debug.txt");
+std::ofstream debug("main/debug/debug.txt");
 
 void Debug::Log(const std::string& text) {
 	OS::SetConsoleColor(White);
 	std::cout << text << "\n";
-	output << text << "\n";
+	debug << text << "\n";
 }
 
 void Debug::LogWarning(const std::string& text) {
 	OS::SetConsoleColor(Yellow);
 	std::cout << "[W] " << text << "\n";
-	output << "[W] " << text << "\n";
+	debug << "[W] " << text << "\n";
 	OS::SetConsoleColor(White);
 }
 
 void Debug::LogError(const std::string& text) {
 	OS::SetConsoleColor(Red);
 	std::cout << "[E] " << text << "\n";
-	output << "[E] " << text << "\n";
+	debug << "[E] " << text << "\n";
 	OS::SetConsoleColor(White);
 }
 

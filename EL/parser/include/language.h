@@ -14,16 +14,15 @@ public:
 	~Language();
 
 public:
-	void Load(const char* filePath);
-	void Setup(const char* productions, const char* output);
+	void Setup(const char* productions, const char* fileName);
 
 public:
 	bool Parse(SyntaxTree* tree, const std::string& file);
 	std::string ToString() const;
 
 private:
-	void SaveSyntaxer(const char* output);
-	void LoadSyntaxer(const char* output);
+	void SaveSyntaxer(const char* fileName);
+	void LoadSyntaxer(const char* fileName);
 	void BuildSyntaxer(const char* productions);
 
 	bool SetupEnvironment(const char* productions);

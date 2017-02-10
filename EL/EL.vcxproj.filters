@@ -170,9 +170,6 @@
     <ClCompile Include="parser\src\lr_table.cpp">
       <Filter>parser\src</Filter>
     </ClCompile>
-    <ClCompile Include="parser\src\table.cpp">
-      <Filter>parser\src</Filter>
-    </ClCompile>
     <ClCompile Include="global\src\reference_countable.cpp">
       <Filter>global\src</Filter>
     </ClCompile>

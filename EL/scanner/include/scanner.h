@@ -36,7 +36,7 @@ struct TokenPosition {
 
 class FileScanner {
 public:
-	FileScanner(const char* path);
+	FileScanner(const char* fileName);
 	~FileScanner();
 
 public:

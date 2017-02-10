@@ -64,7 +64,6 @@
     <ClCompile Include="parser\src\serializer.cpp" />
     <ClCompile Include="parser\src\syntaxer.cpp" />
     <ClCompile Include="parser\src\syntax_tree.cpp" />
-    <ClCompile Include="parser\src\table.cpp" />
     <ClCompile Include="scanner\src\scanner.cpp" />
     <ClCompile Include="scanner\src\tokens.cpp" />
   </ItemGroup>

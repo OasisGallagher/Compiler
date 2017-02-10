@@ -246,11 +246,11 @@ bool Serializer::SaveLRActionTable(std::ofstream& file, const LRActionTable &act
 			return false;
 		}
 
-		if (!WriteInteger(file, ite->second.actionType)) {
+		if (!WriteInteger(file, ite->second.type)) {
 			return false;
 		}
 
-		if (!WriteInteger(file, ite->second.actionParameter)) {
+		if (!WriteInteger(file, ite->second.parameter)) {
 			return false;
 		}
 	}

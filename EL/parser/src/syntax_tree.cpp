@@ -73,11 +73,16 @@ SyntaxTree::SyntaxTree()
 }
 
 SyntaxTree::~SyntaxTree() {
-	PreorderTreeWalk(&SyntaxTree::DeleteTreeNode);
+	Destroy();
 }
 
 void SyntaxTree::SetRoot(SyntaxNode* root) {
 	root_ = root;
+}
+
+void SyntaxTree::Destroy() {
+	PreorderTreeWalk(&SyntaxTree::DeleteTreeNode);
+	root_ = nullptr;
 }
 
 std::string SyntaxTree::ToString() const {

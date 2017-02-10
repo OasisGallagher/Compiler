@@ -4,7 +4,7 @@
 
 class FileReader {
 public:
-	FileReader(const char* path, bool skipBlankline, bool appendNewline);
+	FileReader(const char* fileName, bool skipBlankline, bool appendNewline);
 	~FileReader();
 
 public:

@@ -33,8 +33,8 @@ void OS::EnableMemoryLeakCheck() {
 	_CrtSetDbgFlag(_CrtSetDbgFlag(_CRTDBG_REPORT_FLAG) | _CRTDBG_LEAK_CHECK_DF);
 }
 
-time_t OS::GetFileLastWriteTime(const char* filePath) {
-	HANDLE hFile = CreateFile(filePath, 0, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+time_t OS::GetFileLastWriteTime(const char* fileName) {
+	HANDLE hFile = CreateFile(fileName, 0, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
 	FILETIME ftWrite;
 	SYSTEMTIME utcTime, localTime;
 
