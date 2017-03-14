@@ -70,7 +70,7 @@
   <PropertyGroup Label="Globals">
     <ProjectGuid>{1AD72401-EA15-485A-9CBB-9574AC936ED6}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>EL</RootNamespace>
+    <RootNamespace>Compiler</RootNamespace>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
