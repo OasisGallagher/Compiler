@@ -19,7 +19,7 @@ Language::~Language() {
 void Language::Setup(const char* productions, const char* fileName) {
 	time_t tp = OS::GetFileLastWriteTime(productions);
 	time_t to = OS::GetFileLastWriteTime(fileName);
-	if (tp > to) {
+	if (true || tp > to) {
 		Debug::StartSample("build parser");
 		BuildSyntaxer(productions);
 		SaveSyntaxer(fileName);

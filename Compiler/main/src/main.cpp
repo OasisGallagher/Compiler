@@ -12,7 +12,7 @@ int main(int argc, char** argv) {
 	Debug::EnableMemoryLeakCheck();
 
 	Language* lang = new Language;
-	lang->Setup(productions, compiler);
+	lang->Setup(grammar, compiler);
 
 	//Debug::Log(lang->ToString());
 

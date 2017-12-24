@@ -11,3 +11,6 @@
 /EL/Debug/*.pdb
 /*.opensdf
 /UpgradeLog.htm
+/Compiler/Debug
+/.vs/Compiler/v14/*.suo
+/*.db

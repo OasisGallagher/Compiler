@@ -1,10 +1,10 @@
 #include <algorithm>
 #include <functional>
 
-#include "debug.h"
-#include "define.h"
 #include "reader.h"
 #include "utilities.h"
+#include "debug.h"
+#include "define.h"
 
 FileReader::FileReader(const char* fileName, bool skipBlankline, bool appendNewline)
 	: ifs_(fileName), lineNumber_(0), skipBlankline_(skipBlankline), appendNewline_(appendNewline) {
@@ -25,7 +25,11 @@ bool FileReader::ReadLine(char* buffer, size_t length, int* lineNumber) {
 
 	if (appendNewline_ && !ifs_.eof()) {
 		size_t ctext = strlen(buffer);
-		Assert(ctext + 1 < length, "buffer too small");
+		if (ctext + 1 >= length) {
+			Debug::LogError("buffer too small");
+			return false;
+		}
+
 		buffer[ctext] = '\n';
 		buffer[ctext + 1] = 0;
 	}
@@ -37,7 +41,7 @@ bool FileReader::ReadLine(char* buffer, size_t length, int* lineNumber) {
 	return !!ifs_;
 }
 
-GrammarReader::GrammarReader(const char* file) : fileReader_(file, false, false) {
+GrammarReader::GrammarReader(const char* source): source_(source) {
 	ReadGrammars();
 }
 
@@ -45,7 +49,7 @@ const GrammarTextContainer& GrammarReader::GetGrammars() const {
 	return grammars_;
 }
 
-const char* GrammarReader::SplitGrammar(char*& text) {
+const char* GrammarReader::SplitGrammar(const char*& text) {
 	text += strspn(text, ":\t\n ");
 	if (*text == '|') {
 		++text;
@@ -54,17 +58,25 @@ const char* GrammarReader::SplitGrammar(char*& text) {
 	return std::find(text, text + strlen(text), '\t');
 }
 
+bool GrammarReader::GetLine(const char*& ptr, std::string& line) {
+	const char* pos = strchr(ptr, '\n');
+	if (pos == nullptr) {
+		return false;
+	}
+
+	line.assign(ptr, pos);
+	ptr = pos + 1;
+	return true;
+}
+
 void GrammarReader::ReadGrammars() {
-	char buffer[MAX_LINE_CHARACTERS];
-	char* ptr = buffer;
-
-	int line;
 	GrammarText g;
-	std::string text;
+	std::string line;
+	int lineNumber = 1;
 
-	for (; fileReader_.ReadLine(ptr, MAX_LINE_CHARACTERS, &line);) {
-		const char* pos = nullptr;
-		if (Utility::IsBlankText(ptr, &pos)) {
+	const char* start = source_;
+	for (; GetLine(start, line); ++lineNumber) {
+		if (Utility::IsBlankText(line.c_str(), nullptr)) {
 			if (!g.Empty()) {
 				grammars_.push_back(g);
 				g.Clear();
@@ -74,12 +86,16 @@ void GrammarReader::ReadGrammars() {
 		}
 
 		if (g.Empty()) {
-			g.lhs = Utility::Trim(ptr);
+			g.lhs = Utility::Trim(line);
 			continue;
 		}
 
+		const char* ptr = line.c_str();
 		const char* tabpos = SplitGrammar(ptr);
-		Assert(*tabpos != 0, Utility::Format("missing \\t between production and action at line %d.", line));
+		if (*tabpos == 0) {
+			Debug::LogError("missing \\t between production and action at line %d." + std::to_string(lineNumber));
+			break;
+		}
 
 		g.productions.push_back(std::make_pair(Utility::Trim(std::string(ptr, tabpos)), Utility::Trim(std::string(tabpos))));
 	}

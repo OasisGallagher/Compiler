@@ -32,16 +32,17 @@ typedef std::vector<GrammarText> GrammarTextContainer;
 
 class GrammarReader {
 public:
-	GrammarReader(const char* file);
+	GrammarReader(const char* source);
 
 public:
 	const GrammarTextContainer& GetGrammars() const;
 
 private:
 	void ReadGrammars();
-	const char* SplitGrammar(char*& text);
+	const char* SplitGrammar(const char*& text);
+	bool GetLine(const char*& ptr, std::string& line);
 
 private:
-	FileReader fileReader_;
+	const char* source_;
 	GrammarTextContainer grammars_;
 };

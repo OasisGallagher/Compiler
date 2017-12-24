@@ -33,6 +33,8 @@ bool LR0::CreateLR0Itemsets(LR1ItemsetContainer& itemsets, LR1EdgeTable& edges) 
 }
 
 bool LR0::CreateLR1ItemsetsOnePass() {
+	static int pass = 0;
+	Debug::StartSample(Utility::Format("CreateLR1Itemsets (%d: %d)", ++pass, itemsets_.size()));
 	bool setChanged = false;
 	LR1ItemsetContainer cont = itemsets_;
 	for (LR1ItemsetContainer::iterator ite = cont.begin(); ite != cont.end(); ++ite) {
@@ -50,6 +52,8 @@ bool LR0::CreateLR1ItemsetsOnePass() {
 			setChanged = GetLR1EdgeTarget(itemset, *ite, ite2->second) || setChanged;
 		}
 	}
+
+	Debug::EndSample();
 
 	return setChanged;
 }
